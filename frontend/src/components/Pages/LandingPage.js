@@ -4,6 +4,8 @@ import {
     Link
 } from "react-router-dom";
 
+import * as ROUTES from "../../constants/routes"
+
 class LandingPage extends React.Component {
     constructor(props) {
         super(props);
@@ -28,10 +30,10 @@ class LandingPage extends React.Component {
                 <a href="about:blank">Privacy Policy</a> and <a href="about:blank">Cookies Policy</a>.</span>
                 </div>
                 <div id="join">
-                    <Link to="/signup">Join TwoFatherHome</Link>
+                    <Link to={ROUTES.SIGN_UP}>Join TwoFatherHome</Link>
                 </div>
                 <div id="members">
-                    <Link to="/login">Already a member? Login here.</Link>
+                    <Link to={ROUTES.SIGN_IN}>Already a member? Login here.</Link>
                 </div>
                 {/* <div className="background"></div> */}
             </div>
