@@ -1,6 +1,24 @@
 #header {
     height: 50px;
     box-shadow: 10px 3px #CCC;
+    width:100%;
+    text-align:center;
+}
+
+#leftDiv {
+    float:left;
+    width:100px;
+}
+
+#centerDiv {
+    margin:0 auto;
+    width:100px;
+}
+
+#rightDiv {
+    float:right;
+    width:100px;
+    color: #EEE;
 }
 
 .App {
@@ -8,14 +26,24 @@
 }
 
 .background {
-    width: auto;
-    height: 800px;
+    width: 290px;
+    height: 300px;
     background-image: url("./assets/twofatherhome_00.jpg");
     background-repeat: no-repeat;
     background-attachment: scroll;
+    background-size: cover;
 }
 
+@media screen and (min-width: 360px) {
+    .background {
+        width: auto;
+        height: 800px;
+    }
+}
+
+/*                          */
 /* copied from alligator.io */
+/*                          */
 
 html,
 body {
@@ -57,8 +85,8 @@ body {
 /* Position and sizing of burger button */
 .bm-burger-button {
   position: fixed;
-  width: 36px;
-  height: 30px;
+  width: 18px;
+  height: 15px;
   left: 36px;
   top: 36px;
 }

@@ -2,34 +2,53 @@ import React from 'react';
 import logo from './logo.svg';
 import './App.css';
 
-// import { slide as Menu } from 'react-burger-menu'
-// import Menu from "./components/Menu"
+import {
+    BrowserRouter as Router,
+    Switch,
+    Route,
+    Link
+} from "react-router-dom";
+
 import Sidebar from "./components/Sidebar"
+import Signup from "./components/Pages/Signup"
+import Login from './components/Pages/Login'
+import LandingPage from "./components/Pages/LandingPage"
 
 function App() {
     return (
         <div className="App">
-            <div id="header">
-                <Sidebar />
-                <h1>TwoFatherHome</h1>
-            </div>
-            <h3>Finally, a site that isn't about hookups...</h3>
-            <div id="copywriting">
-                <h4>On TwoFatherHome, you're looking for more than just a one night stand.
-                You have dreams of starting a family, raising kids, and even have your own family values.
-                Meet someone who wants to raise a family too, not just another hookup!
-                    Because you deserve a quality family life.</h4>
-            </div>
-            <div id="disclaimer">
-                <span>By clicking Join, you agree to our <a href="about:blank">Terms</a>. Learn what happens to your data in our
-                <a href="about:blank">Privacy Policy</a> and <a href="about:blank">Cookies Policy</a>.</span>
-            </div>
-            <div id="join">
-                <button>Join TwoFatherHome</button>
-            </div>
-            <div className="background"></div>
+            <Router>
+                <div id="header">
+                    {/* TODO: make Sidebar and TwoFatherHome sit nicely in the header w/ a sign-in btn like POF's */}
+                    <div id="leftDiv">
+                        <Sidebar />
+                    </div>
+                    <div id="rightDiv">
+                        <Link to="/login">Log In</Link>
+                    </div>
+                    <div id="centerDiv">
+                        <h1>TwoFatherHome</h1>
+                    </div>
+                </div>
+
+
+                <Switch>
+                    <Route path="/" exact component={LandingPage}>
+                    </Route>
+                    <Route path="/signup" exact component={Signup}>
+                    </Route>
+                    <Route path="/login" exact component={Login}>
+                    </Route>
+                </Switch>
+            </Router>
         </div>
     );
 }
 
 export default App;
+
+// todo: install Firebase
+// todo: add sign up page logic
+// todo: add login page logic
+// todo: add the page users see upon logging in or signing up
+// todo: add
