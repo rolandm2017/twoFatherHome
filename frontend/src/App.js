@@ -76,3 +76,5 @@ export default withAuthentication(App);
 // TODO: make Sidebar and TwoFatherHome sit nicely in the header w / a sign-in btn like POF's
 
 // TODO: Refactor from the Robin Tutorial's global state to Redux for state mgmt.
+
+// todo: protect the account page and make it accessible only for authed users
