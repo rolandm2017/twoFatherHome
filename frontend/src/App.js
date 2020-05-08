@@ -28,35 +28,15 @@ import AdminPage from './components/Auth/Admin';
 
 import * as ROUTES from './constants/routes';
 import { withFirebase } from "./components/Firebase"
+import { withAuthentication } from "./components/Auth/Session"
 
-class App extends Component {
-    constructor(props) {
-        super(props);
+const App = () => (
+    <div className="App">
 
-        this.state = {
-            authUser: null,
-        };
-    }
-
-    componentDidMount() {
-        this.listener = this.props.firebase.auth.onAuthStateChanged(
-            authUser => {
-                authUser
-                    ? this.setState({ authUser })
-                    : this.setState({ authUser: null });
-            });
-    }
-
-    componentWillUnmount() {
-        this.listener(); // how does this work?
-    }
-
-    render() {
-        return (
-            <div className="App">
-                <Router>
-                    <Navigation authUser={this.state.authUser} />
-                    {/* <div id="header">
+        <Router>
+            {/* <Navigation authUser={this.state.authUser} /> */}
+            <Navigation />
+            {/* <div id="header">
                     <div id="leftDiv">
                     <Sidebar />
                     </div>
@@ -68,27 +48,25 @@ class App extends Component {
                     </div>
                 </div> */}
 
-                    <Switch>
-                        <Route exact path={ROUTES.LANDING} component={LandingPage} />
-                        <Route path={ROUTES.SIGN_UP} component={SignUpPage} />
-                        <Route path={ROUTES.SIGN_IN} component={SignInPage} />
-                        <Route path={ROUTES.PASSWORD_FORGET} component={PasswordForgetPage} />
-                        <Route path={ROUTES.HOME} component={HomePage} />
-                        <Route path={ROUTES.ACCOUNT} component={AccountPage} />
-                        <Route path={ROUTES.ADMIN} component={AdminPage} />
-                        {/* my stuff: */}
-                        {/* <Route path="/signup" exact component={Signup}>
+            <Switch>
+                <Route exact path={ROUTES.LANDING} component={LandingPage} />
+                <Route path={ROUTES.SIGN_UP} component={SignUpPage} />
+                <Route path={ROUTES.SIGN_IN} component={SignInPage} />
+                <Route path={ROUTES.PASSWORD_FORGET} component={PasswordForgetPage} />
+                <Route path={ROUTES.HOME} component={HomePage} />
+                <Route path={ROUTES.ACCOUNT} component={AccountPage} />
+                <Route path={ROUTES.ADMIN} component={AdminPage} />
+                {/* my stuff: */}
+                {/* <Route path="/signup" exact component={Signup}>
                     </Route>
                     <Route path="/login" exact component={Login}>
                 </Route> */}
-                    </Switch>
-                </Router>
-            </div>
-        );
-    }
-}
+            </Switch>
+        </Router>
+    </div>
+)
 
-export default withFirebase(App);
+export default withAuthentication(App);
 
 // todo: install Firebase
 // todo: add sign up page logic

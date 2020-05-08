@@ -5,8 +5,14 @@ import SignOutButton from "./Auth/SignOut"
 import * as ROUTES from "../constants/routes"
 import SignOut from './Auth/SignOut';
 
-const Navigation = ({ authUser }) => (
-    <div>{authUser ? <NavigationAuth /> : <NavigationNonAuth />}</div>
+import { AuthUserContext } from "./Auth/Session"
+
+const Navigation = () => (
+    <div><AuthUserContext.Consumer>
+        {authUser =>
+            authUser ? <NavigationAuth /> : <NavigationNonAuth />
+        }
+    </AuthUserContext.Consumer></div>
 );
 
 const NavigationAuth = () => (
