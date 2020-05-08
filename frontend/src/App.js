@@ -46,7 +46,6 @@ function App() {
                     </div>
                 </div> */}
 
-
                 <Switch>
                     <Route exact path={ROUTES.LANDING} component={LandingPage} />
                     <Route path={ROUTES.SIGN_UP} component={SignUpPage} />
