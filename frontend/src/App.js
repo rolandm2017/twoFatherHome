@@ -1,5 +1,4 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { Component } from 'react';
 import './App.css';
 
 import {
@@ -28,44 +27,68 @@ import AccountPage from './components/Auth/Account';
 import AdminPage from './components/Auth/Admin';
 
 import * as ROUTES from './constants/routes';
+import { withFirebase } from "./components/Firebase"
 
-function App() {
-    return (
-        <div className="App">
-            <Router>
-                <Navigation />
-                {/* <div id="header">
+class App extends Component {
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            authUser: null,
+        };
+    }
+
+    componentDidMount() {
+        this.listener = this.props.firebase.auth.onAuthStateChanged(
+            authUser => {
+                authUser
+                    ? this.setState({ authUser })
+                    : this.setState({ authUser: null });
+            });
+    }
+
+    componentWillUnmount() {
+        this.listener(); // how does this work?
+    }
+
+    render() {
+        return (
+            <div className="App">
+                <Router>
+                    <Navigation authUser={this.state.authUser} />
+                    {/* <div id="header">
                     <div id="leftDiv">
-                        <Sidebar />
+                    <Sidebar />
                     </div>
                     <div id="rightDiv">
-                        <Link to="/login">Log In</Link>
+                    <Link to="/login">Log In</Link>
                     </div>
                     <div id="centerDiv">
-                        <h1>TwoFatherHome</h1>
+                    <h1>TwoFatherHome</h1>
                     </div>
                 </div> */}
 
-                <Switch>
-                    <Route exact path={ROUTES.LANDING} component={LandingPage} />
-                    <Route path={ROUTES.SIGN_UP} component={SignUpPage} />
-                    <Route path={ROUTES.SIGN_IN} component={SignInPage} />
-                    <Route path={ROUTES.PASSWORD_FORGET} component={PasswordForgetPage} />
-                    <Route path={ROUTES.HOME} component={HomePage} />
-                    <Route path={ROUTES.ACCOUNT} component={AccountPage} />
-                    <Route path={ROUTES.ADMIN} component={AdminPage} />
-                    {/* my stuff: */}
-                    {/* <Route path="/signup" exact component={Signup}>
+                    <Switch>
+                        <Route exact path={ROUTES.LANDING} component={LandingPage} />
+                        <Route path={ROUTES.SIGN_UP} component={SignUpPage} />
+                        <Route path={ROUTES.SIGN_IN} component={SignInPage} />
+                        <Route path={ROUTES.PASSWORD_FORGET} component={PasswordForgetPage} />
+                        <Route path={ROUTES.HOME} component={HomePage} />
+                        <Route path={ROUTES.ACCOUNT} component={AccountPage} />
+                        <Route path={ROUTES.ADMIN} component={AdminPage} />
+                        {/* my stuff: */}
+                        {/* <Route path="/signup" exact component={Signup}>
                     </Route>
                     <Route path="/login" exact component={Login}>
-                    </Route> */}
-                </Switch>
-            </Router>
-        </div>
-    );
+                </Route> */}
+                    </Switch>
+                </Router>
+            </div>
+        );
+    }
 }
 
-export default App;
+export default withFirebase(App);
 
 // todo: install Firebase
 // todo: add sign up page logic
@@ -73,3 +96,5 @@ export default App;
 // todo: add the page users see upon logging in or signing up
 // todo: add
 // TODO: make Sidebar and TwoFatherHome sit nicely in the header w / a sign-in btn like POF's
+
+// TODO: Refactor from the Robin Tutorial's global state to Redux for state mgmt.

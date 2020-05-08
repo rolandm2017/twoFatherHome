@@ -21,9 +21,9 @@ const devConfig = {
 
 
 
-console.log(process.env.NODE_ENV)
+// console.log(process.env.NODE_ENV)
 const config = process.env.NODE_ENV === "production" ? prodConfig : devConfig;
-console.log(config)
+// console.log(config)
 
 class Firebase {
     constructor() {
