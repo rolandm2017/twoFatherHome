@@ -80,3 +80,5 @@ export default withAuthentication(App);
 // todo: protect the account page and make it accessible only for authed users
 
 // TODO: "protected routes in react with authorization"
+
+// TODO: make the Admin page show the list of users
