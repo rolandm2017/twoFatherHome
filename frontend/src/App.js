@@ -11,11 +11,18 @@ import {
 
 import { withFirebase } from "./components/Firebase"
 
-import Sidebar from "./components/Sidebar"
-import Signup from "./components/Pages/Signup"
-import Login from './components/Pages/Login'
-import LandingPage from "./components/Pages/LandingPage"
+import * as ROUTES from "./constants/routes"
+
 import Navigation from "./components/Navigation"
+
+import LandingPage from "./components/Pages/LandingPage"
+import HomePage from './components/Pages/HomePage';
+
+import SignUpPage from './components/Auth/SignUp';
+import SignInPage from './components/Auth/SignIn';
+import PasswordForgetPage from './components/Auth/PasswordForget';
+import AccountPage from './components/Auth/Account';
+import AdminPage from './components/Auth/Admin';
 
 class App extends Component {
     constructor(props) {
@@ -42,12 +49,18 @@ class App extends Component {
                     <Navigation userIsAuthenticated={this.state.userIsAuthenticated} />
 
                     <Switch>
-                        <Route path="/" exact component={LandingPage}>
-                        </Route>
-                        <Route path="/signup" exact component={Signup}>
-                        </Route>
-                        <Route path="/login" exact component={Login}>
-                        </Route>
+                        <Route exact path={ROUTES.LANDING} component={LandingPage} />
+                        <Route exact path={ROUTES.HOME} component={HomePage} />
+
+                        <Route exact path={ROUTES.SIGN_UP} component={SignUpPage} />
+                        <Route exact path={ROUTES.SIGN_IN} component={SignInPage} />
+                        <Route
+                            exact
+                            path={ROUTES.PASSWORD_FORGET}
+                            component={PasswordForgetPage}
+                        />
+                        <Route exact path={ROUTES.ACCOUNT} component={AccountPage} />
+                        <Route exact path={ROUTES.ADMIN} component={AdminPage} />
                     </Switch>
                 </Router>
             </div>
