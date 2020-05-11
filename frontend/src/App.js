@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 
@@ -9,46 +9,60 @@ import {
     Link
 } from "react-router-dom";
 
+import { withFirebase } from "./components/Firebase"
+
 import Sidebar from "./components/Sidebar"
 import Signup from "./components/Pages/Signup"
 import Login from './components/Pages/Login'
 import LandingPage from "./components/Pages/LandingPage"
+import Navigation from "./components/Navigation"
 
-function App() {
-    return (
-        <div className="App">
-            <Router>
-                <div id="header">
-                    {/* TODO: make Sidebar and TwoFatherHome sit nicely in the header w/ a sign-in btn like POF's */}
-                    <div id="leftDiv">
-                        <Sidebar />
-                    </div>
-                    <div id="rightDiv">
-                        <Link to="/login">Log In</Link>
-                    </div>
-                    <div id="centerDiv">
-                        <h1>TwoFatherHome</h1>
-                    </div>
-                </div>
+class App extends Component {
+    constructor(props) {
+        super(props);
 
+        this.state = {
+            authUser: null,
+        };
+    }
 
-                <Switch>
-                    <Route path="/" exact component={LandingPage}>
-                    </Route>
-                    <Route path="/signup" exact component={Signup}>
-                    </Route>
-                    <Route path="/login" exact component={Login}>
-                    </Route>
-                </Switch>
-            </Router>
-        </div>
-    );
+    componentDidMount() {
+        console.log(this.props)
+        //     this.props.firebase.auth.onAuthStateChanged(authUser => {
+        //         authUser
+        //             ? this.setState({ authUser })
+        //             : this.setState({ authUser: null });
+        //     });
+    }
+
+    render() {
+        return (
+            <div className="App">
+                <Router>
+                    <Navigation userIsAuthenticated={this.state.userIsAuthenticated} />
+
+                    <Switch>
+                        <Route path="/" exact component={LandingPage}>
+                        </Route>
+                        <Route path="/signup" exact component={Signup}>
+                        </Route>
+                        <Route path="/login" exact component={Login}>
+                        </Route>
+                    </Switch>
+                </Router>
+            </div>
+        );
+    }
 }
 
-export default App;
+export default withFirebase(App);
 
 // todo: install Firebase
 // todo: add sign up page logic
 // todo: add login page logic
 // todo: add the page users see upon logging in or signing up
-// todo: add
+// todo: add admin page
+// todo: allow admin to see list of all signed up users
+// todo: allow admin to delete a user(?)
+// todo: create inbox page
+// todo: create two dummy accounts and send some messages between them to test the inbox page's logic
