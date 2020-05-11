@@ -34,12 +34,18 @@ class App extends Component {
     }
 
     componentDidMount() {
-        console.log(this.props)
+        console.log("3000")
+        console.log(this.props.firebase)
+        console.log(withFirebase)
         //     this.props.firebase.auth.onAuthStateChanged(authUser => {
         //         authUser
         //             ? this.setState({ authUser })
         //             : this.setState({ authUser: null });
         //     });
+    }
+
+    componentWillUnmount() {
+        this.listener();
     }
 
     render() {
@@ -71,9 +77,6 @@ class App extends Component {
 export default withFirebase(App);
 
 // todo: install Firebase
-// todo: add sign up page logic
-// todo: add login page logic
-// todo: add the page users see upon logging in or signing up
 // todo: add admin page
 // todo: allow admin to see list of all signed up users
 // todo: allow admin to delete a user(?)
