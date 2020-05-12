@@ -19,6 +19,7 @@ import Navigation from "./components/Navigation"
 
 import LandingPage from "./components/Pages/LandingPage"
 import HomePage from './components/Pages/HomePage';
+import InboxPage from './components/Pages/InboxPage';
 
 import SignUpPage from './components/Auth/SignUp';
 import SignInPage from './components/Auth/SignIn';
@@ -28,34 +29,33 @@ import AdminPage from './components/Auth/Admin';
 
 const App = () => (
     <div className="App">
-        <AuthUserContext.Provider value={this.state.authUser}>
 
-            <Router>
-                <Navigation />
+        <Router>
+            <Navigation />
 
-                <Switch>
-                    <Route exact path={ROUTES.LANDING} component={LandingPage} />
-                    <Route exact path={ROUTES.HOME} component={HomePage} />
+            <Switch>
+                <Route exact path={ROUTES.LANDING} component={LandingPage} />
+                <Route exact path={ROUTES.HOME} component={HomePage} />
+                <Route exact path={ROUTES.INBOX} component={InboxPage} />
 
-                    <Route exact path={ROUTES.SIGN_UP} component={SignUpPage} />
-                    <Route exact path={ROUTES.SIGN_IN} component={SignInPage} />
-                    <Route
-                        exact
-                        path={ROUTES.PASSWORD_FORGET}
-                        component={PasswordForgetPage}
-                    />
-                    <Route exact path={ROUTES.ACCOUNT} component={AccountPage} />
-                    <Route exact path={ROUTES.ADMIN} component={AdminPage} />
-                </Switch>
-            </Router>
-        </AuthUserContext.Provider>
+                <Route exact path={ROUTES.SIGN_UP} component={SignUpPage} />
+                <Route exact path={ROUTES.SIGN_IN} component={SignInPage} />
+                <Route
+                    exact
+                    path={ROUTES.PASSWORD_FORGET}
+                    component={PasswordForgetPage}
+                />
+                <Route exact path={ROUTES.ACCOUNT} component={AccountPage} />
+                <Route exact path={ROUTES.ADMIN} component={AdminPage} />
+            </Switch>
+        </Router>
     </div>
 );
 
 export default withAuthentication(App);
 
 // todo: install Firebase
-// todo: add admin page
+// todo: add admin page **
 // todo: allow admin to see list of all signed up users
 // todo: allow admin to delete a user(?)
 // todo: create inbox page
