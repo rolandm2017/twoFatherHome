@@ -1,6 +1,7 @@
 import app from "firebase/app";
 import "firebase/auth";
-import "firebase/database"
+import "firebase/database" // can probably deelete this
+import "firebase/firestore"
 
 const prodConfig = {
     apiKey: process.env.REACT_APP_API_KEY,
@@ -32,6 +33,8 @@ class Firebase {
 
         this.auth = app.auth();
         this.db = app.database();
+
+        this.fs = app.firestore();
     }
 
     // *** Auth API ***
