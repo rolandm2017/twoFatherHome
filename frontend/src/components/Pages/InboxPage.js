@@ -1,14 +1,19 @@
 import React, { Component } from 'react';
 
-import { withAuthentication } from "../Session/"
+import { withAuthentication, AuthUserContext } from "../Session/"
+import { withFirebase } from '../Firebase';
 
 class InboxPage extends Component {
 
     componentDidMount() {
-        // ### retrieve user's messages from database and populate the render() method with them
+        // ### retrieve user's chatrooms from database and populate the render() method with them
         // connect to the database
         // retrieve messages from database
         // display retrieved messages to user
+        let messages;
+        this.props.firebase.getUsersChatrooms().then(res => console.log(res))
+
+
     }
 
     render() {
@@ -21,4 +26,4 @@ class InboxPage extends Component {
     }
 }
 
-export default withAuthentication(InboxPage);
+export default withAuthentication(withFirebase(InboxPage));

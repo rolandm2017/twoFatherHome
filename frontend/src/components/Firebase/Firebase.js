@@ -52,11 +52,54 @@ class Firebase {
     doPasswordUpdate = password =>
         this.auth.currentUser.updatePassword(password);
 
-    // *** User API ***
+    getUserName = () => this.auth.currentUser.displayName// should return something
+
+    // *** User API *** using Realtime Database
 
     user = uid => this.db.ref(`users/${uid}`);
 
     users = () => this.db.ref('users');
+
+    // *** Admin Stuff Goes Here ***
+
+    // *** Firestore User API ***
+
+    getUserInfo = docId => this.fs.collection("users").doc(docId).get().then(doc => {
+        return doc.data()
+    })
+
+    // return all chatroom ids where user is present in the list of users
+    getUsersChatroomsWithPromise = user => {
+        return new Promise(resolve => {
+            this.fs.collection("chatrooms").get().then(snapshot => {
+                const rooms = [];
+                snapshot.forEach(doc => {
+                    const users = doc.data().users.split(",")
+                    if (users[0] === user || users[1] === user) {
+                        rooms.push([doc.id, doc.data().users])
+                    }
+                })
+                resolve(rooms)
+            })
+        }
+        )
+    }
+
+    // return all chatroom ids where user is present in the list of users
+    getUsersChatrooms = user => this.fs.collection("chatrooms").get().then(snapshot => {
+        const rooms = [];
+        snapshot.forEach(doc => {
+            const users = doc.data().users.split(",")
+            if (users[0] === user || users[1] === user) {
+                rooms.push([doc.id, doc.data().users])
+            }
+        })
+        resolve(rooms)
+    })
+
+    // makeUsersList = () => //
+
+    testLog = () => console.log("printed!")
 
 }
 
