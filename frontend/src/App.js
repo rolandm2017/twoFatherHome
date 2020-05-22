@@ -60,3 +60,9 @@ export default withAuthentication(App);
 // todo: allow admin to delete a user(?)
 // todo: create inbox page
 // todo: create two dummy accounts and send some messages between them to test the inbox page's logic
+
+// TODO: On account signup, redirect to "Create Profile" page & allow user to create profile.
+// TODO: Make Authentication-Only pages redirect to the login/signup page
+
+// TODO: On user signup, associate their Auth.uid as their users' collection document ID/key.
+// ...so you can do fs.colletion("users").doc(uid).get() and retrieve their username that way

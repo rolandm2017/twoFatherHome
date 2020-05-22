@@ -52,7 +52,7 @@ class Firebase {
     doPasswordUpdate = password =>
         this.auth.currentUser.updatePassword(password);
 
-    getUserName = () => this.auth.currentUser.displayName// should return something
+    getUserName = () => app.auth().currentUser.displayName// should return something
 
     // *** User API *** using Realtime Database
 
@@ -63,6 +63,10 @@ class Firebase {
     // *** Admin Stuff Goes Here ***
 
     // *** Firestore User API ***
+
+    getUsernameByUID = (uid) => this.fs.collection("users").doc(uid).get().then(doc => {
+        return doc.data().username
+    })
 
     getUserInfo = docId => this.fs.collection("users").doc(docId).get().then(doc => {
         return doc.data()
@@ -94,7 +98,7 @@ class Firebase {
                 rooms.push([doc.id, doc.data().users])
             }
         })
-        resolve(rooms)
+        return rooms
     })
 
     // makeUsersList = () => //
