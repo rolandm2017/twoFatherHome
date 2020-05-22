@@ -70,9 +70,11 @@ class Firebase {
 
     getUserInfo = docId => this.fs.collection("users").doc(docId).get().then(doc => {
         return doc.data()
-    })
+    }) // TODO: mk all users in the database keyed by their UID value. create unique auth accts for each user so this works
 
-    // return all chatroom ids where user is present in the list of users
+    // *** Firestore Messages API ***
+
+    // return all chatroom ids where user is present in the list of users... as a promise
     getUsersChatroomsWithPromise = user => {
         return new Promise(resolve => {
             this.fs.collection("chatrooms").get().then(snapshot => {
@@ -89,6 +91,7 @@ class Firebase {
         )
     }
 
+
     // return all chatroom ids where user is present in the list of users
     getUsersChatrooms = user => this.fs.collection("chatrooms").get().then(snapshot => {
         const rooms = [];
@@ -99,6 +102,14 @@ class Firebase {
             }
         })
         return rooms
+    })
+
+    getChatroomMessages = roomId => this.fs.collection("chatrooms").doc(roomId).collection("messages").get().then(snapshot => {
+        const msgContent = [];
+        snapshot.forEach(msg => {
+            msgContent.push(msg.data())
+        })
+        return msgContent
     })
 
     // makeUsersList = () => //
