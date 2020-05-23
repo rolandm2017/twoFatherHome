@@ -10,7 +10,7 @@ class InboxPage extends Component {
     constructor(props) {
         super(props);
 
-        this.generateChatrooms = this.generateChatrooms.bind(this)
+        // this.generateChatrooms = this.generateChatrooms.bind(this)
         // self = this;
 
         this.state = {
@@ -48,40 +48,53 @@ class InboxPage extends Component {
 
     getInboxByUID(userUID) {
         console.log("10:", userUID)
+        const jsxContent = [];
         this.props.firebase.getUsernameByUID(userUID).then(username => {
             this.assignUsernameToState(username)
-            this.props.firebase.getUsersChatrooms(username).then(results => {
-                this.setState({ rooms: results });
-                console.log("11:", results)
-                this.generateChatrooms()
+            this.props.firebase.getUsersChatrooms(username).then(rooms => {
+                // this.setState({ rooms: results });
+                console.log("11:", rooms)
+                rooms.forEach(room => {
+                    this.props.firebase.getChatroomMessages(room[0]).then(messages => {
+                        messages.forEach(content => {
+                            jsxContent.push([room[1], content])
+                            console.log("25:", jsxContent)
+                        })
+                    }).then(x => {
+                        console.log("30:", this.state.jsxContent)
+                        this.setState({ content: jsxContent })
+                    })
+                })
             })
-        }) // returns a dang promise... maybe async/await?
-        // console.log("15:", targetUsername)
-        // this.props.firebase.getUsersChatrooms(targetUsername).then(results => {
+        })
     }
 
     assignUsernameToState(username) {
         this.setState({ username: username })
     }
 
-    generateChatrooms = () => {
-        let jsx;
-
-        const scopeHack = this.props.firebase;
-
-        this.state.rooms.map(function (room) {
-            jsx += "From: " + room[1]
-            scopeHack.getChatroomMessages(room[0]).then(messages => {
-                messages.forEach(content => {
-                    jsx += content;
-                    console.log("20:", content)
-                })
-            })
-        })
-        // for (let i = 0; i < this.state.rooms.length; i++) {
-        // }
-        this.setState({ content: jsx })
+    logState = () => {
+        console.log(this.state)
     }
+
+    // generateChatrooms = () => {
+    //     let jsx;
+
+    //     const scopeHack = this.props.firebase;
+
+    //     this.state.rooms.map(function (room) {
+    //         jsx += "From: " + room[1]
+    //         scopeHack.getChatroomMessages(room[0]).then(messages => {
+    //             messages.forEach(content => {
+    //                 jsx += content;
+    //                 console.log("20:", content)
+    //             })
+    //         })
+    //     })
+    //     // for (let i = 0; i < this.state.rooms.length; i++) {
+    //     // }
+    //     this.setState({ content: jsx })
+    // }
     // TODO: Turn this.state.rooms[0] and [1] into a display on the user's screen with "participant" & "most recent msg" like twitter
 
     render() {
@@ -92,7 +105,7 @@ class InboxPage extends Component {
                 <p>The Inbox is for authenticated users only.</p>
                 <p>Look here are your chatrooms:</p>
                 <ul>
-                    <Rooms rooms={this.state.rooms} />
+                    <Rooms rooms={this.state.content} />
                     {/* {this.state.rooms.map(room => {
                         return (
                             <li key={room[0]}>
@@ -104,28 +117,27 @@ class InboxPage extends Component {
                         )
                     })} */}
                 </ul>
-                <p>this.state.content:</p>
-                <p>{this.state.content}</p>
+
+                <button onClick={this.logState}>Click Me</button>
             </div >
         )
     }
 }
 
-function Rooms({ room }) {
-    if (!room) {
-        console.log("Returning null...")
+function Rooms({ rooms }) {
+    if (!rooms) {
+        console.log("Returning null...", rooms)
         return null;
+    } else {
+        console.log("returning rooms...")
+        return (
+            <ul>
+                {rooms.map(room => (
+                    <ChatroomBox user={room[0]} message={room[1].content} />
+                ))}
+            </ul>
+        )
     }
-
-    console.log("returning rooms...")
-    return (
-        <li key={room[0]}>
-            <ChatroomBox
-                user={room[1]}
-                message={this.props.firebase.getChatroomMessages(room[0])}
-            />
-        </li>
-    )
 }
 
 export default withFirebase(InboxPage);
