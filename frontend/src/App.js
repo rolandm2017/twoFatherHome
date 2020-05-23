@@ -1,16 +1,16 @@
-import React, { Component } from 'react';
+import React from 'react';
 import './App.css';
 
 import {
     BrowserRouter as Router,
     Switch,
     Route,
-    Link
+    // Link
 } from "react-router-dom";
 
 // HOCs and wrappers
-import { withFirebase } from "./components/Firebase"
-import { AuthUserContext } from "./components/Session"
+// import { withFirebase } from "./components/Firebase"
+// import { AuthUserContext } from "./components/Session"
 import { withAuthentication } from './components/Session';
 
 import * as ROUTES from "./constants/routes"
