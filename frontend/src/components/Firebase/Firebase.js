@@ -72,6 +72,23 @@ class Firebase {
         return doc.data()
     }) // TODO: mk all users in the database keyed by their UID value. create unique auth accts for each user so this works
 
+    // creates a profile with docId "uid"... this has so many args, consider splitting it into two funcs/two pages...
+    createProfile = (uid, username, city, state, country, familyValues, interests, hasPets, diet, drinks, smokes) =>
+        this.fs.collection("users").doc(uid).set({
+            username: username,
+            city: city,
+            state: state,
+            country: country,
+            familyValues: familyValues,
+            interests: interests,
+            hasPets: hasPets,
+            diet: diet,
+            drinks: drinks,
+            smokes: smokes,
+            dob: null,
+            signedUpAt: this.fs.FieldValue.serverTimestamp()
+        })
+
     // *** Firestore Messages API ***
 
     // return all chatroom ids where user is present in the list of users... as a promise

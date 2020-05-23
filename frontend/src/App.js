@@ -15,17 +15,20 @@ import { withAuthentication } from './components/Session';
 
 import * as ROUTES from "./constants/routes"
 
+// general component & page imports
 import Navigation from "./components/Navigation"
 
 import LandingPage from "./components/Pages/LandingPage"
 import HomePage from './components/Pages/HomePage';
 import InboxPage from './components/Pages/InboxPage';
 
+// more authentication-related stuff is kept here
 import SignUpPage from './components/Auth/SignUp';
 import SignInPage from './components/Auth/SignIn';
 import PasswordForgetPage from './components/Auth/PasswordForget';
 import AccountPage from './components/Auth/Account';
 import AdminPage from './components/Auth/Admin';
+import CreateProfilePage from "./components/Auth/CreateProfilePage";
 
 const App = () => (
     <div className="App">
@@ -39,6 +42,7 @@ const App = () => (
                 <Route exact path={ROUTES.INBOX} component={InboxPage} />
 
                 <Route exact path={ROUTES.SIGN_UP} component={SignUpPage} />
+                <Route exact path={ROUTES.CREATE_PROFILE} component={CreateProfilePage} />
                 <Route exact path={ROUTES.SIGN_IN} component={SignInPage} />
                 <Route
                     exact

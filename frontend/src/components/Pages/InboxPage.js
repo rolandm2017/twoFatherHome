@@ -116,7 +116,3 @@ function Rooms({ rooms, currentUser }) {
 }
 
 export default withFirebase(InboxPage);
-
-// TODO: Display room participant and content like
-// FROM: Username
-// Content: MostRecentMsg

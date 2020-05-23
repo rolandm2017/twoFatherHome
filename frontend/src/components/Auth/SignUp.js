@@ -13,6 +13,7 @@ const SignUpPage = () => (
 
 const INITIAL_STATE = {
   username: '',
+  fullName: "",
   email: '',
   passwordOne: '',
   passwordTwo: '',
@@ -27,13 +28,14 @@ class SignUpFormBase extends Component {
   }
 
   onSubmit = event => {
+    console.log("Submitted new user!")
     const { username, email, passwordOne } = this.state;
 
     this.props.firebase
       .doCreateUserWithEmailAndPassword(email, passwordOne)
       .then(authUser => {
         this.setState({ ...INITIAL_STATE });
-        this.props.history.push(ROUTES.HOME);
+        this.props.history.push(ROUTES.CREATE_PROFILE);
       })
       .catch(error => {
         this.setState({ error });
@@ -46,9 +48,55 @@ class SignUpFormBase extends Component {
     this.setState({ [event.target.name]: event.target.value });
   };
 
+  // TODO: Allow only valid usernames, valid full names, valid emails (how?), valid passwords
+
+	containsAny = (str, chars) => {
+	  // top answer here: https://stackoverflow.com/questions/15201939/jquery-javascript-check-string-for-multiple-substrings
+	  for (const i in chars) {
+		  const unacceptableChar = chars[i]
+		  if (str.indexOf(unacceptableChar) > -1) {
+			  return true;
+		  }
+	  }
+	  return false;
+  }
+
+	namesAreValid = fullname => { // "first name & last name both must be longer than 1 char and contains a whitespace" rule 
+		if (fullname.indexOf(" ") > -1) {
+			const firstName = fullname.split(" ")[0]
+			const lastName = fullname.split(" ")[1]
+			if (firstName.length < 2) {
+				return false
+			} else if (lastName.length < 2) {
+				return false
+			} else {
+				return true;
+			}
+		} else {
+			return false // return false ("invalid") because indexOf(" ") returned -1
+		}
+	}
+
+  checkState = () => {
+	  console.log(this.state)
+	  const { username, fullName, email, passwordOne, passwordTwo, error } = this.state;
+	  const isInvalid = passwordOne !== passwordTwo ||
+		  passwordOne.length < 7 || // length rule
+		  email === '' ||
+		  username === '' ||
+		  username.includes(" ") || // no spaces rule
+		  !(email.includes("@")) || // must include "@" symbol rule
+		  !(email.includes(".")) || // must include "." (as in ".com" or ".net") rule
+		  this.namesAreValid(fullName) || // "first name & last name both must be longer than 1 char and contains a whitespace" rule 
+		  this.containsAny(fullName, [",", ".", ";", ":", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "+", "="]);
+	  
+	  console.log(isInvalid) // FIXME: form validation returns true when it should return false. this is a job for unit tests...
+  }
+
   render() {
     const {
       username,
+      fullName,
       email,
       passwordOne,
       passwordTwo,
@@ -56,47 +104,64 @@ class SignUpFormBase extends Component {
     } = this.state;
 
     const isInvalid =
-      passwordOne !== passwordTwo ||
-      passwordOne === '' ||
-      email === '' ||
-      username === '';
-
+      	passwordOne !== passwordTwo ||
+      	passwordOne.length < 7 || // length rule
+      	email === '' ||
+      	username === '' ||
+      	username.includes(" ") || // no spaces rule
+      	!(email.includes("@")) || // must include "@" symbol rule
+      	!(email.includes(".")) || // must include "." (as in ".com" or ".net") rule
+		this.namesAreValid(fullName) || // "first name & last name both must be longer than 1 char and contains a whitespace" rule 
+	  // full name must not include a special character
+		this.containsAny(fullName, [",", ".", ";", ":", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "+", "="]);
+      
     return (
-      <form onSubmit={this.onSubmit}>
-        <input
-          name="username"
-          value={username}
-          onChange={this.onChange}
-          type="text"
-          placeholder="Full Name"
-        />
-        <input
-          name="email"
-          value={email}
-          onChange={this.onChange}
-          type="text"
-          placeholder="Email Address"
-        />
-        <input
-          name="passwordOne"
-          value={passwordOne}
-          onChange={this.onChange}
-          type="password"
-          placeholder="Password"
-        />
-        <input
-          name="passwordTwo"
-          value={passwordTwo}
-          onChange={this.onChange}
-          type="password"
-          placeholder="Confirm Password"
-        />
-        <button disabled={isInvalid} type="submit">
-          Sign Up
-        </button>
+      <div>
+        <form onSubmit={this.onSubmit}>
+          <input
+            name="username"
+            value={username}
+            onChange={this.onChange}
+            type="text"
+            placeholder="Username"
+            />
+          <input
+            name="fullName"
+            value={fullName}
+            onChange={this.onChange}
+            type="text"
+            placeholder="Full Name"
+            />
+          <input
+            name="email"
+            value={email}
+            onChange={this.onChange}
+            type="text"
+            placeholder="Email Address"
+            />
+          <input
+            name="passwordOne"
+            value={passwordOne}
+            onChange={this.onChange}
+            type="password"
+            placeholder="Password"
+            />
+          <input
+            name="passwordTwo"
+            value={passwordTwo}
+            onChange={this.onChange}
+            type="password"
+            placeholder="Confirm Password"
+            />
+          <button disabled={isInvalid} type="submit">
+            Sign Up
+          </button>
 
-        {error && <p>{error.message}</p>}
-      </form>
+          {error && <p>{error.message}</p>}
+        </form>
+
+        <button onClick={this.checkState}>Test</button>
+      </div>
     );
   }
 }
