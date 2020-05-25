@@ -9,7 +9,7 @@ const AccountPage = () => (
         <h1>Account Page</h1>
         <PasswordForgetForm />
         <PasswordChangeForm />
-        {/* <EditProfilePage /> */}
+        <EditProfilePage />
     </div>
 );
 

@@ -10,15 +10,12 @@ class EditProfilePage extends Component {
         super(props);
 
         this.state = {
-            startDate: new Date(),
-            fullName: null,
             username: null,
             city: null,
             state: null,
             country: null,
-            age: null,
             familyValues: [],
-            interests: null,
+            interests: "",
             hasPets: false,
             diet: null,
             drinks: false,
@@ -27,7 +24,6 @@ class EditProfilePage extends Component {
             alertMsg: "Fill out the form & hit submit!"
         };
     }
-
 
     // todo: start a new development branch
 
@@ -43,15 +39,20 @@ class EditProfilePage extends Component {
                         console.log("DOC:", doc)
                         if (doc.exists) {
                             const userData = doc.data()
+                            console.log(userData)
+                            this.setState({
+                                username: userData.username,
+                                city: userData.city, state: userData.state, country: userData.country,
+                                familyValues: userData.familyValues, interests: userData.interests, hasPets: userData.hasPets,
+                                diet: userData.diet, drinks: userData.drinks, smokes: userData.smokes, doesDrugs: userData.drugs
+                            })
+                            // TODO: populate fields with data from doc.data()
                         } else {
                             // what to do if someone goes to the EditProfilePage without having a profile? redirect to... ___?
                         }
                     }).catch(err => {
                         console.log(err)
                     })
-                    // console.log(authUser.uid)
-                    // const profileAlreadyCreated = this.props.firebase.checkIfUserHasProfile(authUser.uid);
-                    // console.log("9000:", profileAlreadyCreated)
                     this.setState({ authUser: authUser });
                 } else {
                     this.setState({ authUser: null })
@@ -60,10 +61,28 @@ class EditProfilePage extends Component {
         );
         // TODO: make Create Profile page inaccessible to users who already created a profile.
         // ............--> redirect to "Edit Profile" page!
+
     }
 
     componentWillUnmount() {
         this.listener(); // prevents a memory leak or something
+    }
+
+    checkIfFamilyValueExists = selection => {
+        // function is unique to EditProfilePage, doesn't exist in CreateProfilePage.
+        let loadedValues = this.state.familyValues
+        if (loadedValues.length) {
+            loadedValues = loadedValues.split(",")
+        } else {
+            return false // exit early if loadedValues has no length.
+        }
+        for (let i = 0; i < loadedValues.length; i++) {
+            // "if the input value is in the list of loaded values..."
+            if (loadedValues[i] === selection) {
+                return true;
+            }
+        }
+        return false;
     }
 
     storeValue = (event) => {
@@ -324,14 +343,14 @@ class EditProfilePage extends Component {
                 <input onChange={this.storeValue} name="username" id="username"></input> */}
 
                 <label htmlFor="country">Pick your country:</label>
-                <select onChange={this.storeValue} name="country" id="country">
+                <select onChange={this.storeValue} value={this.state.country} name="country" id="country">
                     <option value="Select one...">Select one...</option>
                     <option value="Canada">Canada</option>
                     {/* <option value="USA">USA</option> */}
                 </select>
 
                 <label htmlFor="state">Pick your province:</label>
-                <select onChange={this.storeValue} name="state" id="state">
+                <select onChange={this.storeValue} value={this.state.state} name="state" id="state">
                     <option value="Select one...">Select one...</option>
                     <option value="British Columbia">British Columbia</option>
                     <option value="Ontario">Ontario</option>
@@ -347,9 +366,11 @@ class EditProfilePage extends Component {
                     {/* TODO: Expand to other provinces */}
                 </select>
 
-                {this.state.state === "British Columbia" ? <IfBritishColumbia passStoreValue={this.storeValue} /> : null}
+                {this.state.state === "British Columbia" ? <IfBritishColumbia passStoreValue={this.storeValue}
+                    storedCity={this.state.city} /> : null}
 
-                {this.state.state === "Ontario" ? <IfOntario passStoreValue={this.storeValue} /> : null}
+                {this.state.state === "Ontario" ? <IfOntario passStoreValue={this.storeValue}
+                    storedCity={this.state.city} /> : null}
 
                 {/* Disabled in the Edit Profile page because user cannot change their age! */}
                 {/* <AgeSelector passStoreValue={this.storeValue} /> */}
@@ -357,29 +378,51 @@ class EditProfilePage extends Component {
                 <div>
                     <label htmlFor="familyValues">Tell us what your family values will be:</label>
                     <br />
-                    <span>Valuing Elders</span><input onChange={this.handleFamilyValuesEvent} type="checkbox" name="Valuing Elders" />
-                    <span>Hard Work</span><input onChange={this.handleFamilyValuesEvent} type="checkbox" name="Hard Work" />
-                    <span>Respect</span><input onChange={this.handleFamilyValuesEvent} type="checkbox" name="Respect" />
-                    <span>Compassion</span><input onChange={this.handleFamilyValuesEvent} type="checkbox" name="Compassion" />
-                    <span>Eating Together</span><input onChange={this.handleFamilyValuesEvent} type="checkbox" name="Eating Together" />
-                    <span>Responsibility</span><input onChange={this.handleFamilyValuesEvent} type="checkbox" name="Responsibility" />
-                    <span>Creativity</span><input onChange={this.handleFamilyValuesEvent} type="checkbox" name="Creativity" />
-                    <span>Kindness</span><input onChange={this.handleFamilyValuesEvent} type="checkbox" name="Kindness" />
-                    <span>Fun</span><input onChange={this.handleFamilyValuesEvent} type="checkbox" name="Fun" />
-                    <span>Volunteering</span><input onChange={this.handleFamilyValuesEvent} type="checkbox" name="Volunteering" />
-                    <span>Mine aren't listed!</span><input onChange={this.handleFamilyValuesEvent} type="checkbox" name="unlisted" />
+                    <span>Valuing Elders</span>
+                    <input onChange={this.handleFamilyValuesEvent} type="checkbox"
+                        checked={this.checkIfFamilyValueExists("Valuing Elders")} name="Valuing Elders" />
+                    <span>Hard Work</span>
+                    <input onChange={this.handleFamilyValuesEvent} type="checkbox"
+                        checked={this.checkIfFamilyValueExists("Hard Work")} name="Hard Work" />
+                    <span>Respect</span>
+                    <input onChange={this.handleFamilyValuesEvent} type="checkbox"
+                        checked={this.checkIfFamilyValueExists("Respect")} name="Respect" />
+                    <span>Compassion</span>
+                    <input onChange={this.handleFamilyValuesEvent} type="checkbox"
+                        checked={this.checkIfFamilyValueExists("Compassion")} name="Compassion" />
+                    <span>Eating Together</span>
+                    <input onChange={this.handleFamilyValuesEvent} type="checkbox"
+                        checked={this.checkIfFamilyValueExists("Eating Together")} name="Eating Together" />
+                    <span>Responsibility</span>
+                    <input onChange={this.handleFamilyValuesEvent} type="checkbox"
+                        checked={this.checkIfFamilyValueExists("Responsibility")} name="Responsibility" />
+                    <span>Creativity</span>
+                    <input onChange={this.handleFamilyValuesEvent} type="checkbox"
+                        checked={this.checkIfFamilyValueExists("Creativity")} name="Creativity" />
+                    <span>Kindness</span>
+                    <input onChange={this.handleFamilyValuesEvent} type="checkbox"
+                        checked={this.checkIfFamilyValueExists("Kindness")} name="Kindness" />
+                    <span>Fun</span>
+                    <input onChange={this.handleFamilyValuesEvent} type="checkbox"
+                        checked={this.checkIfFamilyValueExists("Fun")} name="Fun" />
+                    <span>Volunteering</span>
+                    <input onChange={this.handleFamilyValuesEvent} type="checkbox"
+                        checked={this.checkIfFamilyValueExists("Volunteering")} name="Volunteering" />
+                    <span>Mine aren't listed!</span>
+                    <input onChange={this.handleFamilyValuesEvent} type="checkbox"
+                        checked={this.checkIfFamilyValueExists("unlisted")} name="unlisted" />
                 </div>
 
                 <div>
                     <label htmlFor="interests">What are your interests? Separate each one by a comma:</label>
-                    <input type="text" onChange={this.handleInterests} placeholder="interest1, interest2..." />
+                    <input type="text" onChange={this.handleInterests} value={this.state.interests} placeholder="interest1, interest2" />
                 </div>
 
                 <label htmlFor="hasPets">Do you have pets? Tick the box if so:</label>
-                <input onChange={this.handlePets} type="checkbox" name="hasPets" />
+                <input onChange={this.handlePets} checked={this.state.hasPets} type="checkbox" name="hasPets" />
 
                 <label htmlFor="diet">Dietary preferences:</label>
-                <select onChange={this.storeValue} name="diet" id="diet">
+                <select onChange={this.storeValue} value={this.state.diet} name="diet" id="diet">
                     <option value="Select one...">Select one...</option>
                     <option value="Omnivore">Omnivore</option>
                     <option value="Carnivore">Carnivore (lol)</option>
@@ -389,13 +432,13 @@ class EditProfilePage extends Component {
                 </select>
 
                 <label htmlFor="drinks">Do you drink?</label>
-                <input onChange={this.handleCheckbox} type="checkbox" name="drinks" />
+                <input onChange={this.handleCheckbox} type="checkbox" checked={this.state.drinks} name="drinks" />
 
                 <label htmlFor="smokes">Do you smoke?</label>
-                <input onChange={this.handleCheckbox} type="checkbox" name="smokes" />
+                <input onChange={this.handleCheckbox} type="checkbox" checked={this.state.smokes} name="smokes" />
 
                 <label htmlFor="doesDrugs">Do you do any drugs?</label>
-                <input onChange={this.handleCheckbox} type="checkbox" name="drugs" />
+                <input onChange={this.handleCheckbox} type="checkbox" checked={this.state.doesDrugs} name="drugs" />
 
                 <button onClick={this.editProfile}>Submit Profile</button>
 
@@ -423,7 +466,7 @@ class IfBritishColumbia extends Component {
         return (
             <div>
                 <label htmlFor="city">Pick the city closest to you:</label>
-                <select onChange={this.props.passStoreValue} name="city" id="city">
+                <select onChange={this.props.passStoreValue} value={this.props.storedCity} name="city" id="city">
                     <option value="Select one...">Select one...</option>
                     <option value="Vancouver">Vancouver</option>
                     <option value="Victoria">Victoria</option>
@@ -441,7 +484,7 @@ class IfOntario extends Component {
         return (
             <div>
                 <label htmlFor="city">Pick the city closest to you:</label>
-                <select onChange={this.props.passStoreValue} name="city" id="city">
+                <select onChange={this.props.passStoreValue} value={this.props.storedCity} name="city" id="city">
                     <option value="Select one...">Select one...</option>
                     <option value="Toronto">Toronto</option>
                     <option value="Ottawa">Ottawa</option>

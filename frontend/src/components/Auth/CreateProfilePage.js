@@ -289,6 +289,7 @@ class CreateProfilePage extends Component {
             const drinks = this.state.drinks;
             const smokes = this.state.smokes;
             const doesDrugs = this.state.doesDrugs;
+            // fixme: boolean value for doesDrugs did not work for some reason
             this.props.firebase.createProfile(userUID, fullName, username, city, state, country, age, familyValues, interests,
                 hasPets, diet, drinks, smokes, doesDrugs)
             this.displayMessage("Profile form is valid, welcome to TwoFatherHome!")
@@ -415,7 +416,7 @@ class CreateProfilePage extends Component {
                 <input onChange={this.handleCheckbox} type="checkbox" name="smokes" />
 
                 <label htmlFor="doesDrugs">Do you do any drugs?</label>
-                <input onChange={this.handleCheckbox} type="checkbox" name="drugs" />
+                <input onChange={this.handleCheckbox} type="checkbox" name="doesDrugs" />
 
                 <button onClick={this.submitProfile}>Submit Profile</button>
 
