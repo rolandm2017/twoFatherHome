@@ -9,3 +9,4 @@ export const INBOX = "/inbox";
 export const CREATE_PROFILE = "/create-profile"
 export const EDIT_PROFILE = "/edit-profile"
 export const SETTINGS = "/settings"
+export const PROFILE = "/profile"

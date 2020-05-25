@@ -29,6 +29,9 @@ const NavigationAuth = () => (
             <Link to={ROUTES.INBOX}>Inbox</Link>
         </li>
         <li>
+            <Link to={ROUTES.PROFILE}>Profile</Link>
+        </li>
+        <li>
             <Link to={ROUTES.ACCOUNT}>Account</Link>
         </li>
         <li>

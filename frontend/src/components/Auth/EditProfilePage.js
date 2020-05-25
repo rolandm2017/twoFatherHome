@@ -56,6 +56,8 @@ class EditProfilePage extends Component {
                     this.setState({ authUser: authUser });
                 } else {
                     this.setState({ authUser: null })
+                    // redirect to login screen since no user is signed in
+                    this.props.history.push(ROUTES.SIGN_IN)
                 }
             },
         );
@@ -91,26 +93,25 @@ class EditProfilePage extends Component {
         console.log(this.state)
     }
 
-    handleFamilyValuesEvent = event => {
-        // edits the array of familyValues objects in this.state.familyValues
+    editFamilyValuesEvent = event => {
+        // edits the *CSV* of familyValues objects in this.state.familyValues
         const currentValues = this.state.familyValues;
-        const updatedValues = [];
-        if (event.target.checked) { // if true, we add the name to the list
-            for (const value in currentValues) { // remake the list and...
-                updatedValues.push(currentValues[value])
-            }
-            // ...add the new name to the list
-            const valueToAdd = event.target.name;
-            updatedValues.push(valueToAdd)
-        } else { // otherwise, we remove the name from the list
-            const valueToRemove = event.target.name;
-            for (const value in currentValues) {
-                if (currentValues[value] === valueToRemove) {
-                } else {
-                    updatedValues.push(currentValues[value])
+        const targetValue = event.target.name;
+        let updatedValues;
+        if (event.target.checked) { // if ticking a box triggered the event
+            updatedValues = currentValues + targetValue;
+        } else { // if unticking a box triggered the event, 
+            const tempContainer = currentValues.split(",")
+            updatedValues = tempContainer[0]
+            if (tempContainer.length > 0) {
+                for (let i = 1; i < tempContainer.length; i++) {
+                    if (tempContainer[i] !== targetValue) { // if the current value is not the value targeted for removal
+                        updatedValues = updatedValues + "," + tempContainer[i]
+                    }
                 }
             }
         }
+
         console.log("name:", event.target.name)
         console.log("checked: ", event.target.checked)
         console.log("starting values:", currentValues)
@@ -134,52 +135,12 @@ class EditProfilePage extends Component {
         this.setState({ alertMsg: content })
     }
 
-    // todo: move "pick a username" action from SignUp page to CreateProfilePage
 
     testAuth = () => {
         // for debugging
         console.log(this.state.authUser)
         console.log("displayname:", this.state.authUser.displayName)
     }
-
-    // validateFullName = () => { // "first name & last name both must be longer than 1 char and contains a whitespace" rule 
-    //     const fullname = this.state.fullName;
-    //     if (/^[A-Za-z.-\s]+$/.test(fullname)) {
-    //         const firstName = fullname.split(" ")[0]
-    //         const lastName = fullname.split(" ")[1]
-    //         if (firstName.length < 2) {
-    //             this.displayMessage("Name length must be 2 or greater.")
-    //             return false
-    //         } else if (lastName.length < 2) {
-    //             this.displayMessage("Name length must be 2 or greater.")
-    //             return false
-    //         } else {
-    //             return true;
-    //         }
-    //     } else {
-    //         this.displayMessage("Only alphabetical characters, periods, hyphens and spaces are allowed in full names.")
-    //         return false // .test() failed.
-    //     }
-    // }
-
-    // validateUsername = () => {
-    //     const username = this.state.username;
-    //     // https://stackoverflow.com/questions/41597685/javascript-test-string-for-only-letters-and-numbers
-    //     if (username) {
-    //         if (/^[A-Za-z0-9]+$/.test(username)) {
-    //             console.log(username, "is a fine name")
-    //             return true;
-    //         } else {
-    //             console.log("something's wrong with the username")
-    //             this.displayMessage("Usernames can only use letters and numbers. Please edit your username.")
-    //             return false;
-    //         }
-    //     } else {
-    //         console.log("Username wasn't filled in")
-    //         this.displayMessage("Please fill in a username. Letters and numbers only.")
-    //         return false
-    //     }
-    // }
 
     validateLocation = () => {
         const country = this.state.country;
@@ -209,26 +170,6 @@ class EditProfilePage extends Component {
             return false
         }
     }
-
-    // validateAge = () => {
-    //     let age = this.state.age;
-    //     if (age) {
-    //         age = parseInt(age, 10);
-    //         if (typeof age === "number") {
-    //             return true;
-    //         }
-    //         this.displayMessage("Please select your age.")
-    //         console.log("Age wasn't right")
-    //         return false;
-    //     } else {
-    //         this.displayMessage("Please select your age.")
-    //         console.log("Age wasn't selected")
-    //         return false
-    //     }
-    //     console.log(age)
-    //     console.log(typeof age)
-
-    // }
 
     validateFamilyValues = () => {
         const values = this.state.familyValues;
@@ -289,7 +230,7 @@ class EditProfilePage extends Component {
             const city = this.state.city;
             const state = this.state.state;
             const country = this.state.country;
-            const familyValues = this.getFamilyValues(this.state.familyValues) // turns array into a comma separated value
+            const familyValues = this.state.familyValues
             const interests = this.state.interests;
             const hasPets = this.state.hasPets;
             const diet = this.state.diet;
@@ -308,15 +249,16 @@ class EditProfilePage extends Component {
         }
     }
 
-    getFamilyValues = input => {
-        // converts the array of family values into a csv string
-        let csv = input[0];
-        for (let i = 1; i < input.length; i++) { // loop runs 0 times if input.length is 1, adding , 0 times... which is good
-            csv = csv + ","
-            csv = csv + input[i]
-        }
-        return csv
-    }
+    // // I think this is completely useless code here, since fValues are not stored as array on this page
+    // getFamilyValues = input => {
+    //     // converts the array of family values into a csv string
+    //     let csv = input[0];
+    //     for (let i = 1; i < input.length; i++) { // loop runs 0 times if input.length is 1, adding , 0 times... which is good
+    //         csv = csv + ","
+    //         csv = csv + input[i]
+    //     }
+    //     return csv
+    // }
 
     // username, city, state, country, age, familyValues, interests, hasPets, diet, drinks, smokes, doesDrugs
 
@@ -331,16 +273,11 @@ class EditProfilePage extends Component {
                 <h1>Edit Your Profile</h1>
 
                 {/* // user cannot change username or full name */}
-                {/* <label htmlFor="fullName">Your full name (kept private):</label>
-                <input
-                    name="fullName"
-                    onChange={this.storeValue}
-                    type="text"
-                    placeholder="Full Name"
-                /> */}
 
-                {/* <label htmlFor="username">Choose a username:</label>
-                <input onChange={this.storeValue} name="username" id="username"></input> */}
+                <h3>Username:</h3>
+                <span>{this.state.username}</span>
+
+                <br />
 
                 <label htmlFor="country">Pick your country:</label>
                 <select onChange={this.storeValue} value={this.state.country} name="country" id="country">
@@ -379,37 +316,37 @@ class EditProfilePage extends Component {
                     <label htmlFor="familyValues">Tell us what your family values will be:</label>
                     <br />
                     <span>Valuing Elders</span>
-                    <input onChange={this.handleFamilyValuesEvent} type="checkbox"
+                    <input onChange={this.editFamilyValuesEvent} type="checkbox"
                         checked={this.checkIfFamilyValueExists("Valuing Elders")} name="Valuing Elders" />
                     <span>Hard Work</span>
-                    <input onChange={this.handleFamilyValuesEvent} type="checkbox"
+                    <input onChange={this.editFamilyValuesEvent} type="checkbox"
                         checked={this.checkIfFamilyValueExists("Hard Work")} name="Hard Work" />
                     <span>Respect</span>
-                    <input onChange={this.handleFamilyValuesEvent} type="checkbox"
+                    <input onChange={this.editFamilyValuesEvent} type="checkbox"
                         checked={this.checkIfFamilyValueExists("Respect")} name="Respect" />
                     <span>Compassion</span>
-                    <input onChange={this.handleFamilyValuesEvent} type="checkbox"
+                    <input onChange={this.editFamilyValuesEvent} type="checkbox"
                         checked={this.checkIfFamilyValueExists("Compassion")} name="Compassion" />
                     <span>Eating Together</span>
-                    <input onChange={this.handleFamilyValuesEvent} type="checkbox"
+                    <input onChange={this.editFamilyValuesEvent} type="checkbox"
                         checked={this.checkIfFamilyValueExists("Eating Together")} name="Eating Together" />
                     <span>Responsibility</span>
-                    <input onChange={this.handleFamilyValuesEvent} type="checkbox"
+                    <input onChange={this.editFamilyValuesEvent} type="checkbox"
                         checked={this.checkIfFamilyValueExists("Responsibility")} name="Responsibility" />
                     <span>Creativity</span>
-                    <input onChange={this.handleFamilyValuesEvent} type="checkbox"
+                    <input onChange={this.editFamilyValuesEvent} type="checkbox"
                         checked={this.checkIfFamilyValueExists("Creativity")} name="Creativity" />
                     <span>Kindness</span>
-                    <input onChange={this.handleFamilyValuesEvent} type="checkbox"
+                    <input onChange={this.editFamilyValuesEvent} type="checkbox"
                         checked={this.checkIfFamilyValueExists("Kindness")} name="Kindness" />
                     <span>Fun</span>
-                    <input onChange={this.handleFamilyValuesEvent} type="checkbox"
+                    <input onChange={this.editFamilyValuesEvent} type="checkbox"
                         checked={this.checkIfFamilyValueExists("Fun")} name="Fun" />
                     <span>Volunteering</span>
-                    <input onChange={this.handleFamilyValuesEvent} type="checkbox"
+                    <input onChange={this.editFamilyValuesEvent} type="checkbox"
                         checked={this.checkIfFamilyValueExists("Volunteering")} name="Volunteering" />
                     <span>Mine aren't listed!</span>
-                    <input onChange={this.handleFamilyValuesEvent} type="checkbox"
+                    <input onChange={this.editFamilyValuesEvent} type="checkbox"
                         checked={this.checkIfFamilyValueExists("unlisted")} name="unlisted" />
                 </div>
 
@@ -438,7 +375,7 @@ class EditProfilePage extends Component {
                 <input onChange={this.handleCheckbox} type="checkbox" checked={this.state.smokes} name="smokes" />
 
                 <label htmlFor="doesDrugs">Do you do any drugs?</label>
-                <input onChange={this.handleCheckbox} type="checkbox" checked={this.state.doesDrugs} name="drugs" />
+                <input onChange={this.handleCheckbox} type="checkbox" checked={this.state.doesDrugs} name="doesDrugs" />
 
                 <button onClick={this.editProfile}>Submit Profile</button>
 

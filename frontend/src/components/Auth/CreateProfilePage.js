@@ -322,7 +322,7 @@ class CreateProfilePage extends Component {
         return csv
     }
 
-    // username, city, state, country, age, familyValues, interests, hasPets, diet, drinks, smokes, doesDrugs
+    // fullname, username, city, state, country, age, familyValues, interests, hasPets, diet, drinks, smokes, doesDrugs
 
     // FIXME: I guarantee there are bugs waiting to be discovered.
     // TODO: Create unit tests

@@ -22,6 +22,7 @@ import Navigation from "./components/Navigation"
 import LandingPage from "./components/Pages/LandingPage"
 import HomePage from './components/Pages/HomePage';
 import InboxPage from './components/Pages/InboxPage';
+import ProfilePage from './components/Pages/ProfilePage';
 
 // more authentication-related stuff is kept here
 import SignUpPage from './components/Auth/SignUp';
@@ -52,6 +53,9 @@ const App = () => (
                 />
                 <Route exact path={ROUTES.ACCOUNT} component={AccountPage} />
                 <Route exact path={ROUTES.ADMIN} component={AdminPage} />
+
+                <Route exact path={ROUTES.PROFILE} component={ProfilePage} />
+
             </Switch>
         </Router>
     </div>
@@ -59,7 +63,10 @@ const App = () => (
 
 export default withAuthentication(App);
 
-// todo: install Firebase
+// TODO: add page where user can browse other users's profiles
+// TODO: allow users to upload 3 images to their profile
+// TODO: design the "user profile page"
+// TODO: let users browse and Like/pass on users just like OkCupid (display # of wanted kids beside photo!)
 
 // todo: add admin page **
 // todo: allow admin to see list of all signed up users

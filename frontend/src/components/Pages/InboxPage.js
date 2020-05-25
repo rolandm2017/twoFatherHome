@@ -9,9 +9,6 @@ class InboxPage extends Component {
     constructor(props) {
         super(props);
 
-        // this.generateChatrooms = this.generateChatrooms.bind(this)
-        // self = this;
-
         this.state = {
             authUser: null,
             rooms: null,
