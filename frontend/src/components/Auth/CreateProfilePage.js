@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
 
 import { withFirebase } from '../Firebase';
+import { withRouter } from 'react-router-dom';
+
+import * as ROUTES from "../../constants/routes"
 
 class CreateProfilePage extends Component {
     constructor(props) {
@@ -13,15 +16,14 @@ class CreateProfilePage extends Component {
             state: null,
             country: null,
             age: null,
-            // familyValues: ["Valuing Elders": false, "Hard Work": false, "Respect": false, "Compassion": false, "Eating Together": false,
-            // "Responsibility": false, "Creativity": false, "Kindness": false, "Fun": false, "Volutneering": false, "unlisted": false],
             familyValues: [],
             interests: null,
             hasPets: false,
             diet: null,
             drinks: false,
             smokes: false,
-            doesDrugs: false
+            doesDrugs: false,
+            alertMsg: "Fill out the form & hit submit!"
         };
     }
 
@@ -91,6 +93,10 @@ class CreateProfilePage extends Component {
         console.log(this.state)
     }
 
+    displayMessage = content => {
+        this.setState({ alertMsg: content })
+    }
+
     validateUsername = () => {
         const username = this.state.username;
         // https://stackoverflow.com/questions/41597685/javascript-test-string-for-only-letters-and-numbers
@@ -100,10 +106,12 @@ class CreateProfilePage extends Component {
                 return true;
             } else {
                 console.log("something's wrong with the username")
+                this.displayMessage("Usernames can only use letters and numbers. Please edit your username.")
                 return false;
             }
         } else {
             console.log("Username wasn't filled in")
+            this.displayMessage("Please fill in a username. Letters and numbers only.")
             return false
         }
     }
@@ -117,18 +125,22 @@ class CreateProfilePage extends Component {
         if (country && city && state) {
             if (country === "Select one...") {
                 console.log("country was invalid")
+                this.displayMessage("Country selection invalid, please try again.")
                 return false
             } else if (state === "Select one...") {
                 console.log("state was invalid")
+                this.displayMessage("Province or state selection invalid, please try again.")
                 return false
             } else if (city === "Select one...") {
                 console.log("city was invalid")
+                this.displayMessage("City selection invalid, please try again.")
                 return false
             } else {
                 return true
             }
         } else {
             console.log("One of country, city & state were missing")
+            this.displayMessage("Please fix your location. One of country, city and state/province is missing.")
             return false
         }
     }
@@ -141,6 +153,7 @@ class CreateProfilePage extends Component {
             return true;
         }
         console.log("family values are invalid")
+        this.displayMessage("Please select at least one family value.")
         return false // "if no family values are listed as true, then the user still needs to pick at least one."
     }
 
@@ -149,14 +162,16 @@ class CreateProfilePage extends Component {
         if (this.state.interests) {
             // this if statement checks: a) length of "interests" is greater than 5, and b) there is at least 2 interests
             if (this.state.interests.length > 5 && this.state.interests.indexOf(",") > -1) {
-                if (/^[A-Za-z0-9][,]+$/.test(this.state.interests)) { // note: [,] adds comma to the regex
+                if (/^[A-Za-z0-9,\s]+$/.test(this.state.interests)) { // note: [,] adds comma to the regex
                     return true;
                 } else {
                     console.log("interests contained an unacceptable character")
+                    this.displayMessage("Interests may only contain letters, numbers, spaces and commas.")
                     return false;
                 }
             } else {
                 console.log("Interests was too short, please include at least two interests")
+                this.displayMessage("")
                 return false // return false if the "interests" list is less than 5 chars long
             }
         }
@@ -186,6 +201,8 @@ class CreateProfilePage extends Component {
             const doesDrugs = this.state.doesDrugs;
             this.props.firebase.createProfile(userUID, username, city, state, country, age, familyValues, interests,
                 hasPets, diet, drinks, smokes, doesDrugs)
+            this.displayMessage("Profile form is valid, welcome to TwoFatherHome!")
+            this.props.history.push(ROUTES.HOME)
         } else {
             // do something... display a msg to the user informing him that he needs to improve the form.
         }
@@ -239,7 +256,7 @@ class CreateProfilePage extends Component {
                 <AgeSelector passStoreValue={this.storeValue} />
 
                 <div>
-                    <label htmlFor="familyValues">Select some family values:</label>
+                    <label htmlFor="familyValues">Tell us what your family values will be:</label>
                     <br />
                     <span>Valuing Elders</span><input onChange={this.handleCheckbox} type="checkbox" name="Valuing Elders" />
                     <span>Hard Work</span><input onChange={this.handleCheckbox} type="checkbox" name="Hard Work" />
@@ -285,6 +302,7 @@ class CreateProfilePage extends Component {
 
                 <div>
                     {/* // Display messages to the user here... e.g. if the form is messed up */}
+                    {this.state.alertMsg}
                 </div>
 
             </div>
