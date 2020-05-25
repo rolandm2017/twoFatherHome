@@ -142,7 +142,7 @@ class CreateProfilePage extends Component {
     validateAge = () => {
         let age = this.state.age;
         if (age) {
-            age = age.toInt();
+            age = parseInt(age, 10);
             if (typeof age === "number") {
                 return true;
             }
@@ -193,6 +193,16 @@ class CreateProfilePage extends Component {
         console.log("Interests wasn't filled in")
     }
 
+    validateDiet = () => {
+        const diet = this.state.diet;
+        if (diet && diet !== "Select one...") {
+            return true;
+        } else {
+            this.displayMessage("Please select your diet.")
+            return false;
+        }
+    }
+
     submitProfile = () => {
         console.log(this.state)
         const usernameIsValid = this.validateUsername();
@@ -200,10 +210,12 @@ class CreateProfilePage extends Component {
         const ageIsValid = this.validateAge();
         const familyValuesAreValid = this.validateFamilyValues();
         const interestsAreValid = this.validateInterests();
+        const dietIsValid = this.validateDiet();
         const userIsSignedIn = this.state.authUser;
 
 
-        if (usernameIsValid && locationIsValid && familyValuesAreValid && interestsAreValid && userIsSignedIn) {
+        if (usernameIsValid && locationIsValid && familyValuesAreValid && interestsAreValid &&
+            ageIsValid && dietIsValid && userIsSignedIn) {
             const userUID = this.state.authUser.uid;
             const username = this.state.username;
             const city = this.state.city;
