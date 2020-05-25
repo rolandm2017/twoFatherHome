@@ -55,12 +55,6 @@ class CreateProfilePage extends Component {
         console.log(this.state)
     }
 
-    // handleDate = date => {
-    //     this.setState({
-    //         dateOfBirth: date
-    //     });
-    // };
-
     handleCheckbox = event => {
         // edits the array of familyValues objects in this.state.familyValues
         const currentValues = this.state.familyValues;
@@ -145,6 +139,26 @@ class CreateProfilePage extends Component {
         }
     }
 
+    validateAge = () => {
+        let age = this.state.age;
+        if (age) {
+            age = age.toInt();
+            if (typeof age === "number") {
+                return true;
+            }
+            this.displayMessage("Please select your age.")
+            console.log("Age wasn't right")
+            return false;
+        } else {
+            this.displayMessage("Please select your age.")
+            console.log("Age wasn't selected")
+            return false
+        }
+        console.log(age)
+        console.log(typeof age)
+
+    }
+
     validateFamilyValues = () => {
         const values = this.state.familyValues;
         console.log("values: ", values)
@@ -175,6 +189,7 @@ class CreateProfilePage extends Component {
                 return false // return false if the "interests" list is less than 5 chars long
             }
         }
+        this.displayMessage("Please fill in at least two interests.")
         console.log("Interests wasn't filled in")
     }
 
@@ -182,10 +197,13 @@ class CreateProfilePage extends Component {
         console.log(this.state)
         const usernameIsValid = this.validateUsername();
         const locationIsValid = this.validateLocation();
+        const ageIsValid = this.validateAge();
         const familyValuesAreValid = this.validateFamilyValues();
-        const interstsAreValid = this.validateInterests();
+        const interestsAreValid = this.validateInterests();
+        const userIsSignedIn = this.state.authUser;
 
-        if (usernameIsValid && locationIsValid && familyValuesAreValid && interstsAreValid) {
+
+        if (usernameIsValid && locationIsValid && familyValuesAreValid && interestsAreValid && userIsSignedIn) {
             const userUID = this.state.authUser.uid;
             const username = this.state.username;
             const city = this.state.city;
@@ -202,16 +220,22 @@ class CreateProfilePage extends Component {
             this.props.firebase.createProfile(userUID, username, city, state, country, age, familyValues, interests,
                 hasPets, diet, drinks, smokes, doesDrugs)
             this.displayMessage("Profile form is valid, welcome to TwoFatherHome!")
+            console.log("Success")
             this.props.history.push(ROUTES.HOME)
         } else {
             // do something... display a msg to the user informing him that he needs to improve the form.
+            // this.displayMessage("Something isn't filled in properly with your form, or you are not signed in.")
         }
     }
 
     getFamilyValues = input => {
-        // receives an array of objects with boolean values, representing the familyValues options
-        // converts this array into a csv e.g.:
-        // "Hard Work": true, "Volunteering": true, "Fun": false, "Compassion": true --> "Hard Work,Volunteering, Compassion"
+        // converts the array of family values into a csv string
+        let csv = input[0];
+        for (let i = 1; i < input.length; i++) { // loop runs 0 times if input.length is 1, adding , 0 times... which is good
+            csv = csv + ","
+            csv = csv + input[i]
+        }
+        return csv
     }
 
     // username, city, state, country, age, familyValues, interests, hasPets, diet, drinks, smokes, doesDrugs
