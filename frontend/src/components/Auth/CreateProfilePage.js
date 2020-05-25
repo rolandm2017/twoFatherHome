@@ -11,6 +11,7 @@ class CreateProfilePage extends Component {
 
         this.state = {
             startDate: new Date(),
+            fullName: null,
             username: null,
             city: null,
             state: null,
@@ -27,7 +28,6 @@ class CreateProfilePage extends Component {
         };
     }
 
-    // todo: make this page associate the authenticated user with their own profile & info.
     // todo: start a new development branch
 
     // todo: when "finished", check here:
@@ -84,11 +84,38 @@ class CreateProfilePage extends Component {
 
     handleInterests = event => {
         this.setState({ interests: event.target.value })
-        console.log(this.state)
     }
 
     displayMessage = content => {
         this.setState({ alertMsg: content })
+    }
+
+    // todo: move "pick a username" action from SignUp page to CreateProfilePage
+
+    testAuth = () => {
+        // for debugging
+        console.log(this.state.authUser)
+        console.log("displayname:", this.state.authUser.displayName)
+    }
+
+    validateFullName = () => { // "first name & last name both must be longer than 1 char and contains a whitespace" rule 
+        const fullname = this.state.fullName;
+        if (/^[A-Za-z.-\s]+$/.test(fullname)) {
+            const firstName = fullname.split(" ")[0]
+            const lastName = fullname.split(" ")[1]
+            if (firstName.length < 2) {
+                this.displayMessage("Name length must be 2 or greater.")
+                return false
+            } else if (lastName.length < 2) {
+                this.displayMessage("Name length must be 2 or greater.")
+                return false
+            } else {
+                return true;
+            }
+        } else {
+            this.displayMessage("Only alphabetical characters, periods, hyphens and spaces are allowed in full names.")
+            return false // .test() failed.
+        }
     }
 
     validateUsername = () => {
@@ -205,6 +232,7 @@ class CreateProfilePage extends Component {
 
     submitProfile = () => {
         console.log(this.state)
+        const fullNameIsValid = this.validateFullName();
         const usernameIsValid = this.validateUsername();
         const locationIsValid = this.validateLocation();
         const ageIsValid = this.validateAge();
@@ -213,10 +241,12 @@ class CreateProfilePage extends Component {
         const dietIsValid = this.validateDiet();
         const userIsSignedIn = this.state.authUser;
 
-
+        console.log("boolean check: ", usernameIsValid, locationIsValid, ageIsValid,
+            familyValuesAreValid, interestsAreValid, dietIsValid, userIsSignedIn)
         if (usernameIsValid && locationIsValid && familyValuesAreValid && interestsAreValid &&
             ageIsValid && dietIsValid && userIsSignedIn) {
             const userUID = this.state.authUser.uid;
+            const fullName = this.state.fullName;
             const username = this.state.username;
             const city = this.state.city;
             const state = this.state.state;
@@ -229,9 +259,18 @@ class CreateProfilePage extends Component {
             const drinks = this.state.drinks;
             const smokes = this.state.smokes;
             const doesDrugs = this.state.doesDrugs;
-            this.props.firebase.createProfile(userUID, username, city, state, country, age, familyValues, interests,
+            this.props.firebase.createProfile(userUID, fullName, username, city, state, country, age, familyValues, interests,
                 hasPets, diet, drinks, smokes, doesDrugs)
             this.displayMessage("Profile form is valid, welcome to TwoFatherHome!")
+            // update the displayName value associated with the authUser
+            this.props.firebase.onAuthStateChanged(function (user) {
+                if (user) {
+                    user.displayName = username;
+                } else {
+                    // this should never happen!
+                    throw "No user was authenticated while attempting to set .displayName property"
+                }
+            })
             console.log("Success")
             this.props.history.push(ROUTES.HOME)
         } else {
@@ -251,12 +290,24 @@ class CreateProfilePage extends Component {
     }
 
     // username, city, state, country, age, familyValues, interests, hasPets, diet, drinks, smokes, doesDrugs
-    // todo: validate username, family values, interests (do a basic job)
+
+    // FIXME: I guarantee there are bugs waiting to be discovered.
+    // TODO: Create unit tests
+    // TODO: Refactor so the Warning msgs still display && the Submit btn is disabled until all fields are correct. (low urgency)
+    // TODO: give user opportunity to sign up for regular emails
 
     render() {
         return (
             <div>
                 <h1>Create Your Profile</h1>
+
+                <label htmlFor="fullName">Your full name (kept private):</label>
+                <input
+                    name="fullName"
+                    onChange={this.storeValue}
+                    type="text"
+                    placeholder="Full Name"
+                />
 
                 <label htmlFor="username">Choose a username:</label>
                 <input onChange={this.storeValue} name="username" id="username"></input>
@@ -308,8 +359,8 @@ class CreateProfilePage extends Component {
                 </div>
 
                 <div>
-                    <label htmlFor="interests">Write your interests. Separate each one by a comma:</label>
-                    <input type="text" onChange={this.handleInterests} />
+                    <label htmlFor="interests">What are your interests? Separate each one by a comma:</label>
+                    <input type="text" onChange={this.handleInterests} placeholder="interest1, interest2..." />
                 </div>
 
                 <label htmlFor="hasPets">Do you have pets? Tick the box if so:</label>
@@ -340,6 +391,9 @@ class CreateProfilePage extends Component {
                     {/* // Display messages to the user here... e.g. if the form is messed up */}
                     {this.state.alertMsg}
                 </div>
+
+                {/* // for debugging */}
+                <button onClick={this.testAuth}>Test Auth State</button>
 
             </div>
         )

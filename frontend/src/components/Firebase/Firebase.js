@@ -35,6 +35,8 @@ class Firebase {
         this.db = app.database();
 
         this.fs = app.firestore();
+
+        this.timestamp = app.firestore.FieldValue.serverTimestamp();
     }
 
     // *** Auth API ***
@@ -73,8 +75,9 @@ class Firebase {
     }) // TODO: mk all users in the database keyed by their UID value. create unique auth accts for each user so this works
 
     // creates a profile with docId "uid"... this has so many args, consider splitting it into two funcs/two pages...
-    createProfile = (uid, username, city, state, country, age, familyValues, interests, hasPets, diet, drinks, smokes, drugs) =>
+    createProfile = (uid, fullName, username, city, state, country, age, familyValues, interests, hasPets, diet, drinks, smokes, drugs) =>
         this.fs.collection("users").doc(uid).set({
+            fullName: fullName,
             username: username,
             city: city,
             state: state,
@@ -87,7 +90,7 @@ class Firebase {
             drinks: drinks,
             smokes: smokes,
             drugs: drugs,
-            signedUpAt: this.fs.FieldValue.serverTimestamp()
+            signedUpAt: this.timestamp
         })
 
     // *** Firestore Messages API ***

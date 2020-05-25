@@ -27,6 +27,9 @@ class SignUpFormBase extends Component {
     this.state = { ...INITIAL_STATE };
   }
 
+  // FIXME: username is selected after .doCreateUserWithEmailAndPassword, 100p. migrate username sel to next pg
+  // FIXME: how is "Full Name" captured by firebase auth or firestore? We DO need the user's full name, right? like, for emails...
+
   onSubmit = event => {
     console.log("Submitted new user!")
     const { username, email, passwordOne } = this.state;
@@ -48,7 +51,7 @@ class SignUpFormBase extends Component {
     this.setState({ [event.target.name]: event.target.value });
   };
 
-  // TODO: Allow only valid usernames, valid full names, valid emails (how?), valid passwords
+  // FIXME: form validation proooooobably needs work, or at least testing...
 
 	containsAny = (str, chars) => {
 	  // top answer here: https://stackoverflow.com/questions/15201939/jquery-javascript-check-string-for-multiple-substrings
@@ -61,30 +64,49 @@ class SignUpFormBase extends Component {
 	  return false;
   }
 
-	namesAreValid = fullname => { // "first name & last name both must be longer than 1 char and contains a whitespace" rule 
-		if (fullname.indexOf(" ") > -1) {
-			const firstName = fullname.split(" ")[0]
-			const lastName = fullname.split(" ")[1]
-			if (firstName.length < 2) {
-				return false
-			} else if (lastName.length < 2) {
-				return false
-			} else {
-				return true;
-			}
-		} else {
-			return false // return false ("invalid") because indexOf(" ") returned -1
-		}
-	}
+	// namesAreValid = fullname => { // "first name & last name both must be longer than 1 char and contains a whitespace" rule 
+	// 	if (fullname.indexOf(" ") > -1) {
+	// 		const firstName = fullname.split(" ")[0]
+	// 		const lastName = fullname.split(" ")[1]
+	// 		if (firstName.length < 2) {
+	// 			return false
+	// 		} else if (lastName.length < 2) {
+	// 			return false
+	// 		} else {
+	// 			return true;
+	// 		}
+	// 	} else {
+	// 		return false // return false ("invalid") because indexOf(" ") returned -1
+	// 	}
+  // }
+  
+  validateUsername = (username) => {
+    // modified code from CreateProfilePage.js
+    // https://stackoverflow.com/questions/41597685/javascript-test-string-for-only-letters-and-numbers
+    if (username) {
+      if (/^[A-Za-z0-9]+$/.test(username)) {
+        console.log(username, "is a fine name")
+        return true;
+      } else {
+        console.log("something's wrong with the username")
+        return false;
+      }
+    } else {
+      console.log("Username wasn't filled in")
+      return false
+    }
+  }
 
   checkState = () => {
 	  console.log(this.state)
-	  const { username, fullName, email, passwordOne, passwordTwo, error } = this.state;
+    const { username, fullName, email, passwordOne, passwordTwo, error } = this.state;
+    
 	  const isInvalid = passwordOne !== passwordTwo ||
 		  passwordOne.length < 7 || // length rule
 		  email === '' ||
 		  username === '' ||
-		  username.includes(" ") || // no spaces rule
+      username.includes(" ") || // no spaces rule
+      !this.validateUsername(username) || // general validation check (has to be flipped in bool value)
 		  !(email.includes("@")) || // must include "@" symbol rule
 		  !(email.includes(".")) || // must include "." (as in ".com" or ".net") rule
 		  this.namesAreValid(fullName) || // "first name & last name both must be longer than 1 char and contains a whitespace" rule 
@@ -104,16 +126,16 @@ class SignUpFormBase extends Component {
     } = this.state;
 
     const isInvalid =
-      	passwordOne !== passwordTwo ||
-      	passwordOne.length < 7 || // length rule
-      	email === '' ||
-      	username === '' ||
-      	username.includes(" ") || // no spaces rule
-      	!(email.includes("@")) || // must include "@" symbol rule
-      	!(email.includes(".")) || // must include "." (as in ".com" or ".net") rule
-		this.namesAreValid(fullName) || // "first name & last name both must be longer than 1 char and contains a whitespace" rule 
+      passwordOne !== passwordTwo ||
+      passwordOne.length < 7 || // length rule
+      email === '' ||
+      username === '' ||
+      username.includes(" ") || // no spaces rule
+      !(email.includes("@")) || // must include "@" symbol rule
+      !(email.includes(".")); // must include "." (as in ".com" or ".net") rule
+		// this.namesAreValid(fullName) || // "first name & last name both must be longer than 1 char and contains a whitespace" rule 
 	  // full name must not include a special character
-		this.containsAny(fullName, [",", ".", ";", ":", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "+", "="]);
+		// this.containsAny(fullName, [",", ".", ";", ":", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "+", "="]);
       
     return (
       <div>
@@ -125,13 +147,13 @@ class SignUpFormBase extends Component {
             type="text"
             placeholder="Username"
             />
-          <input
+          {/* <input
             name="fullName"
             value={fullName}
             onChange={this.onChange}
             type="text"
             placeholder="Full Name"
-            />
+            /> */}
           <input
             name="email"
             value={email}

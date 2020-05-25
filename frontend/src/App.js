@@ -72,3 +72,7 @@ export default withAuthentication(App);
 // ...so you can do fs.colletion("users").doc(uid).get() and retrieve their username that way
 
 // TODO: Include a "hasPremium" boolean field in user profiles in the db
+
+// TODO: Make ROUTES.CREATE_PROFILE redirect to login page if no user is signed in.
+
+// TODO: Convert to Redux & Global state mgmt
