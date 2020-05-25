@@ -70,3 +70,5 @@ export default withAuthentication(App);
 
 // TODO: On user signup, associate their Auth.uid as their users' collection document ID/key.
 // ...so you can do fs.colletion("users").doc(uid).get() and retrieve their username that way
+
+// TODO: Include a "hasPremium" boolean field in user profiles in the db

@@ -1,18 +1,255 @@
 import React, { Component } from 'react';
 
+
 class CreateProfilePage extends Component {
     constructor(props) {
         super(props);
 
         this.state = {
-
+            startDate: new Date()
         };
     }
 
     // todo: make this page associate the authenticated user with their own profile & info.
+    // todo: start a new development branch
+
+    // todo: when "finished", check here:
+    // https://stackoverflow.com/questions/28773839/react-form-onchange-setstate-one-step-behind
+
+    storeValue = (event) => {
+        this.setState({ [event.target.name]: event.target.value })
+        console.log(this.state)
+    }
+
+    // handleDate = date => {
+    //     this.setState({
+    //         dateOfBirth: date
+    //     });
+    // };
+
+    handleCheckbox = event => {
+        this.setState({ [event.target.name]: event.target.checked })
+        console.log("name:", event.target.name)
+        console.log("checked: ", event.target.checked)
+        console.log(this.state)
+    }
+
+    handleInterests = event => {
+        this.setState({ interests: event.target.value })
+        console.log(this.state)
+    }
+
+    submitProfile = () => {
+
+    }
+
+    // username, city, state, country, age, familyValues, interests, hasPets, diet, drinks, smokes
+    // todo: validate username, family values, interests (do a basic job)
 
     render() {
+        return (
+            <div>
+                <h1>Create Your Profile</h1>
 
+                <label htmlFor="username">Choose a username:</label>
+                <input onChange={this.storeValue} name="username" id="username"></input>
+
+                <label htmlFor="country">Pick your country:</label>
+                <select onChange={this.storeValue} name="country" id="country">
+                    <option value="Select one...">Select one...</option>
+                    <option value="Canada">Canada</option>
+                    {/* <option value="USA">USA</option> */}
+                </select>
+
+                <label htmlFor="state">Pick your province:</label>
+                <select onChange={this.storeValue} name="state" id="state">
+                    <option value="Select one...">Select one...</option>
+                    <option value="British Columbia">British Columbia</option>
+                    <option value="Ontario">Ontario</option>
+                    {/* <option value="Quebec">Quebec</option>
+                    <option value="Alberta">Alberta</option>
+                    <option value="Saskatchewan">Saskatchewan</option>
+                    <option value="Manitoba">Manitoba</option>
+                    <option value="New Brunswick">New Brunswick</option>
+                    <option value="Nova Scotia">Nova Scotia</option>
+                    <option value="Newfoundland">Newfoundland</option>
+                    <option value="P.E.I.">P.E.I.</option> */}
+
+                    {/* TODO: Expand to other provinces */}
+                </select>
+
+                {this.state.state === "British Columbia" ? <IfBritishColumbia /> : null}
+
+                {this.state.state === "Ontario" ? <IfOntario /> : null}
+
+                <AgeSelector />
+
+                <div>
+                    <label htmlFor="familyValues">Select some family values:</label>
+                    <br />
+                    <span>Valuing Elders</span><input onChange={this.handleCheckbox} type="checkbox" name="Valuing Elders" />
+                    <span>Hard Work</span><input onChange={this.handleCheckbox} type="checkbox" name="Hard Work" />
+                    <span>Respect</span><input onChange={this.handleCheckbox} type="checkbox" name="Respect" />
+                    <span>Compassion</span><input onChange={this.handleCheckbox} type="checkbox" name="Compassion" />
+                    <span>Eating Together</span><input onChange={this.handleCheckbox} type="checkbox" name="Eating Together" />
+                    <span>Responsibility</span><input onChange={this.handleCheckbox} type="checkbox" name="Responsibility" />
+                    <span>Creativity</span><input onChange={this.handleCheckbox} type="checkbox" name="Creativity" />
+                    <span>Kindness</span><input onChange={this.handleCheckbox} type="checkbox" name="Kindness" />
+                    <span>Fun</span><input onChange={this.handleCheckbox} type="checkbox" name="Fun" />
+                    <span>Volunteering</span><input onChange={this.handleCheckbox} type="checkbox" name="Volunteering" />
+                </div>
+
+                <div>
+                    <label htmlFor="interests">Write your interests. Separate each one by a comma:</label>
+                    <input type="text" onChange={this.handleInterests} />
+                </div>
+
+                <label htmlFor="hasPets">Do you have pets? Tick the box if so:</label>
+                <input onChange={this.handleCheckbox} type="checkbox" name="hasPets" />
+
+                <label htmlFor="diet">Dietary preferences:</label>
+                <select onChange={this.storeValue} name="diet" id="diet">
+                    <option value="Select one...">Select one...</option>
+                    <option value="Omnivore">Omnivore</option>
+                    <option value="Carnivore">Carnivore</option>
+                    <option value="Vegetarian">Vegetarian</option>
+                    <option value="Pescetarian">Pescetarian</option>
+                    <option value="Keto">Keto</option>
+                </select>
+
+                <label htmlFor="drinks">Do you drink?</label>
+                <input onChange={this.handleCheckbox} type="checkbox" name="drinks" />
+
+                <label htmlFor="smokes">Do you smoke?</label>
+                <input onChange={this.handleCheckbox} type="checkbox" name="smokes" />
+
+                <label htmlFor="doesDrugs">Do you do any drugs?</label>
+                <input onChange={this.handleCheckbox} type="checkbox" name="drugs" />
+
+                <button onClick={this.submitProfile}>Submit Profile</button>
+
+                <div>
+                    {/* // Display messages to the user here */}
+                </div>
+
+            </div>
+        )
 
     }
 }
+
+// TODO: Expand choice of states and provinces
+// TODO: Add USA (once marketing covers Vancouver and Toronto)
+
+// TODO: Maybe export those long a.f. selector components to another file? for length
+
+// const ifUSA = () => {
+//     return (
+//         <div>
+//         <label htmlFor="state">Pick your state:</label>
+//             <select onChange={this.storeValue} name="state" id="state">
+//                 <option value=""
+//             </select>
+//         </div>
+//     )
+// }
+
+// function ifBritishColumbia() {
+class IfBritishColumbia extends Component {
+    render() {
+        return (
+            <div>
+                <label htmlFor="city">Pick the city closest to you:</label>
+                <select onChange={this.storeValue} name="city" id="city">
+                    <option value="Select one...">Select one...</option>
+                    <option value="Vancouver">Vancouver</option>
+                    <option value="Victoria">Victoria</option>
+                    <option value="Kelowna">Kelowna</option>
+                    <option value="Abbotsford">Abbotsford</option>
+                    <option value="White Rock">White Rock</option>
+                </select>
+            </div >
+        )
+    }
+}
+
+// function ifOntario() {
+class IfOntario extends Component {
+    render() {
+        return (
+            <div>
+                <label htmlFor="city">Pick the city closest to you:</label>
+                <select onChange={this.storeValue} name="city" id="city">
+                    <option value="Select one...">Select one...</option>
+                    <option value="Toronto">Toronto</option>
+                    <option value="Ottawa">Ottawa</option>
+                    <option value="Hamilton">Hamilton</option>
+                    <option value="Kitchener">Kitchener</option>
+                    <option value="London">London</option>
+                    <option value="Oshawa">Oshawa</option>
+                    <option value="Windsor">Windsor</option>
+                    <option value="St. Catharines">St. Catharines</option>
+                    <option value="Barrie">Barrie</option>
+                </select>
+            </div>
+        )
+    }
+}
+
+class AgeSelector extends Component {
+    render() {
+        return (
+            <div >
+                <label htmlFor="age">How old are you?</label>
+                <select onChange={this.storeValue} name="age" id="age">
+                    <option value="Select one...">Select one...</option>
+                    <option value="18">18</option>
+                    <option value="19">19</option>
+                    <option value="20">20</option>
+                    <option value="21">21</option>
+                    <option value="22">22</option>
+                    <option value="23">23</option>
+                    <option value="24">24</option>
+                    <option value="25">25</option>
+                    <option value="26">26</option>
+                    <option value="27">27</option>
+                    <option value="28">28</option>
+                    <option value="29">29</option>
+                    <option value="30">30</option>
+                    <option value="31">31</option>
+                    <option value="32">32</option>
+                    <option value="33">33</option>
+                    <option value="34">34</option>
+                    <option value="35">35</option>
+                    <option value="36">36</option>
+                    <option value="37">37</option>
+                    <option value="38">38</option>
+                    <option value="39">39</option>
+                    <option value="40">40</option>
+                    <option value="41">41</option>
+                    <option value="42">42</option>
+                    <option value="43">43</option>
+                    <option value="44">44</option>
+                    <option value="45">45</option>
+                    <option value="46">46</option>
+                    <option value="47">47</option>
+                    <option value="48">48</option>
+                    <option value="49">49</option>
+                    <option value="50">50</option>
+                    <option value="51">51</option>
+                    <option value="52">52</option>
+                    <option value="53">53</option>
+                    <option value="54">54</option>
+                    <option value="55">55</option>
+                    <option value="56">56</option>
+                    <option value="57">57</option>
+                    <option value="58">58</option>
+                    <option value="59">59</option>
+                    <option value="60+">60+</option>
+                </select>
+            </div >
+        )
+    }
+}
+
+export default CreateProfilePage;
