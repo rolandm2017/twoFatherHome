@@ -16,6 +16,22 @@ class CreateProfilePage extends Component {
     // todo: when "finished", check here:
     // https://stackoverflow.com/questions/28773839/react-form-onchange-setstate-one-step-behind
 
+    componentDidMount() {
+        this.listener = this.props.firebase.auth.onAuthStateChanged(
+            authUser => {
+                if (authUser) {
+                    this.setState({ authUser: authUser });
+                } else {
+                    this.setState({ authUser: null })
+                }
+            },
+        );
+    }
+
+    componentWillUnmount() {
+        this.listener(); // prevents a memory leak or something
+    }
+
     storeValue = (event) => {
         this.setState({ [event.target.name]: event.target.value })
         console.log(this.state)
@@ -39,11 +55,83 @@ class CreateProfilePage extends Component {
         console.log(this.state)
     }
 
-    submitProfile = () => {
-
+    validateUsername = () => {
+        const username = this.state.username;
+        // https://stackoverflow.com/questions/41597685/javascript-test-string-for-only-letters-and-numbers
+        if (/^[A-Za-z0-9]+$/.test(username)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
-    // username, city, state, country, age, familyValues, interests, hasPets, diet, drinks, smokes
+    validateLocation = () => {
+        const country = this.state.country;
+        const state = this.state.state;
+        const city = this.state.city;
+
+        if (country === "Select one...") {
+            return false
+        } else if (state === "Select one...") {
+            return false
+        } else if (city === "Select one...") {
+            return false
+        } else {
+            return true
+        }
+    }
+
+    validateFamilyValues = () => {
+        const values = this.state.familyValues;
+        for (const value in values) {
+            if (values[value]) { // "if there is at least one true value listed, the family values are valid"
+                return true
+            }
+        }
+        return false // "if no family values are listed as true, then the user still needs to pick at least one."
+    }
+
+    validateInterests = () => {
+        // should only see alphanumeric chars here, and commas
+        if (this.state.interests.length > 5) {
+            if (/^[A-Za-z0-9][,]+$/.test(this.state.interests)) { // note: [,] adds comma to the regex
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false // return false if the "interests" list is less than 5 chars long
+        }
+    }
+
+    submitProfile = () => {
+        const usernameIsValid = this.validateUsername();
+        const locationIsValid = this.validateLocation();
+        const familyValuesAreValid = this.validatFamilyValues();
+        const interstsAreValid = this.validateInterests();
+
+        if (usernameIsValid && locationIsValid && familyValuesAreValid && interstsAreValid) {
+            const userUID = this.state.authUser.uid;
+            const username = this.state.username;
+            const city = this.state.city;
+            const state = this.state.state;
+            const country = this.state.country;
+            const age = this.state.age;
+            const familyValues = getFamilyValues(this.state.familyValues) // turns array into a comma separated value
+            const interests = this.state.interests;
+            const hasPets = this.state.hasPets;
+            const diet = this.state.diet;
+            const drinks = this.state.drinks;
+            const smokes = this.state.smokes;
+            const doesDrugs = this.state.doesDrugs;
+            this.props.firebase.createProfile(userUID, username, city, state, country, age, familyValues, interests,
+                hasPets, diet, drinks, smokes, doesDrugs)
+        } else {
+            // do something... display a msg to the user informing him that he needs to improve the form.
+        }
+    }
+
+    // username, city, state, country, age, familyValues, interests, hasPets, diet, drinks, smokes, doesDrugs
     // todo: validate username, family values, interests (do a basic job)
 
     render() {
@@ -97,6 +185,7 @@ class CreateProfilePage extends Component {
                     <span>Kindness</span><input onChange={this.handleCheckbox} type="checkbox" name="Kindness" />
                     <span>Fun</span><input onChange={this.handleCheckbox} type="checkbox" name="Fun" />
                     <span>Volunteering</span><input onChange={this.handleCheckbox} type="checkbox" name="Volunteering" />
+                    <span>Mine aren't listed!</span><input onChange={this.handleCheckbox} type="checkbox" name="Mine aren't listed!" />
                 </div>
 
                 <div>
@@ -129,7 +218,7 @@ class CreateProfilePage extends Component {
                 <button onClick={this.submitProfile}>Submit Profile</button>
 
                 <div>
-                    {/* // Display messages to the user here */}
+                    {/* // Display messages to the user here... e.g. if the form is messed up */}
                 </div>
 
             </div>
