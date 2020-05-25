@@ -3,15 +3,23 @@ import { withRouter } from 'react-router-dom';
 import { compose } from 'recompose';
 
 import { SignUpLink } from './SignUp';
+<<<<<<< HEAD
 import { PasswordForgetLink } from "./PasswordForget"
+=======
+>>>>>>> usingDocs
 import { withFirebase } from '../Firebase';
 import * as ROUTES from '../../constants/routes';
 
 const SignInPage = () => (
     <div>
+<<<<<<< HEAD
         <h1>SignIn</h1>
         <SignInForm />
         <PasswordForgetLink />
+=======
+        <h1>Sign In</h1>
+        <SignInForm />
+>>>>>>> usingDocs
         <SignUpLink />
     </div>
 );

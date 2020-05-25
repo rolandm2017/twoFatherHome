@@ -1,6 +1,9 @@
 import app from "firebase/app";
 import "firebase/auth";
-import "firebase/database"
+
+import "firebase/database" // can probably deelete this
+import "firebase/firestore"
+
 
 const prodConfig = {
     apiKey: process.env.REACT_APP_API_KEY,
@@ -32,6 +35,10 @@ class Firebase {
 
         this.auth = app.auth();
         this.db = app.database();
+
+        this.fs = app.firestore();
+
+        this.timestamp = app.firestore.FieldValue.serverTimestamp();
     }
 
     // *** Auth API ***
@@ -50,10 +57,110 @@ class Firebase {
         this.auth.currentUser.updatePassword(password);
 
     // *** User API ***
+    getUserName = () => app.auth().currentUser.displayName// should return something
 
-    user = uid => this.db.ref(`users/${uid}`);
+    // *** Admin Stuff Goes Here ***
 
-    users = () => this.db.ref('users');
+    // *** Firestore User API ***
+
+    checkIfUserHasProfile = (uid) => {
+        this.fs.collection("users").doc(uid).get().then((doc) => {
+            console.log("DOC:", doc)
+            if (doc.exists) {
+                return true
+            } else {
+                return false
+            }
+        }).catch(err => {
+            console.log(err)
+        })
+    }
+
+    getUsernameByUID = (uid) => this.fs.collection("users").doc(uid).get().then(doc => {
+        return doc.data().username
+    })
+
+    getUserInfo = docId => this.fs.collection("users").doc(docId).get().then(doc => {
+        return doc.data()
+    }) // TODO: mk all users in the database keyed by their UID value. create unique auth accts for each user so this works
+
+    // creates a profile with docId "uid"... this has so many args, consider splitting it into two funcs/two pages...
+    createProfile = (uid, fullName, username, city, state, country, age, familyValues, interests, hasPets, diet, drinks, smokes, drugs) =>
+        this.fs.collection("users").doc(uid).set({
+            fullName: fullName,
+            username: username,
+            city: city,
+            state: state,
+            country: country,
+            age: age,
+            familyValues: familyValues,
+            interests: interests,
+            hasPets: hasPets,
+            diet: diet,
+            drinks: drinks,
+            smokes: smokes,
+            drugs: drugs,
+            signedUpAt: this.timestamp
+        })
+
+    editProfile = (uid, city, state, country, familyValues, interests, hasPets, diet, drinks, smokes, doesDrugs) => {
+        this.fs.collection("users").doc(uid).update({
+            city: city,
+            state: state,
+            country: country,
+            familyValues: familyValues,
+            interests: interests,
+            hasPets: hasPets,
+            diet: diet,
+            drinks: drinks,
+            smokes: smokes,
+            drugs: doesDrugs
+        })
+    }
+
+    // *** Firestore Messages API ***
+
+    // return all chatroom ids where user is present in the list of users... as a promise
+    getUsersChatroomsWithPromise = user => {
+        return new Promise(resolve => {
+            this.fs.collection("chatrooms").get().then(snapshot => {
+                const rooms = [];
+                snapshot.forEach(doc => {
+                    const users = doc.data().users.split(",")
+                    if (users[0] === user || users[1] === user) {
+                        rooms.push([doc.id, doc.data().users])
+                    }
+                })
+                resolve(rooms)
+            })
+        }
+        )
+    }
+
+
+    // return all chatroom ids where user is present in the list of users
+    getUsersChatrooms = user => this.fs.collection("chatrooms").get().then(snapshot => {
+        const rooms = [];
+        snapshot.forEach(doc => {
+            const users = doc.data().users.split(",")
+            if (users[0] === user || users[1] === user) {
+                rooms.push([doc.id, doc.data().users])
+            }
+        })
+        return rooms
+    })
+
+    getChatroomMessages = roomId => this.fs.collection("chatrooms").doc(roomId).collection("messages").get().then(snapshot => {
+        const msgContent = [];
+        snapshot.forEach(msg => {
+            msgContent.push(msg.data())
+        })
+        return msgContent
+    })
+
+    // makeUsersList = () => //
+
+    testLog = () => console.log("printed!")
 
 }
 
