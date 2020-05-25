@@ -79,6 +79,8 @@ class SignUpFormBase extends Component {
 	// 		return false // return false ("invalid") because indexOf(" ") returned -1
 	// 	}
   // }
+
+  // TODO: move username and full name into CreateProfilePage.js
   
   validateUsername = (username) => {
     // modified code from CreateProfilePage.js
@@ -101,16 +103,16 @@ class SignUpFormBase extends Component {
 	  console.log(this.state)
     const { username, fullName, email, passwordOne, passwordTwo, error } = this.state;
     
-	  const isInvalid = passwordOne !== passwordTwo ||
-		  passwordOne.length < 7 || // length rule
-		  email === '' ||
-		  username === '' ||
-      username.includes(" ") || // no spaces rule
-      !this.validateUsername(username) || // general validation check (has to be flipped in bool value)
-		  !(email.includes("@")) || // must include "@" symbol rule
-		  !(email.includes(".")) || // must include "." (as in ".com" or ".net") rule
-		  this.namesAreValid(fullName) || // "first name & last name both must be longer than 1 char and contains a whitespace" rule 
-		  this.containsAny(fullName, [",", ".", ";", ":", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "+", "="]);
+    const isInvalid = passwordOne !== passwordTwo ||
+      passwordOne.length < 7 || // length rule
+      email === '';
+		  // username === '' ||
+      // username.includes(" ") || // no spaces rule
+      // !this.validateUsername(username) || // general validation check (has to be flipped in bool value)
+		  // !(email.includes("@")) || // must include "@" symbol rule
+		  // !(email.includes(".")) || // must include "." (as in ".com" or ".net") rule
+		  // this.namesAreValid(fullName) || // "first name & last name both must be longer than 1 char and contains a whitespace" rule 
+		  // this.containsAny(fullName, [",", ".", ";", ":", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "+", "="]);
 	  
 	  console.log(isInvalid) // FIXME: form validation returns true when it should return false. this is a job for unit tests...
   }
@@ -129,8 +131,8 @@ class SignUpFormBase extends Component {
       passwordOne !== passwordTwo ||
       passwordOne.length < 7 || // length rule
       email === '' ||
-      username === '' ||
-      username.includes(" ") || // no spaces rule
+      // username === '' ||
+      // username.includes(" ") || // no spaces rule
       !(email.includes("@")) || // must include "@" symbol rule
       !(email.includes(".")); // must include "." (as in ".com" or ".net") rule
 		// this.namesAreValid(fullName) || // "first name & last name both must be longer than 1 char and contains a whitespace" rule 
@@ -140,13 +142,14 @@ class SignUpFormBase extends Component {
     return (
       <div>
         <form onSubmit={this.onSubmit}>
-          <input
+          {/* // username and fullname moved into createProfilePage.js on 5/25/2020 */}
+          {/* <input
             name="username"
             value={username}
             onChange={this.onChange}
             type="text"
             placeholder="Username"
-            />
+            /> */}
           {/* <input
             name="fullName"
             value={fullName}

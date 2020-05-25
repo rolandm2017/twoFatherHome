@@ -5,7 +5,7 @@ import { withRouter } from 'react-router-dom';
 
 import * as ROUTES from "../../constants/routes"
 
-class CreateProfilePage extends Component {
+class EditProfilePage extends Component {
     constructor(props) {
         super(props);
 
@@ -38,16 +38,13 @@ class CreateProfilePage extends Component {
         this.listener = this.props.firebase.auth.onAuthStateChanged(
             authUser => {
                 if (authUser) {
-                    // check if authUser already created a profile
+                    // get user profile info by UID and load info into profile edit screen
                     this.props.firebase.fs.collection("users").doc(authUser.uid).get().then((doc) => {
                         console.log("DOC:", doc)
                         if (doc.exists) {
-                            console.log("User already has a profile!")
-                            this.props.history.push(ROUTES.EDIT_PROFILE)
-                            // return true
+                            const userData = doc.data()
                         } else {
-                            // do nothing because a doc for uid "uid" not existing means the user hasn't created a profile yet
-                            // return false
+                            // what to do if someone goes to the EditProfilePage without having a profile? redirect to... ___?
                         }
                     }).catch(err => {
                         console.log(err)
@@ -58,8 +55,6 @@ class CreateProfilePage extends Component {
                     this.setState({ authUser: authUser });
                 } else {
                     this.setState({ authUser: null })
-                    // redirect to login screen since no user is signed in
-                    this.props.history.push(ROUTES.SIGN_IN)
                 }
             },
         );
@@ -128,44 +123,44 @@ class CreateProfilePage extends Component {
         console.log("displayname:", this.state.authUser.displayName)
     }
 
-    validateFullName = () => { // "first name & last name both must be longer than 1 char and contains a whitespace" rule 
-        const fullname = this.state.fullName;
-        if (/^[A-Za-z.-\s]+$/.test(fullname)) {
-            const firstName = fullname.split(" ")[0]
-            const lastName = fullname.split(" ")[1]
-            if (firstName.length < 2) {
-                this.displayMessage("Name length must be 2 or greater.")
-                return false
-            } else if (lastName.length < 2) {
-                this.displayMessage("Name length must be 2 or greater.")
-                return false
-            } else {
-                return true;
-            }
-        } else {
-            this.displayMessage("Only alphabetical characters, periods, hyphens and spaces are allowed in full names.")
-            return false // .test() failed.
-        }
-    }
+    // validateFullName = () => { // "first name & last name both must be longer than 1 char and contains a whitespace" rule 
+    //     const fullname = this.state.fullName;
+    //     if (/^[A-Za-z.-\s]+$/.test(fullname)) {
+    //         const firstName = fullname.split(" ")[0]
+    //         const lastName = fullname.split(" ")[1]
+    //         if (firstName.length < 2) {
+    //             this.displayMessage("Name length must be 2 or greater.")
+    //             return false
+    //         } else if (lastName.length < 2) {
+    //             this.displayMessage("Name length must be 2 or greater.")
+    //             return false
+    //         } else {
+    //             return true;
+    //         }
+    //     } else {
+    //         this.displayMessage("Only alphabetical characters, periods, hyphens and spaces are allowed in full names.")
+    //         return false // .test() failed.
+    //     }
+    // }
 
-    validateUsername = () => {
-        const username = this.state.username;
-        // https://stackoverflow.com/questions/41597685/javascript-test-string-for-only-letters-and-numbers
-        if (username) {
-            if (/^[A-Za-z0-9]+$/.test(username)) {
-                console.log(username, "is a fine name")
-                return true;
-            } else {
-                console.log("something's wrong with the username")
-                this.displayMessage("Usernames can only use letters and numbers. Please edit your username.")
-                return false;
-            }
-        } else {
-            console.log("Username wasn't filled in")
-            this.displayMessage("Please fill in a username. Letters and numbers only.")
-            return false
-        }
-    }
+    // validateUsername = () => {
+    //     const username = this.state.username;
+    //     // https://stackoverflow.com/questions/41597685/javascript-test-string-for-only-letters-and-numbers
+    //     if (username) {
+    //         if (/^[A-Za-z0-9]+$/.test(username)) {
+    //             console.log(username, "is a fine name")
+    //             return true;
+    //         } else {
+    //             console.log("something's wrong with the username")
+    //             this.displayMessage("Usernames can only use letters and numbers. Please edit your username.")
+    //             return false;
+    //         }
+    //     } else {
+    //         console.log("Username wasn't filled in")
+    //         this.displayMessage("Please fill in a username. Letters and numbers only.")
+    //         return false
+    //     }
+    // }
 
     validateLocation = () => {
         const country = this.state.country;
@@ -196,25 +191,25 @@ class CreateProfilePage extends Component {
         }
     }
 
-    validateAge = () => {
-        let age = this.state.age;
-        if (age) {
-            age = parseInt(age, 10);
-            if (typeof age === "number") {
-                return true;
-            }
-            this.displayMessage("Please select your age.")
-            console.log("Age wasn't right")
-            return false;
-        } else {
-            this.displayMessage("Please select your age.")
-            console.log("Age wasn't selected")
-            return false
-        }
-        console.log(age)
-        console.log(typeof age)
+    // validateAge = () => {
+    //     let age = this.state.age;
+    //     if (age) {
+    //         age = parseInt(age, 10);
+    //         if (typeof age === "number") {
+    //             return true;
+    //         }
+    //         this.displayMessage("Please select your age.")
+    //         console.log("Age wasn't right")
+    //         return false;
+    //     } else {
+    //         this.displayMessage("Please select your age.")
+    //         console.log("Age wasn't selected")
+    //         return false
+    //     }
+    //     console.log(age)
+    //     console.log(typeof age)
 
-    }
+    // }
 
     validateFamilyValues = () => {
         const values = this.state.familyValues;
@@ -260,28 +255,21 @@ class CreateProfilePage extends Component {
         }
     }
 
-    submitProfile = () => {
+    editProfile = () => {
+        // TODO: edit "submitProfile" into "editProfile"
         console.log(this.state)
-        const fullNameIsValid = this.validateFullName();
-        const usernameIsValid = this.validateUsername();
         const locationIsValid = this.validateLocation();
-        const ageIsValid = this.validateAge();
         const familyValuesAreValid = this.validateFamilyValues();
         const interestsAreValid = this.validateInterests();
         const dietIsValid = this.validateDiet();
         const userIsSignedIn = this.state.authUser;
 
-        console.log("boolean check: ", fullNameIsValid, usernameIsValid, locationIsValid, ageIsValid,
-            familyValuesAreValid, interestsAreValid, dietIsValid, userIsSignedIn)
-        if (fullNameIsValid && usernameIsValid && locationIsValid && familyValuesAreValid && interestsAreValid &&
-            ageIsValid && dietIsValid && userIsSignedIn) {
+        console.log("boolean check: ", locationIsValid, familyValuesAreValid, interestsAreValid, dietIsValid, userIsSignedIn)
+        if (locationIsValid && familyValuesAreValid && interestsAreValid && dietIsValid && userIsSignedIn) {
             const userUID = this.state.authUser.uid;
-            const fullName = this.state.fullName;
-            const username = this.state.username;
             const city = this.state.city;
             const state = this.state.state;
             const country = this.state.country;
-            const age = this.state.age;
             const familyValues = this.getFamilyValues(this.state.familyValues) // turns array into a comma separated value
             const interests = this.state.interests;
             const hasPets = this.state.hasPets;
@@ -289,22 +277,12 @@ class CreateProfilePage extends Component {
             const drinks = this.state.drinks;
             const smokes = this.state.smokes;
             const doesDrugs = this.state.doesDrugs;
-            this.props.firebase.createProfile(userUID, fullName, username, city, state, country, age, familyValues, interests,
+            this.props.firebase.editProfile(userUID, city, state, country, familyValues, interests,
                 hasPets, diet, drinks, smokes, doesDrugs)
-            this.displayMessage("Profile form is valid, welcome to TwoFatherHome!")
-            // update the displayName value associated with the authUser
-            this.props.firebase.auth.onAuthStateChanged(function (user) {
-                if (user) {
-                    user.updateProfile({ displayName: username }).then(() => {
-                        user.sendEmailVerification()
-                    }).catch(err => console.log(err));
-                } else {
-                    // this should never happen!
-                    throw "No user was authenticated while attempting to set .displayName property"
-                }
-            })
+            this.displayMessage("You edited your profile successfully.")
+
             console.log("Success")
-            this.props.history.push(ROUTES.HOME)
+            // this.props.history.push(ROUTES.HOME)
         } else {
             // do something... display a msg to the user informing him that he needs to improve the form.
             // this.displayMessage("Something isn't filled in properly with your form, or you are not signed in.")
@@ -326,23 +304,24 @@ class CreateProfilePage extends Component {
     // FIXME: I guarantee there are bugs waiting to be discovered.
     // TODO: Create unit tests
     // TODO: Refactor so the Warning msgs still display && the Submit btn is disabled until all fields are correct. (low urgency)
-    // TODO: give user opportunity to sign up for regular emails
+    // TODO: give user opportunity to sign up for regular emails (or opt out)
 
     render() {
         return (
             <div>
-                <h1>Create Your Profile</h1>
+                <h1>Edit Your Profile</h1>
 
-                <label htmlFor="fullName">Your full name (kept private):</label>
+                {/* // user cannot change username or full name */}
+                {/* <label htmlFor="fullName">Your full name (kept private):</label>
                 <input
                     name="fullName"
                     onChange={this.storeValue}
                     type="text"
                     placeholder="Full Name"
-                />
+                /> */}
 
-                <label htmlFor="username">Choose a username:</label>
-                <input onChange={this.storeValue} name="username" id="username"></input>
+                {/* <label htmlFor="username">Choose a username:</label>
+                <input onChange={this.storeValue} name="username" id="username"></input> */}
 
                 <label htmlFor="country">Pick your country:</label>
                 <select onChange={this.storeValue} name="country" id="country">
@@ -372,7 +351,8 @@ class CreateProfilePage extends Component {
 
                 {this.state.state === "Ontario" ? <IfOntario passStoreValue={this.storeValue} /> : null}
 
-                <AgeSelector passStoreValue={this.storeValue} />
+                {/* Disabled in the Edit Profile page because user cannot change their age! */}
+                {/* <AgeSelector passStoreValue={this.storeValue} /> */}
 
                 <div>
                     <label htmlFor="familyValues">Tell us what your family values will be:</label>
@@ -417,7 +397,7 @@ class CreateProfilePage extends Component {
                 <label htmlFor="doesDrugs">Do you do any drugs?</label>
                 <input onChange={this.handleCheckbox} type="checkbox" name="drugs" />
 
-                <button onClick={this.submitProfile}>Submit Profile</button>
+                <button onClick={this.editProfile}>Submit Profile</button>
 
                 <div>
                     {/* // Display messages to the user here... e.g. if the form is messed up */}
@@ -438,18 +418,6 @@ class CreateProfilePage extends Component {
 
 // TODO: Maybe export those long a.f. selector components to another file? for length
 
-// const ifUSA = () => {
-//     return (
-//         <div>
-//         <label htmlFor="state">Pick your state:</label>
-//             <select onChange={this.storeValue} name="state" id="state">
-//                 <option value=""
-//             </select>
-//         </div>
-//     )
-// }
-
-// function ifBritishColumbia() {
 class IfBritishColumbia extends Component {
     render() {
         return (
@@ -468,7 +436,6 @@ class IfBritishColumbia extends Component {
     }
 }
 
-// function ifOntario() {
 class IfOntario extends Component {
     render() {
         return (
@@ -491,60 +458,5 @@ class IfOntario extends Component {
     }
 }
 
-class AgeSelector extends Component {
-    render() {
-        return (
-            <div >
-                <label htmlFor="age">How old are you?</label>
-                <select onChange={this.props.passStoreValue} name="age" id="age">
-                    <option value="Select one...">Select one...</option>
-                    <option value="18">18</option>
-                    <option value="19">19</option>
-                    <option value="20">20</option>
-                    <option value="21">21</option>
-                    <option value="22">22</option>
-                    <option value="23">23</option>
-                    <option value="24">24</option>
-                    <option value="25">25</option>
-                    <option value="26">26</option>
-                    <option value="27">27</option>
-                    <option value="28">28</option>
-                    <option value="29">29</option>
-                    <option value="30">30</option>
-                    <option value="31">31</option>
-                    <option value="32">32</option>
-                    <option value="33">33</option>
-                    <option value="34">34</option>
-                    <option value="35">35</option>
-                    <option value="36">36</option>
-                    <option value="37">37</option>
-                    <option value="38">38</option>
-                    <option value="39">39</option>
-                    <option value="40">40</option>
-                    <option value="41">41</option>
-                    <option value="42">42</option>
-                    <option value="43">43</option>
-                    <option value="44">44</option>
-                    <option value="45">45</option>
-                    <option value="46">46</option>
-                    <option value="47">47</option>
-                    <option value="48">48</option>
-                    <option value="49">49</option>
-                    <option value="50">50</option>
-                    <option value="51">51</option>
-                    <option value="52">52</option>
-                    <option value="53">53</option>
-                    <option value="54">54</option>
-                    <option value="55">55</option>
-                    <option value="56">56</option>
-                    <option value="57">57</option>
-                    <option value="58">58</option>
-                    <option value="59">59</option>
-                    <option value="60+">60+</option>
-                </select>
-            </div >
-        )
-    }
-}
 
-export default withFirebase(CreateProfilePage);
+export default withFirebase(EditProfilePage);

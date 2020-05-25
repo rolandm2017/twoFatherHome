@@ -7,3 +7,5 @@ export const ADMIN = '/admin';
 export const PASSWORD_FORGET = '/pw-forget';
 export const INBOX = "/inbox";
 export const CREATE_PROFILE = "/create-profile"
+export const EDIT_PROFILE = "/edit-profile"
+export const SETTINGS = "/settings"

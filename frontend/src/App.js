@@ -26,7 +26,7 @@ import InboxPage from './components/Pages/InboxPage';
 import SignUpPage from './components/Auth/SignUp';
 import SignInPage from './components/Auth/SignIn';
 import PasswordForgetPage from './components/Auth/PasswordForget';
-import AccountPage from './components/Auth/Account';
+import AccountPage from './components/Auth/AccountPage';
 import AdminPage from './components/Auth/Admin';
 import CreateProfilePage from "./components/Auth/CreateProfilePage";
 

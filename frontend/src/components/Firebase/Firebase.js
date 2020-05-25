@@ -66,6 +66,19 @@ class Firebase {
 
     // *** Firestore User API ***
 
+    checkIfUserHasProfile = (uid) => {
+        this.fs.collection("users").doc(uid).get().then((doc) => {
+            console.log("DOC:", doc)
+            if (doc.exists) {
+                return true
+            } else {
+                return false
+            }
+        }).catch(err => {
+            console.log(err)
+        })
+    }
+
     getUsernameByUID = (uid) => this.fs.collection("users").doc(uid).get().then(doc => {
         return doc.data().username
     })
@@ -92,6 +105,21 @@ class Firebase {
             drugs: drugs,
             signedUpAt: this.timestamp
         })
+
+    editProfile = (uid, city, state, country, familyValues, interests, hasPets, diet, drinks, smokes, doesDrugs) => {
+        this.fs.collection("users").doc(uid).update({
+            city: city,
+            state: state,
+            country: country,
+            familyValues: familyValues,
+            interests: interests,
+            hasPets: hasPets,
+            diet: diet,
+            drinks: drinks,
+            smokes: smokes,
+            drugs: doesDrugs
+        })
+    }
 
     // *** Firestore Messages API ***
 
