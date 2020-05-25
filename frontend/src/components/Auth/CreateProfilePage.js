@@ -1,12 +1,25 @@
 import React, { Component } from 'react';
 
+import { withFirebase } from '../Firebase';
 
 class CreateProfilePage extends Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            startDate: new Date()
+            startDate: new Date(),
+            username: null,
+            city: null,
+            state: null,
+            country: null,
+            age: null,
+            familyValues: [],
+            interests: null,
+            hasPets: false,
+            diet: null,
+            drinks: false,
+            smokes: false,
+            doesDrugs: false
         };
     }
 
@@ -33,8 +46,9 @@ class CreateProfilePage extends Component {
     }
 
     storeValue = (event) => {
+        console.log("editing: ", event.target.name, event.target.value)
         this.setState({ [event.target.name]: event.target.value })
-        console.log(this.state)
+        // console.log(this.state)
     }
 
     // handleDate = date => {
@@ -58,10 +72,17 @@ class CreateProfilePage extends Component {
     validateUsername = () => {
         const username = this.state.username;
         // https://stackoverflow.com/questions/41597685/javascript-test-string-for-only-letters-and-numbers
-        if (/^[A-Za-z0-9]+$/.test(username)) {
-            return true;
+        if (username) {
+            if (/^[A-Za-z0-9]+$/.test(username)) {
+                console.log(username, "is a fine name")
+                return true;
+            } else {
+                console.log("something's wrong with the username")
+                return false;
+            }
         } else {
-            return false;
+            console.log("Username wasn't filled in")
+            return false
         }
     }
 
@@ -70,14 +91,23 @@ class CreateProfilePage extends Component {
         const state = this.state.state;
         const city = this.state.city;
 
-        if (country === "Select one...") {
-            return false
-        } else if (state === "Select one...") {
-            return false
-        } else if (city === "Select one...") {
-            return false
+        console.log(country, state, city)
+        if (country && city && state) {
+            if (country === "Select one...") {
+                console.log("country was invalid")
+                return false
+            } else if (state === "Select one...") {
+                console.log("state was invalid")
+                return false
+            } else if (city === "Select one...") {
+                console.log("city was invalid")
+                return false
+            } else {
+                return true
+            }
         } else {
-            return true
+            console.log("One of country, city & state were missing")
+            return false
         }
     }
 
@@ -85,29 +115,37 @@ class CreateProfilePage extends Component {
         const values = this.state.familyValues;
         for (const value in values) {
             if (values[value]) { // "if there is at least one true value listed, the family values are valid"
+                console.log("values are fine")
                 return true
             }
         }
+        console.log("family values are invalid")
         return false // "if no family values are listed as true, then the user still needs to pick at least one."
     }
 
     validateInterests = () => {
         // should only see alphanumeric chars here, and commas
-        if (this.state.interests.length > 5) {
-            if (/^[A-Za-z0-9][,]+$/.test(this.state.interests)) { // note: [,] adds comma to the regex
-                return true;
+        if (this.state.interests) {
+            // this if statement checks: a) length of "interests" is greater than 5, and b) there is at least 2 interests
+            if (this.state.interests.length > 5 && this.state.interests.indexOf(",") > -1) {
+                if (/^[A-Za-z0-9][,]+$/.test(this.state.interests)) { // note: [,] adds comma to the regex
+                    return true;
+                } else {
+                    console.log("interests contained an unacceptable character")
+                    return false;
+                }
             } else {
-                return false;
+                console.log("Interests was too short, please include at least two interests")
+                return false // return false if the "interests" list is less than 5 chars long
             }
-        } else {
-            return false // return false if the "interests" list is less than 5 chars long
         }
+        console.log("Interests wasn't filled in")
     }
 
     submitProfile = () => {
         const usernameIsValid = this.validateUsername();
         const locationIsValid = this.validateLocation();
-        const familyValuesAreValid = this.validatFamilyValues();
+        const familyValuesAreValid = this.validateFamilyValues();
         const interstsAreValid = this.validateInterests();
 
         if (usernameIsValid && locationIsValid && familyValuesAreValid && interstsAreValid) {
@@ -117,7 +155,7 @@ class CreateProfilePage extends Component {
             const state = this.state.state;
             const country = this.state.country;
             const age = this.state.age;
-            const familyValues = getFamilyValues(this.state.familyValues) // turns array into a comma separated value
+            const familyValues = this.getFamilyValues(this.state.familyValues) // turns array into a comma separated value
             const interests = this.state.interests;
             const hasPets = this.state.hasPets;
             const diet = this.state.diet;
@@ -129,6 +167,12 @@ class CreateProfilePage extends Component {
         } else {
             // do something... display a msg to the user informing him that he needs to improve the form.
         }
+    }
+
+    getFamilyValues = input => {
+        // receives an array of objects with boolean values, representing the familyValues options
+        // converts this array into a csv e.g.:
+        // "Hard Work": true, "Volunteering": true, "Fun": false, "Compassion": true --> "Hard Work,Volunteering, Compassion"
     }
 
     // username, city, state, country, age, familyValues, interests, hasPets, diet, drinks, smokes, doesDrugs
@@ -166,11 +210,11 @@ class CreateProfilePage extends Component {
                     {/* TODO: Expand to other provinces */}
                 </select>
 
-                {this.state.state === "British Columbia" ? <IfBritishColumbia /> : null}
+                {this.state.state === "British Columbia" ? <IfBritishColumbia passStoreValue={this.storeValue} /> : null}
 
-                {this.state.state === "Ontario" ? <IfOntario /> : null}
+                {this.state.state === "Ontario" ? <IfOntario passStoreValue={this.storeValue} /> : null}
 
-                <AgeSelector />
+                <AgeSelector passStoreValue={this.storeValue} />
 
                 <div>
                     <label htmlFor="familyValues">Select some family values:</label>
@@ -249,7 +293,7 @@ class IfBritishColumbia extends Component {
         return (
             <div>
                 <label htmlFor="city">Pick the city closest to you:</label>
-                <select onChange={this.storeValue} name="city" id="city">
+                <select onChange={this.props.passStoreValue} name="city" id="city">
                     <option value="Select one...">Select one...</option>
                     <option value="Vancouver">Vancouver</option>
                     <option value="Victoria">Victoria</option>
@@ -268,7 +312,7 @@ class IfOntario extends Component {
         return (
             <div>
                 <label htmlFor="city">Pick the city closest to you:</label>
-                <select onChange={this.storeValue} name="city" id="city">
+                <select onChange={this.props.passStoreValue} name="city" id="city">
                     <option value="Select one...">Select one...</option>
                     <option value="Toronto">Toronto</option>
                     <option value="Ottawa">Ottawa</option>
@@ -290,7 +334,7 @@ class AgeSelector extends Component {
         return (
             <div >
                 <label htmlFor="age">How old are you?</label>
-                <select onChange={this.storeValue} name="age" id="age">
+                <select onChange={this.props.passStoreValue} name="age" id="age">
                     <option value="Select one...">Select one...</option>
                     <option value="18">18</option>
                     <option value="19">19</option>
@@ -341,4 +385,4 @@ class AgeSelector extends Component {
     }
 }
 
-export default CreateProfilePage;
+export default withFirebase(CreateProfilePage);
