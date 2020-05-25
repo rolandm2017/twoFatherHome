@@ -73,6 +73,18 @@ class ProfilePage extends Component {
                 <h3>Age:</h3><p>{this.state.age}</p>
 
                 <h3>Family Values:</h3><p>{this.state.familyValues}</p>
+
+                <h3>Interests:</h3><p>{this.state.interests}</p>
+
+                <h3>Has pets:</h3><p>{this.state.hasPets}</p>
+
+                <h3>Diet:</h3><p>{this.state.diet}</p>
+
+                <h3>Drinks:</h3><p>{this.state.drinks ? "yes" : "no"}</p>
+
+                <h3>Smokes:</h3><p>{this.state.smokes ? "yes" : "no"}</p>
+
+                <h3>Does drugs:</h3><p>{this.state.doesDrugs ? "yes" : "no"}</p>
             </div>
         )
     }

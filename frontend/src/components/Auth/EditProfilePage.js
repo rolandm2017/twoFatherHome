@@ -439,4 +439,4 @@ class IfOntario extends Component {
 }
 
 
-export default withFirebase(EditProfilePage);
+export default withRouter(withFirebase(EditProfilePage));

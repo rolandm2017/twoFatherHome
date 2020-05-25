@@ -211,9 +211,6 @@ class CreateProfilePage extends Component {
             console.log("Age wasn't selected")
             return false
         }
-        console.log(age)
-        console.log(typeof age)
-
     }
 
     validateFamilyValues = () => {
@@ -548,4 +545,4 @@ class AgeSelector extends Component {
     }
 }
 
-export default withFirebase(CreateProfilePage);
+export default withRouter(withFirebase(CreateProfilePage));

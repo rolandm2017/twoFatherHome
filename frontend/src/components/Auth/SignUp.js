@@ -33,7 +33,7 @@ class SignUpFormBase extends Component {
 
   onSubmit = event => {
     console.log("Submitted new user!")
-    const { username, email, passwordOne } = this.state;
+    const { email, passwordOne } = this.state;
 
     this.props.firebase
       .doCreateUserWithEmailAndPassword(email, passwordOne)
@@ -102,7 +102,7 @@ class SignUpFormBase extends Component {
 
   checkState = () => {
 	  console.log(this.state)
-    const { username, fullName, email, passwordOne, passwordTwo, error } = this.state;
+    const { email, passwordOne, passwordTwo, error } = this.state;
     
     const isInvalid = passwordOne !== passwordTwo ||
       passwordOne.length < 7 || // length rule
@@ -120,8 +120,6 @@ class SignUpFormBase extends Component {
 
   render() {
     const {
-      username,
-      fullName,
       email,
       passwordOne,
       passwordTwo,

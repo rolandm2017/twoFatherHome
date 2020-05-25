@@ -68,6 +68,8 @@ export default withAuthentication(App);
 // TODO: design the "user profile page"
 // TODO: let users browse and Like/pass on users just like OkCupid (display # of wanted kids beside photo!)
 
+// TODO: Expand "doesDrugs, smokes, drinks" bools into options like "Never, rarely, sometimes, often"
+
 // todo: add admin page **
 // todo: allow admin to see list of all signed up users
 // todo: allow admin to delete a user(?)
