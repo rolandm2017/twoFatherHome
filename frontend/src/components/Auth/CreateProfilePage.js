@@ -13,6 +13,8 @@ class CreateProfilePage extends Component {
             state: null,
             country: null,
             age: null,
+            // familyValues: ["Valuing Elders": false, "Hard Work": false, "Respect": false, "Compassion": false, "Eating Together": false,
+            // "Responsibility": false, "Creativity": false, "Kindness": false, "Fun": false, "Volutneering": false, "unlisted": false],
             familyValues: [],
             interests: null,
             hasPets: false,
@@ -48,7 +50,7 @@ class CreateProfilePage extends Component {
     storeValue = (event) => {
         console.log("editing: ", event.target.name, event.target.value)
         this.setState({ [event.target.name]: event.target.value })
-        // console.log(this.state)
+        console.log(this.state)
     }
 
     // handleDate = date => {
@@ -58,10 +60,30 @@ class CreateProfilePage extends Component {
     // };
 
     handleCheckbox = event => {
-        this.setState({ [event.target.name]: event.target.checked })
+        // edits the array of familyValues objects in this.state.familyValues
+        const currentValues = this.state.familyValues;
+        const updatedValues = [];
+        if (event.target.checked) { // if true, we add the name to the list
+            for (const value in currentValues) { // remake the list and...
+                updatedValues.push(currentValues[value])
+            }
+            // ...add the new name to the list
+            const valueToAdd = event.target.name;
+            updatedValues.push(valueToAdd)
+        } else { // otherwise, we remove the name from the list
+            const valueToRemove = event.target.name;
+            for (const value in currentValues) {
+                if (currentValues[value] === valueToRemove) {
+                } else {
+                    updatedValues.push(currentValues[value])
+                }
+            }
+        }
         console.log("name:", event.target.name)
         console.log("checked: ", event.target.checked)
-        console.log(this.state)
+        console.log("starting values:", currentValues)
+        console.log("updated values:", updatedValues)
+        this.setState({ familyValues: updatedValues })
     }
 
     handleInterests = event => {
@@ -113,11 +135,10 @@ class CreateProfilePage extends Component {
 
     validateFamilyValues = () => {
         const values = this.state.familyValues;
-        for (const value in values) {
-            if (values[value]) { // "if there is at least one true value listed, the family values are valid"
-                console.log("values are fine")
-                return true
-            }
+        console.log("values: ", values)
+        if (values.length) {
+            // "if there is at least one true value listed, the family values are valid"
+            return true;
         }
         console.log("family values are invalid")
         return false // "if no family values are listed as true, then the user still needs to pick at least one."
@@ -143,6 +164,7 @@ class CreateProfilePage extends Component {
     }
 
     submitProfile = () => {
+        console.log(this.state)
         const usernameIsValid = this.validateUsername();
         const locationIsValid = this.validateLocation();
         const familyValuesAreValid = this.validateFamilyValues();
@@ -229,7 +251,7 @@ class CreateProfilePage extends Component {
                     <span>Kindness</span><input onChange={this.handleCheckbox} type="checkbox" name="Kindness" />
                     <span>Fun</span><input onChange={this.handleCheckbox} type="checkbox" name="Fun" />
                     <span>Volunteering</span><input onChange={this.handleCheckbox} type="checkbox" name="Volunteering" />
-                    <span>Mine aren't listed!</span><input onChange={this.handleCheckbox} type="checkbox" name="Mine aren't listed!" />
+                    <span>Mine aren't listed!</span><input onChange={this.handleCheckbox} type="checkbox" name="unlisted" />
                 </div>
 
                 <div>
