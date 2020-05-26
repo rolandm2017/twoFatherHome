@@ -1,8 +1,10 @@
 import app from "firebase/app";
 import "firebase/auth";
 
-import "firebase/database" // can probably deelete this
+// import "firebase/database" // can probably deelete this
 import "firebase/firestore"
+
+import "firebase/storage"
 
 
 const prodConfig = {
@@ -39,6 +41,8 @@ class Firebase {
         this.fs = app.firestore();
 
         this.timestamp = app.firestore.FieldValue.serverTimestamp();
+
+        this.storage = app.storage()
     }
 
     // *** Auth API ***
@@ -85,7 +89,8 @@ class Firebase {
     }) // TODO: mk all users in the database keyed by their UID value. create unique auth accts for each user so this works
 
     // creates a profile with docId "uid"... this has so many args, consider splitting it into two funcs/two pages...
-    createProfile = (uid, fullName, username, city, state, country, age, familyValues, interests, hasPets, diet, drinks, smokes, doesDrugs) =>
+    createProfile = (uid, fullName, username, city, state, country, age, familyValues,
+        interests, hasPets, diet, drinks, smokes, doesDrugs) =>
         this.fs.collection("users").doc(uid).set({
             fullName: fullName,
             username: username,
@@ -159,6 +164,39 @@ class Firebase {
     })
 
     // makeUsersList = () => //
+
+    // *** Images API ***
+
+    uploadFile = (userUID, number, file) => {
+        // file structure: images/userUID/profilePic-number.jpg
+        const storageRef = this.storage.ref();
+        // create a reference to "profilePic(number).jpg"
+        const profilePicRef = storageRef.child(`profilePic-${number}.jpg`)
+        // create a ref to "images/profilePic-userUID-number.jpg"
+        const profilePicImagesRef = storageRef.child(`images/profilePic-${userUID}-${number}.jpg`)
+
+        const task = ref.put(file)
+
+        task.on("state_changed", function progress(snapshot) {
+            let percentage = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            this.setState({ uploadPercent: percentage })
+        }, function error(err) {
+            console.log(err)
+        }, function complete() {
+            // what to do when the upload is complete? Set userMsg to "finished upload"?
+
+            // get download URL:
+            uploadTask.snapshot.ref.getDownloadURL().then(function (downloadURL) {
+                console.log('File available at', downloadURL);
+            });
+        })
+    }
+
+    getPhotoNumByUser = (userUID) => {
+        // function retrieves the highest numbered photo so newly uploaded photos can have value "highestNum + 1"
+    }
+
+    // *** test code ***
 
     testLog = () => console.log("printed!")
 
