@@ -36,7 +36,7 @@ class Firebase {
         app.initializeApp(config);
 
         this.auth = app.auth();
-        this.db = app.database();
+        // this.db = app.database();
 
         this.fs = app.firestore();
 
@@ -169,31 +169,84 @@ class Firebase {
 
     uploadFile = (userUID, number, file) => {
         // file structure: images/userUID/profilePic-number.jpg
-        const storageRef = this.storage.ref();
+        // const storageRef = this.storage.ref();
         // create a reference to "profilePic(number).jpg"
-        const profilePicRef = storageRef.child(`profilePic-${number}.jpg`)
+        // const profilePicRef = storageRef.child(`profilePic-${number}.jpg`)
         // create a ref to "images/profilePic-userUID-number.jpg"
-        const profilePicImagesRef = storageRef.child(`images/profilePic-${userUID}-${number}.jpg`)
+        // const profilePicImagesRef = storageRef.child(`images/profilePic-${userUID}-${number}.jpg`)
 
-        const task = ref.put(file)
+        // https://stackoverflow.com/questions/41304405/firebase-storage-web-how-to-upload-a-file
 
-        task.on("state_changed", function progress(snapshot) {
+        const storageReference = this.storage.ref(`image/${userUID}/profilePic-${number}`)
+
+        const uploadTask = storageReference.put(file)
+
+        uploadTask.on("state_changed", function progress(snapshot) {
             let percentage = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            this.setState({ uploadPercent: percentage })
+            this.setState({ uploadPercent: percentage }) // TODO: Figure out how I'm gonna get this value into UploadPhotosPage.js
+            // maybe it will just work? does calling .setState here set the state of the component that calls the function?
         }, function error(err) {
+            // TODO: improve this. tell the user about an upload error and prompt them to try again?
             console.log(err)
+            // A full list of error codes is available at
+            // https://firebase.google.com/docs/storage/web/handle-errors
+            switch (err.code) {
+                case 'storage/unauthorized':
+                    // User doesn't have permission to access the object
+                    break;
+                case 'storage/canceled':
+                    // User canceled the upload
+                    break;
+                case 'storage/unknown':
+                    // Unknown error occurred, inspect error.serverResponse
+                    break;
+                default:
+                    console.log("error type not listed in switch statement: ", err)
+                    break;
+            }
         }, function complete() {
-            // what to do when the upload is complete? Set userMsg to "finished upload"?
+            // TODO: what to do when the upload is complete? Set userMsg to "finished upload"?
+            // TODO: when upload is complete, trigger uploaded photo being added to "user photos" display section on page
 
             // get download URL:
             uploadTask.snapshot.ref.getDownloadURL().then(function (downloadURL) {
                 console.log('File available at', downloadURL);
+                return downloadURL
             });
         })
     }
 
-    getPhotoNumByUser = (userUID) => {
-        // function retrieves the highest numbered photo so newly uploaded photos can have value "highestNum + 1"
+    getHighestPhotoNumByUser = (userUID) => {
+        // function retrieves the highest numbered photo from Storage so newly uploaded photos can have value "highestNum + 1"
+        let highestNumber;
+        // console.log(userUID)
+
+        const storageRef = this.storage.ref()
+        // const imagesRef = storageRef.child(`images/${userUID}`)
+        const imagesRef = storageRef.child("images/BSdlxPSriWP56JNGZiwrUivNwdw1/profilePic-0.jpg")
+
+        // const storageRef = this.storage.ref(`images/${userUID}`)
+        const anotherAttempt = this.storage.ref(`images/BSdlxPSriWP56JNGZiwrUivNwdw1`)
+        // console.log(listRef)
+
+        // TODO: finish me! turn this into "returns highestNumber of photos in user's collection"
+        return new Promise(resolve => {
+            imagesRef.listAll().then(function (result) {
+                console.log("result:", result)
+                console.log("result.items.length:", result.items.length)
+                if (result.items.length == 0) { // base case where user has yet to upload a photo
+                    console.log("returning null!")
+                    resolve(null)
+                }
+                console.log("listRef listAll result: ", result)
+                result.prefixes.forEach(function (something) {
+                    console.log("something! ", something)
+                    resolve("testing")
+                })
+            }).catch(err => {
+                console.log(err)
+            })
+        })
     }
 
     // *** test code ***

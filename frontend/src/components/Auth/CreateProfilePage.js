@@ -298,7 +298,7 @@ class CreateProfilePage extends Component {
                     }).catch(err => console.log(err));
                 } else {
                     // this should never happen!
-                    throw "No user was authenticated while attempting to set .displayName property"
+                    throw new Error("No user was authenticated while attempting to set .displayName property")
                 }
             })
             console.log("Success")

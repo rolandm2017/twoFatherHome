@@ -11,13 +11,13 @@ class EditProfilePage extends Component {
 
         this.state = {
             username: null,
-            city: null,
-            state: null,
-            country: null,
+            city: "Select one...",
+            state: "Select one...",
+            country: "Select one...",
             familyValues: [],
             interests: "",
             hasPets: false,
-            diet: null,
+            diet: "Select one...",
             drinks: false,
             smokes: false,
             doesDrugs: false,
@@ -36,10 +36,10 @@ class EditProfilePage extends Component {
                 if (authUser) {
                     // get user profile info by UID and load info into profile edit screen
                     this.props.firebase.fs.collection("users").doc(authUser.uid).get().then((doc) => {
-                        console.log("DOC:", doc)
+                        // console.log("DOC:", doc)
                         if (doc.exists) {
                             const userData = doc.data()
-                            console.log(userData)
+                            // console.log(userData)
                             this.setState({
                                 username: userData.username,
                                 city: userData.city, state: userData.state, country: userData.country,

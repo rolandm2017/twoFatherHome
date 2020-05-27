@@ -87,3 +87,7 @@ export default withAuthentication(App);
 // TODO: Make ROUTES.CREATE_PROFILE redirect to login page if no user is signed in.
 
 // TODO: Convert to Redux & Global state mgmt
+
+// TODO: Probably at the same time as "convert to redux & global state mgmt", do something like:
+// "if authUser & profile info are present in state, use them. If they aren't loaded into state yet, do getAuthUserAndProfileInfo"
+// -----> saves load time getting authUser and profileInfo on every page that uses them. The goal of react is a FAST user experience!

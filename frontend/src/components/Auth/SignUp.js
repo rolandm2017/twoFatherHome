@@ -42,6 +42,7 @@ class SignUpFormBase extends Component {
         this.props.history.push(ROUTES.CREATE_PROFILE);
       })
       .catch(error => {
+        // TODO: what to do with errors?
         this.setState({ error });
       });
 
@@ -102,8 +103,8 @@ class SignUpFormBase extends Component {
 
   checkState = () => {
 	  console.log(this.state)
-    const { email, passwordOne, passwordTwo, error } = this.state;
-    
+    const { email, passwordOne, passwordTwo } = this.state;
+
     const isInvalid = passwordOne !== passwordTwo ||
       passwordOne.length < 7 || // length rule
       email === '';

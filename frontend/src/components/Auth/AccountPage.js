@@ -3,6 +3,7 @@ import React from 'react';
 import { PasswordForgetForm } from './PasswordForget';
 import PasswordChangeForm from './PasswordChange';
 import EditProfilePage from "./EditProfilePage";
+import UploadPhotosPage from "./UploadPhotosPage"
 
 const AccountPage = () => (
     <div>
@@ -10,6 +11,7 @@ const AccountPage = () => (
         <PasswordForgetForm />
         <PasswordChangeForm />
         <EditProfilePage />
+        <UploadPhotosPage />
     </div>
 );
 
