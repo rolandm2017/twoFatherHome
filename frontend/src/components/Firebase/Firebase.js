@@ -216,38 +216,38 @@ class Firebase {
         })
     }
 
-    getHighestPhotoNumByUser = (userUID) => {
-        // function retrieves the highest numbered photo from Storage so newly uploaded photos can have value "highestNum + 1"
-        let highestNumber;
-        // console.log(userUID)
+    // getHighestPhotoNumByUser = (userUID) => {
+    //     // function retrieves the highest numbered photo from Storage so newly uploaded photos can have value "highestNum + 1"
+    //     let highestNumber;
+    //     // console.log(userUID)
 
-        const storageRef = this.storage.ref()
-        // const imagesRef = storageRef.child(`images/${userUID}`)
-        const imagesRef = storageRef.child("images/BSdlxPSriWP56JNGZiwrUivNwdw1/profilePic-0.jpg")
+    //     const storageRef = this.storage.ref()
+    //     // const imagesRef = storageRef.child(`images/${userUID}`)
+    //     const imagesRef = storageRef.child("images/BSdlxPSriWP56JNGZiwrUivNwdw1/profilePic-0.jpg")
 
-        // const storageRef = this.storage.ref(`images/${userUID}`)
-        const anotherAttempt = this.storage.ref(`images/BSdlxPSriWP56JNGZiwrUivNwdw1`)
-        // console.log(listRef)
+    //     // const storageRef = this.storage.ref(`images/${userUID}`)
+    //     const anotherAttempt = this.storage.ref(`images/BSdlxPSriWP56JNGZiwrUivNwdw1`)
+    //     // console.log(listRef)
 
-        // TODO: finish me! turn this into "returns highestNumber of photos in user's collection"
-        return new Promise(resolve => {
-            imagesRef.listAll().then(function (result) {
-                console.log("result:", result)
-                console.log("result.items.length:", result.items.length)
-                if (result.items.length == 0) { // base case where user has yet to upload a photo
-                    console.log("returning null!")
-                    resolve(null)
-                }
-                console.log("listRef listAll result: ", result)
-                result.prefixes.forEach(function (something) {
-                    console.log("something! ", something)
-                    resolve("testing")
-                })
-            }).catch(err => {
-                console.log(err)
-            })
-        })
-    }
+    //     // TODO: finish me! turn this into "returns highestNumber of photos in user's collection"
+    //     return new Promise(resolve => {
+    //         imagesRef.listAll().then(function (result) {
+    //             console.log("result:", result)
+    //             console.log("result.items.length:", result.items.length)
+    //             if (result.items.length == 0) { // base case where user has yet to upload a photo
+    //                 console.log("returning null!")
+    //                 resolve(null)
+    //             }
+    //             console.log("listRef listAll result: ", result)
+    //             result.prefixes.forEach(function (something) {
+    //                 console.log("something! ", something)
+    //                 resolve("testing")
+    //             })
+    //         }).catch(err => {
+    //             console.log(err)
+    //         })
+    //     })
+    // }
 
     // *** test code ***
 
