@@ -21,10 +21,10 @@ class CreateProfilePage extends Component {
             familyValues: [],
             interests: null,
             hasPets: false,
-            diet: null,
-            drinks: false,
-            smokes: false,
-            doesDrugs: false,
+            diet: "Select one...",
+            drinks: "Select one...",
+            smokes: "Select one...",
+            doesDrugs: "Select one...",
             alertMsg: "Fill out the form & hit submit!"
         };
     }
@@ -274,6 +274,36 @@ class CreateProfilePage extends Component {
         }
     }
 
+    validateDrinks = () => {
+        const drinks = this.state.drinks;
+        if (drinks && drinks !== "Select one...") {
+            return true;
+        } else {
+            this.displayMessage("Please select your drinking habits.")
+            return false;
+        }
+    }
+
+    validateSmokes = () => {
+        const smokes = this.state.smokes;
+        if (smokes && smokes !== "Select one...") {
+            return true;
+        } else {
+            this.displayMessage("Please select your smoking habits.")
+            return false;
+        }
+    }
+
+    validateDoesDrugs = () => {
+        const doesDrugs = this.state.doesDrugs;
+        if (doesDrugs && doesDrugs !== "Select one...") {
+            return true;
+        } else {
+            this.displayMessage("Please inform the site if you do any drugs.")
+            return false;
+        }
+    }
+
     submitProfile = () => {
         console.log(this.state)
         const fullNameIsValid = this.validateFullName();
@@ -284,12 +314,13 @@ class CreateProfilePage extends Component {
         const familyValuesAreValid = this.validateFamilyValues();
         const interestsAreValid = this.validateInterests();
         const dietIsValid = this.validateDiet();
+        const drinksSmokesDrugsAreValid = this.validateDrinks() && this.validateSmokes() && this.validateDoesDrugs();
         const userIsSignedIn = !!this.state.authUser;
 
         console.log("boolean check: ", fullNameIsValid, usernameIsValid, locationIsValid, ageIsValid, kidsAreValid,
-            familyValuesAreValid, interestsAreValid, dietIsValid, userIsSignedIn)
+            familyValuesAreValid, interestsAreValid, dietIsValid, drinksSmokesDrugsAreValid, userIsSignedIn)
         if (fullNameIsValid && usernameIsValid && locationIsValid && familyValuesAreValid && interestsAreValid &&
-            ageIsValid && kidsAreValid && dietIsValid && userIsSignedIn) {
+            ageIsValid && kidsAreValid && dietIsValid && drinksSmokesDrugsAreValid && userIsSignedIn) {
             const userUID = this.state.authUser.uid;
             const fullName = this.state.fullName;
             const username = this.state.username;
@@ -437,13 +468,31 @@ class CreateProfilePage extends Component {
                 </select>
 
                 <label htmlFor="drinks">Do you drink?</label>
-                <input onChange={this.handleCheckbox} type="checkbox" name="drinks" />
+                <select onChange={this.storeValue} value={this.state.drinks} name="drinks" id="drinks">
+                    <option value="Select one...">Select one...</option>
+                    <option value="Never">Never</option>
+                    <option value="Rarely">Rarely</option>
+                    <option value="Sometimes">Sometimes</option>
+                    <option value="Often">Often</option>
+                </select>
 
                 <label htmlFor="smokes">Do you smoke?</label>
-                <input onChange={this.handleCheckbox} type="checkbox" name="smokes" />
+                <select onChange={this.storeValue} value={this.state.smokes} name="smokes" id="smokes">
+                    <option value="Select one...">Select one...</option>
+                    <option value="Never">Never</option>
+                    <option value="Rarely">Rarely</option>
+                    <option value="Sometimes">Sometimes</option>
+                    <option value="Often">Often</option>
+                </select>
 
                 <label htmlFor="doesDrugs">Do you do any drugs?</label>
-                <input onChange={this.handleCheckbox} type="checkbox" name="doesDrugs" />
+                <select onChange={this.storeValue} value={this.state.doesDrugs} name="doesDrugs" id="doesDrugs">
+                    <option value="Select one...">Select one...</option>
+                    <option value="Never">Never</option>
+                    <option value="Rarely">Rarely</option>
+                    <option value="Sometimes">Sometimes</option>
+                    <option value="Often">Often</option>
+                </select>
 
                 <button onClick={this.submitProfile}>Submit Profile</button>
 
