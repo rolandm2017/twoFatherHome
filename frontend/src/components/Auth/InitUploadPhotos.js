@@ -7,7 +7,7 @@ import * as ROUTES from "../../constants/routes"
 
 // import { compose } from "recompose";
 
-class UploadPhotosPage extends Component {
+class InitUploadPhotos extends Component {
     constructor(props) {
         super(props);
 
@@ -231,4 +231,4 @@ class UploadPhotosPage extends Component {
     }
 }
 
-export default withRouter(withFirebase(UploadPhotosPage));
+export default withRouter(withFirebase(InitUploadPhotos));

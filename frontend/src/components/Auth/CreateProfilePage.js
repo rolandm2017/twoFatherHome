@@ -17,6 +17,7 @@ class CreateProfilePage extends Component {
             state: null,
             country: null,
             age: null,
+            kids: null,
             familyValues: [],
             interests: null,
             hasPets: false,
@@ -213,6 +214,22 @@ class CreateProfilePage extends Component {
         }
     }
 
+    validateKids = () => {
+        const kids = this.state.kids;
+
+        if (kids) {
+            if (kids !== "Select one...") {
+                return true
+            } else {
+                this.displayMessage("Please tell us how many kids you intend to have.")
+                return false
+            }
+        } else {
+            this.displayMessage("Please tell us how many kids you intend to have.")
+            return false
+        }
+    }
+
     validateFamilyValues = () => {
         const values = this.state.familyValues;
         console.log("values: ", values)
@@ -263,15 +280,16 @@ class CreateProfilePage extends Component {
         const usernameIsValid = this.validateUsername();
         const locationIsValid = this.validateLocation();
         const ageIsValid = this.validateAge();
+        const kidsAreValid = this.validateKids();
         const familyValuesAreValid = this.validateFamilyValues();
         const interestsAreValid = this.validateInterests();
         const dietIsValid = this.validateDiet();
-        const userIsSignedIn = this.state.authUser;
+        const userIsSignedIn = !!this.state.authUser;
 
-        console.log("boolean check: ", fullNameIsValid, usernameIsValid, locationIsValid, ageIsValid,
+        console.log("boolean check: ", fullNameIsValid, usernameIsValid, locationIsValid, ageIsValid, kidsAreValid,
             familyValuesAreValid, interestsAreValid, dietIsValid, userIsSignedIn)
         if (fullNameIsValid && usernameIsValid && locationIsValid && familyValuesAreValid && interestsAreValid &&
-            ageIsValid && dietIsValid && userIsSignedIn) {
+            ageIsValid && kidsAreValid && dietIsValid && userIsSignedIn) {
             const userUID = this.state.authUser.uid;
             const fullName = this.state.fullName;
             const username = this.state.username;
@@ -279,6 +297,7 @@ class CreateProfilePage extends Component {
             const state = this.state.state;
             const country = this.state.country;
             const age = this.state.age;
+            const kids = this.state.kids;
             const familyValues = this.getFamilyValues(this.state.familyValues) // turns array into a comma separated value
             const interests = this.state.interests;
             const hasPets = this.state.hasPets;
@@ -287,7 +306,7 @@ class CreateProfilePage extends Component {
             const smokes = this.state.smokes;
             const doesDrugs = this.state.doesDrugs;
             // fixme: boolean value for doesDrugs did not work for some reason
-            this.props.firebase.createProfile(userUID, fullName, username, city, state, country, age, familyValues, interests,
+            this.props.firebase.createProfile(userUID, fullName, username, city, state, country, age, kids, familyValues, interests,
                 hasPets, diet, drinks, smokes, doesDrugs)
             this.displayMessage("Profile form is valid, welcome to TwoFatherHome!")
             // update the displayName value associated with the authUser
@@ -302,7 +321,7 @@ class CreateProfilePage extends Component {
                 }
             })
             console.log("Success")
-            this.props.history.push(ROUTES.HOME)
+            this.props.history.push(ROUTES.UPLOAD_PHOTOS)
         } else {
             // do something... display a msg to the user informing him that he needs to improve the form.
             // this.displayMessage("Something isn't filled in properly with your form, or you are not signed in.")
@@ -371,6 +390,17 @@ class CreateProfilePage extends Component {
                 {this.state.state === "Ontario" ? <IfOntario passStoreValue={this.storeValue} /> : null}
 
                 <AgeSelector passStoreValue={this.storeValue} />
+
+                <label htmlFor="kids">How many kids do you intend to have?</label>
+                <select onChange={this.storeValue} name="kids" id="kids">
+                    <option value="Select one...">Select one...</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6+">6+</option>
+                </select>
 
                 <div>
                     <label htmlFor="familyValues">Tell us what your family values will be:</label>

@@ -105,7 +105,8 @@ class Firebase {
             drinks: drinks,
             smokes: smokes,
             drugs: doesDrugs,
-            signedUpAt: this.timestamp
+            signedUpAt: this.timestamp,
+            hasPremium: false
         })
 
     editProfile = (uid, city, state, country, familyValues, interests, hasPets, diet, drinks, smokes, doesDrugs) => {
@@ -120,6 +121,18 @@ class Firebase {
             drinks: drinks,
             smokes: smokes,
             drugs: doesDrugs
+        })
+    }
+
+    enablePremium = uid => {
+        this.fs.collection("users").doc(uid).update({
+            hasPremium: true
+        })
+    }
+
+    disablePremium = uid => {
+        this.fs.collection("users").doc(uid).update({
+            hasPremium: false
         })
     }
 

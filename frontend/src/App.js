@@ -31,6 +31,7 @@ import PasswordForgetPage from './components/Auth/PasswordForget';
 import AccountPage from './components/Auth/AccountPage';
 import AdminPage from './components/Auth/Admin';
 import CreateProfilePage from "./components/Auth/CreateProfilePage";
+import InitUploadPhotos from './components/Auth/InitUploadPhotos';
 
 const App = () => (
     <div className="App">
@@ -45,6 +46,7 @@ const App = () => (
 
                 <Route exact path={ROUTES.SIGN_UP} component={SignUpPage} />
                 <Route exact path={ROUTES.CREATE_PROFILE} component={CreateProfilePage} />
+                <Route exact path={ROUTES.UPLOAD_PHOTOS} component={InitUploadPhotos} />
                 <Route exact path={ROUTES.SIGN_IN} component={SignInPage} />
                 <Route
                     exact
@@ -63,33 +65,32 @@ const App = () => (
 
 export default withAuthentication(App);
 
+// *** TODO: Carousel ***
 // TODO: add page where user can browse other users's profiles
-// TODO: allow users to upload 3 images to their profile
-// TODO: design the "user profile page"
 // TODO: let users browse and Like/pass on users just like OkCupid (display # of wanted kids beside photo!)
 
+// *** TODO: PROFILE STUFF ***
 // TODO: Expand "doesDrugs, smokes, drinks" bools into options like "Never, rarely, sometimes, often"
+// TODO: Update "Create Profile" & Edit Profile & Database to house "desired # of kids" field
 
+// *** TODO: ADMIN PAGE ***
 // todo: add admin page **
 // todo: allow admin to see list of all signed up users
 // todo: allow admin to delete a user(?)
+
+// *** TODO: INBOX & MESSAGES ***
 // todo: create inbox page
 // todo: create two dummy accounts and send some messages between them to test the inbox page's logic
+// TODO: Add notification for new messages somewhere in the UI so users can see it
+// TODO: add option to upload & send images in a chat
 
-// TODO: On account signup, redirect to "Create Profile" page & allow user to create profile.
-// TODO: Make Authentication-Only pages redirect to the login/signup page
-
-// TODO: On user signup, associate their Auth.uid as their users' collection document ID/key.
-// ...so you can do fs.colletion("users").doc(uid).get() and retrieve their username that way
-
-// TODO: Include a "hasPremium" boolean field in user profiles in the db
-
-// TODO: Make ROUTES.CREATE_PROFILE redirect to login page if no user is signed in.
-
+// *** TODO: Misc ***
+// TODO: Make Authentication-Only pages redirect to the login/signup page if nonauthenticated
+// TODO: design the "user profile page"
 // TODO: Convert to Redux & Global state mgmt
+// TODO: For each .catch() error, send a msg to the Firestore database and store the error, the page it came from, and the user info
+// TODO: Build a sales page for Premium Account Upgrades (give: 10 photos max, see who liked you, and _______?)
 
 // TODO: Probably at the same time as "convert to redux & global state mgmt", do something like:
 // "if authUser & profile info are present in state, use them. If they aren't loaded into state yet, do getAuthUserAndProfileInfo"
 // -----> saves load time getting authUser and profileInfo on every page that uses them. The goal of react is a FAST user experience!
-
-// TODO: For each .catch() error, send a msg to the Firestore database and store the error, the page it came from, and the user info
