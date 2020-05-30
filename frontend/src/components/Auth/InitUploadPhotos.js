@@ -32,8 +32,8 @@ class InitUploadPhotos extends Component {
                         if (doc.exists) { // if user already has a profile, we're all set, proceed to this step
 
                             // return true
-                        } else { // if user does not already have a profile, redirect to create profile page
-                            this.props.history.push(ROUTES.CREATE_PROFILE)
+                        } else { // if user does not already have a profile, redirect to edit profile page
+                            this.props.history.push(ROUTES.EDIT_PROFILE)
                             // return false
                         }
                     }).catch(err => {
@@ -186,6 +186,10 @@ class InitUploadPhotos extends Component {
 
     }
 
+    doneUploads = () => {
+        this.props.history.push(ROUTES.HOME)
+    }
+
     checkState = () => {
         console.log(this.state)
     }
@@ -203,7 +207,7 @@ class InitUploadPhotos extends Component {
                             <img src={url[0]} alt={`Profile Pic ${index}`} width="150" height="200" />
                             <button onClick={() => this.deleteImage(this.state.authUser.uid, url[1])}>Delete</button>
                         </div>
-                    }) : "Loading..."}
+                    }) : "No files uploaded!"}
                 </div>
                 {/* // FIXME: sometimes photos do not load until page is refreshed. Why? How to fix? */}
 
@@ -222,6 +226,8 @@ class InitUploadPhotos extends Component {
                 {this.state.uploadPercent ? <p>Percent Complete: {this.state.uploadPercent}</p> : null}
 
                 <p>{this.state.msg}</p>
+
+                <button onClick={this.doneUploads}>Done!</button>
 
                 {/* // test button */}
                 <button onClick={this.checkState}>Test Button</button>

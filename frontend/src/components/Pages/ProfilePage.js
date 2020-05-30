@@ -14,6 +14,7 @@ class ProfilePage extends Component {
             state: null,
             country: null,
             age: null,
+            kids: null,
             familyValues: [],
             interests: null,
             hasPets: false,
@@ -21,6 +22,9 @@ class ProfilePage extends Component {
             drinks: false,
             smokes: false,
             doesDrugs: false,
+
+            currentURLs: [],
+            msg: null
         }
     }
 
@@ -28,6 +32,8 @@ class ProfilePage extends Component {
         this.listener = this.props.firebase.auth.onAuthStateChanged(
             authUser => {
                 if (authUser) {
+                    this.setState({ authUser: authUser });
+
                     // get user profile info by UID and load info into profile edit screen
                     this.props.firebase.fs.collection("users").doc(authUser.uid).get().then((doc) => {
                         console.log("DOC:", doc)
@@ -37,6 +43,7 @@ class ProfilePage extends Component {
                             this.setState({
                                 username: userData.username,
                                 city: userData.city, state: userData.state, country: userData.country, age: userData.age,
+                                kids: userData.kids,
                                 familyValues: userData.familyValues, interests: userData.interests, hasPets: userData.hasPets,
                                 diet: userData.diet, drinks: userData.drinks, smokes: userData.smokes, doesDrugs: userData.drugs
                             })
@@ -46,7 +53,9 @@ class ProfilePage extends Component {
                     }).catch(err => {
                         console.log(err)
                     })
-                    this.setState({ authUser: authUser });
+
+                    // prepare the page to display the user's already-uploaded photos
+                    this.getUsersPhotos(authUser.uid)
                 } else {
                     this.setState({ authUser: null })
                     // redirect to login screen since no user is signed in
@@ -60,6 +69,37 @@ class ProfilePage extends Component {
         this.listener(); // prevents a memory leak or something
     }
 
+    getUsersPhotos = (uid) => {
+        const storageRef = this.props.firebase.storage.ref(uid)
+
+        const scopeHack = this
+
+        storageRef.listAll().then(function (results) {
+            console.log("getUserPhotos results:", results)
+            results.items.forEach(function (imageRef) {
+                imageRef.getDownloadURL().then(function (url) {
+                    const currentURLs = scopeHack.state.currentURLs
+                    console.log("URL:", url)
+                    console.log("NAME:", imageRef.name)
+                    currentURLs.push([url, imageRef.name])
+                    scopeHack.setState({ currentURLs: currentURLs })
+                }).catch(error => {
+                    console.log("error from getDownloadURL():", error)
+                })
+            })
+        }).catch(function (error) {
+            console.log("error in listAll():", error)
+            scopeHack.displayMsg("error: your photos could not display. Try refreshing the page.")
+        })
+    }
+
+    displayMsg = msg => {
+        this.setState({ msg: msg })
+    }
+
+    checkState = () => {
+        console.log(this.state)
+    }
 
     render() {
         return (
@@ -68,15 +108,28 @@ class ProfilePage extends Component {
 
                 <h3>Username:</h3><p>{this.state.username}</p>
 
+                <h3>Here are your current profile pics:</h3>
+                <div>
+                    {/* // fill me in! */}
+                    {this.state.currentURLs.length > 0 ? this.state.currentURLs.map((url, index) => {
+                        return <div key={index}>
+                            <img src={url[0]} alt={`Profile Pic ${index}`} width="150" height="200" />
+                            <button onClick={() => this.deleteImage(this.state.authUser.uid, url[1])}>Delete</button>
+                        </div>
+                    }) : "Go to the Account page and upload a profile pic!"}
+                </div>
+
                 <h3>Location:</h3><p>{this.state.city}, {this.state.state}, {this.state.country}</p>
 
                 <h3>Age:</h3><p>{this.state.age}</p>
+
+                <h3>Intend to have {this.state.kids} kids.</h3>
 
                 <h3>Family Values:</h3><p>{this.state.familyValues}</p>
 
                 <h3>Interests:</h3><p>{this.state.interests}</p>
 
-                <h3>Has pets:</h3><p>{this.state.hasPets}</p>
+                <h3>Has pets:</h3><p>{this.state.hasPets ? "yes" : "no"}</p>
 
                 <h3>Diet:</h3><p>{this.state.diet}</p>
 
@@ -85,6 +138,8 @@ class ProfilePage extends Component {
                 <h3>Smokes:</h3><p>{this.state.smokes ? "yes" : "no"}</p>
 
                 <h3>Does drugs:</h3><p>{this.state.doesDrugs ? "yes" : "no"}</p>
+
+                <button onClick={this.checkState}>Test State</button>
             </div>
         )
     }

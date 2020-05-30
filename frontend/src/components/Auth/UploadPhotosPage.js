@@ -143,7 +143,6 @@ class UploadPhotosPage extends Component {
             console.log("error in listAll():", error)
             scopeHack.displayMsg("error: your photos could not display. Try refreshing the page.")
         })
-
     }
 
     deleteImage = (uid, name) => {
@@ -188,6 +187,29 @@ class UploadPhotosPage extends Component {
 
     checkState = () => {
         console.log(this.state)
+        // this.deleteFolderContents("/GwsCYszJSkgWcZkWG6mc78Nyv032")
+    }
+
+    deleteFolderContents(path) {
+        const ref = this.props.firebase.storage.ref(path);
+        ref.listAll()
+            .then(dir => {
+                dir.items.forEach(fileRef => {
+                    this.deleteFile(ref.fullPath, fileRef.name);
+                });
+                dir.prefixes.forEach(folderRef => {
+                    this.deleteFolderContents(folderRef.fullPath);
+                })
+            })
+            .catch(error => {
+                console.log(error);
+            });
+    }
+
+    deleteFile(pathToFile, fileName) {
+        const ref = this.props.firebase.storage.ref(pathToFile);
+        const childRef = ref.child(fileName);
+        childRef.delete()
     }
 
     render() {
@@ -203,7 +225,7 @@ class UploadPhotosPage extends Component {
                             <img src={url[0]} alt={`Profile Pic ${index}`} width="150" height="200" />
                             <button onClick={() => this.deleteImage(this.state.authUser.uid, url[1])}>Delete</button>
                         </div>
-                    }) : "Loading..."}
+                    }) : "No files uploaded!"}
                 </div>
                 {/* // FIXME: sometimes photos do not load until page is refreshed. Why? How to fix? */}
 

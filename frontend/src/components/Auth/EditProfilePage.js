@@ -14,6 +14,7 @@ class EditProfilePage extends Component {
             city: "Select one...",
             state: "Select one...",
             country: "Select one...",
+            kids: "Select one...",
             familyValues: [],
             interests: "",
             hasPets: false,
@@ -42,7 +43,7 @@ class EditProfilePage extends Component {
                             // console.log(userData)
                             this.setState({
                                 username: userData.username,
-                                city: userData.city, state: userData.state, country: userData.country,
+                                city: userData.city, state: userData.state, country: userData.country, kids: userData.kids,
                                 familyValues: userData.familyValues, interests: userData.interests, hasPets: userData.hasPets,
                                 diet: userData.diet, drinks: userData.drinks, smokes: userData.smokes, doesDrugs: userData.drugs
                             })
@@ -171,6 +172,22 @@ class EditProfilePage extends Component {
         }
     }
 
+    validateKids = () => {
+        const kids = this.state.kids;
+
+        if (kids) {
+            if (kids !== "Select one...") {
+                return true
+            } else {
+                this.displayMessage("Please tell us how many kids you intend to have.")
+                return false
+            }
+        } else {
+            this.displayMessage("Please tell us how many kids you intend to have.")
+            return false
+        }
+    }
+
     validateFamilyValues = () => {
         const values = this.state.familyValues;
         console.log("values: ", values)
@@ -219,17 +236,19 @@ class EditProfilePage extends Component {
         // TODO: edit "submitProfile" into "editProfile"
         console.log(this.state)
         const locationIsValid = this.validateLocation();
+        const kidsAreValid = this.validateKids();
         const familyValuesAreValid = this.validateFamilyValues();
         const interestsAreValid = this.validateInterests();
         const dietIsValid = this.validateDiet();
         const userIsSignedIn = this.state.authUser;
 
-        console.log("boolean check: ", locationIsValid, familyValuesAreValid, interestsAreValid, dietIsValid, userIsSignedIn)
-        if (locationIsValid && familyValuesAreValid && interestsAreValid && dietIsValid && userIsSignedIn) {
+        console.log("boolean check: ", locationIsValid, kidsAreValid, familyValuesAreValid, interestsAreValid, dietIsValid, userIsSignedIn)
+        if (locationIsValid && kidsAreValid && familyValuesAreValid && interestsAreValid && dietIsValid && userIsSignedIn) {
             const userUID = this.state.authUser.uid;
             const city = this.state.city;
             const state = this.state.state;
             const country = this.state.country;
+            const kids = this.state.kids;
             const familyValues = this.state.familyValues
             const interests = this.state.interests;
             const hasPets = this.state.hasPets;
@@ -237,7 +256,7 @@ class EditProfilePage extends Component {
             const drinks = this.state.drinks;
             const smokes = this.state.smokes;
             const doesDrugs = this.state.doesDrugs;
-            this.props.firebase.editProfile(userUID, city, state, country, familyValues, interests,
+            this.props.firebase.editProfile(userUID, city, state, country, kids, familyValues, interests,
                 hasPets, diet, drinks, smokes, doesDrugs)
             this.displayMessage("You edited your profile successfully.")
 
@@ -311,6 +330,17 @@ class EditProfilePage extends Component {
 
                 {/* Disabled in the Edit Profile page because user cannot change their age! */}
                 {/* <AgeSelector passStoreValue={this.storeValue} /> */}
+
+                <label htmlFor="kids">How many kids do you intend to have?</label>
+                <select onChange={this.storeValue} name="kids" id="kids" value={this.state.kids}>
+                    <option value="Select one...">Select one...</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6+">6+</option>
+                </select>
 
                 <div>
                     <label htmlFor="familyValues">Tell us what your family values will be:</label>

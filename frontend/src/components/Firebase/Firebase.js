@@ -89,7 +89,7 @@ class Firebase {
     }) // TODO: mk all users in the database keyed by their UID value. create unique auth accts for each user so this works
 
     // creates a profile with docId "uid"... this has so many args, consider splitting it into two funcs/two pages...
-    createProfile = (uid, fullName, username, city, state, country, age, familyValues,
+    createProfile = (uid, fullName, username, city, state, country, age, kids, familyValues,
         interests, hasPets, diet, drinks, smokes, doesDrugs) =>
         this.fs.collection("users").doc(uid).set({
             fullName: fullName,
@@ -98,6 +98,7 @@ class Firebase {
             state: state,
             country: country,
             age: age,
+            kids: kids,
             familyValues: familyValues,
             interests: interests,
             hasPets: hasPets,
@@ -109,11 +110,12 @@ class Firebase {
             hasPremium: false
         })
 
-    editProfile = (uid, city, state, country, familyValues, interests, hasPets, diet, drinks, smokes, doesDrugs) => {
+    editProfile = (uid, city, state, country, kids, familyValues, interests, hasPets, diet, drinks, smokes, doesDrugs) => {
         this.fs.collection("users").doc(uid).update({
             city: city,
             state: state,
             country: country,
+            kids: kids,
             familyValues: familyValues,
             interests: interests,
             hasPets: hasPets,

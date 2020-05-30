@@ -72,6 +72,7 @@ export default withAuthentication(App);
 // *** TODO: PROFILE STUFF ***
 // TODO: Expand "doesDrugs, smokes, drinks" bools into options like "Never, rarely, sometimes, often"
 // TODO: Update "Create Profile" & Edit Profile & Database to house "desired # of kids" field
+// TODO: Convert "select age" to "select birthdate" and calculate user age based on birthdate (low priority)
 
 // *** TODO: ADMIN PAGE ***
 // todo: add admin page **
