@@ -75,15 +75,6 @@ class UploadPhotosPage extends Component {
         const scopeHack = this
         // TODO: check that uploaded file is a .jpeg or some other common image format... No MP3s Allowed!
         const userUID = this.state.authUser.uid
-        // let photoNumber;
-
-        // // figure out if its the user's first upload (the 0th pic) or not
-        // const highestValuedPhotoForUser = this.state.highestPhotoValue
-        // if (highestValuedPhotoForUser === null) {
-        //     photoNumber = 0
-        // } else {
-        //     photoNumber = highestValuedPhotoForUser + 1
-        // }
 
         // TODO: display a "percent complete" progress bar
         // TODO: display a msg "file upload complete" when file upload is complete
@@ -97,34 +88,36 @@ class UploadPhotosPage extends Component {
             // TODO: Figure out how I'm gonna get this "uploadPercentage" value displayed to the user, as an updating %
             // maybe it will just work? does calling .setState here set the state of the component that calls the function?
         }, function error(err) {
-            // TODO: improve this. tell the user about an upload error and prompt them to try again?
             console.log(err)
             // A full list of error codes is available at
             // https://firebase.google.com/docs/storage/web/handle-errors
             switch (err.code) {
                 case 'storage/unauthorized':
                     // User doesn't have permission to access the object
+                    scopeHack.displayMsg("Error: Unauthorized access (tell a site admin if this persists).")
                     break;
                 case 'storage/canceled':
                     // User canceled the upload
+                    scopeHack.displayMsg("Error: Upload canceled.")
                     break;
                 case 'storage/unknown':
                     // Unknown error occurred, inspect error.serverResponse
+                    scopeHack.displayMsg("Error: Unknown error (tell a site admin if this persists). Try uploading again.")
                     break;
                 default:
-                    console.log("error type not listed in switch statement: ", err)
+                    scopeHack.displayMsg("Error: Unknown error (tell a site admin if this persists). Try uploading again.")
                     break;
             }
         }, function complete() {
-            // TODO: what to do when the upload is complete? Set userMsg to "finished upload"?
-            // TODO: when upload is complete, trigger uploaded photo being added to "user photos" display section on page
-
             // get download URL:
             uploadTask.snapshot.ref.getDownloadURL().then(function (downloadURL) {
+                // update state
                 console.log('File available at', downloadURL);
                 const currentURLs = scopeHack.state.currentURLs
-                currentURLs.push(downloadURL)
+                currentURLs.push([downloadURL, imageFile.name])
                 scopeHack.setState({ currentURLs: currentURLs })
+
+                // update msg to user
                 scopeHack.displayMsg("Upload complete!")
                 return downloadURL
             });
@@ -137,36 +130,42 @@ class UploadPhotosPage extends Component {
         const scopeHack = this
 
         storageRef.listAll().then(function (results) {
-            console.log("getuserphotos results:", results)
+            console.log("getUserPhotos results:", results)
             results.items.forEach(function (imageRef) {
-                scopeHack.displayImage(imageRef)
+                imageRef.getDownloadURL().then(function (url) {
+                    const currentURLs = scopeHack.state.currentURLs
+                    console.log("URL:", url)
+                    console.log("NAME:", imageRef.name)
+                    currentURLs.push([url, imageRef.name])
+                    scopeHack.setState({ currentURLs: currentURLs })
+                }).catch(error => {
+                    console.log("error from getDownloadURL():", error)
+                })
             })
         }).catch(function (error) {
-            // TODO: display error msgs to the user... 
-            // something like, "error: your photos could not display. Try refreshing the page or submit a bug to the site owner"
             console.log("error in listAll():", error)
+            scopeHack.displayMsg("error: your photos could not display. Try refreshing the page.")
         })
 
-    }
-
-    displayImage = imageRef => {
-        const scopeHack = this
-
-        imageRef.getDownloadURL().then(function (url) {
-            // do something with the URL
-            const currentURLs = scopeHack.state.currentURLs
-            currentURLs.push(url)
-            scopeHack.setState({ currentURLs: currentURLs })
-        }).catch(error => {
-            console.log("error from getDownloadURL():", error)
-        })
     }
 
     deleteImage = (uid, name) => {
+        // remove the image from state...
+        const currentImages = this.state.currentURLs
+        const updatedImages = []
+        for (let i = 0; i < currentImages.length; i++) {
+            if (currentImages[i][1] !== name) {
+                updatedImages.push(currentImages[i])
+            }
+        }
+        this.setState({ currentURLs: updatedImages })
+
+        // ...and remove the image from the server.
         const deleteRef = this.props.firebase.storage.ref(`${uid}/${name}`)
 
+        const scopeHack = this
         deleteRef.delete().then(function () {
-            this.displayMsg("File deleted!")
+            scopeHack.displayMsg("File deleted!")
         }).catch(error => {
             console.log(error)
         })
@@ -178,7 +177,6 @@ class UploadPhotosPage extends Component {
 
     checkState = () => {
         console.log(this.state)
-        // this.props.firebase.getHighestPhotoNumByUser(this.state.authUser.uid)
     }
 
     render() {
@@ -190,7 +188,10 @@ class UploadPhotosPage extends Component {
                 <div>
                     {/* // fill me in! */}
                     {this.state.currentURLs.length > 0 ? this.state.currentURLs.map((url, index) => {
-                        return <img key={index} src={url} alt={`Profile Pic ${index}`} width="150" height="200" />
+                        return <div key={index}>
+                            <img src={url[0]} alt={`Profile Pic ${index}`} width="150" height="200" />
+                            <button onClick={() => this.deleteImage(this.state.authUser.uid, url[1])}>Delete</button>
+                        </div>
                     }) : "Loading..."}
                 </div>
                 {/* // FIXME: sometimes photos do not load until page is refreshed. Why? How to fix? */}
@@ -204,6 +205,8 @@ class UploadPhotosPage extends Component {
                     {/* <input type="submit" value="Submit" /> */}
                 </form>
 
+                <p>{this.state.uploadPercent}</p>
+
                 <p>{this.state.msg}</p>
 
                 {/* // test button */}
@@ -213,9 +216,5 @@ class UploadPhotosPage extends Component {
         )
     }
 }
-
-// class currentPhotos extends Component {
-
-// }
 
 export default withRouter(withFirebase(UploadPhotosPage));

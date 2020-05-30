@@ -91,3 +91,5 @@ export default withAuthentication(App);
 // TODO: Probably at the same time as "convert to redux & global state mgmt", do something like:
 // "if authUser & profile info are present in state, use them. If they aren't loaded into state yet, do getAuthUserAndProfileInfo"
 // -----> saves load time getting authUser and profileInfo on every page that uses them. The goal of react is a FAST user experience!
+
+// TODO: For each .catch() error, send a msg to the Firestore database and store the error, the page it came from, and the user info
