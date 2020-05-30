@@ -121,14 +121,6 @@ class CreateProfilePage extends Component {
         this.setState({ alertMsg: content })
     }
 
-    // todo: move "pick a username" action from SignUp page to CreateProfilePage
-
-    testAuth = () => {
-        // for debugging
-        console.log(this.state.authUser)
-        console.log("displayname:", this.state.authUser.displayName)
-    }
-
     validateFullName = () => { // "first name & last name both must be longer than 1 char and contains a whitespace" rule 
         const fullname = this.state.fullName;
         if (/^[A-Za-z.-\s]+$/.test(fullname)) {
@@ -369,10 +361,16 @@ class CreateProfilePage extends Component {
         return csv
     }
 
+    testAuth = () => {
+        // for debugging
+        console.log(this.state)
+        console.log("displayname:", this.state.authUser.displayName)
+    }
+
     // fullname, username, city, state, country, age, familyValues, interests, hasPets, diet, drinks, smokes, doesDrugs
 
     // FIXME: I guarantee there are bugs waiting to be discovered.
-    // TODO: Create unit tests
+
     // TODO: Refactor so the Warning msgs still display && the Submit btn is disabled until all fields are correct. (low urgency)
     // TODO: give user opportunity to sign up for regular emails
 

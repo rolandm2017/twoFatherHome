@@ -138,6 +138,20 @@ class Firebase {
         })
     }
 
+    retrieveNewProfiles = (uid, previouslySeenProfileIds) => {
+        this.fs.collection("users").get().then(snapshot => {
+            const newProfileIds = []
+            snapshot.forEach(doc => {
+                // if the profile ID is NOT included in the list of previously seen profiles...
+                // AND the profile ID is NOT that of the authenticated user ("uid")
+                if (!previouslySeenProfileIds.includes(doc.id) && doc.id !== uid) {
+                    newProfileIds.push(doc.id)
+                }
+            })
+            return newProfileIds
+        })
+    }
+
     // *** Firestore Messages API ***
 
     // return all chatroom ids where user is present in the list of users... as a promise
@@ -156,7 +170,6 @@ class Firebase {
         }
         )
     }
-
 
     // return all chatroom ids where user is present in the list of users
     getUsersChatrooms = user => this.fs.collection("chatrooms").get().then(snapshot => {

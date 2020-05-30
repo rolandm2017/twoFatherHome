@@ -23,6 +23,7 @@ import LandingPage from "./components/Pages/LandingPage"
 import HomePage from './components/Pages/HomePage';
 import InboxPage from './components/Pages/InboxPage';
 import ProfilePage from './components/Pages/ProfilePage';
+import CarouselPage from "./components/Pages/CarouselPage"
 
 // more authentication-related stuff is kept here
 import SignUpPage from './components/Auth/SignUp';
@@ -57,6 +58,7 @@ const App = () => (
                 <Route exact path={ROUTES.ADMIN} component={AdminPage} />
 
                 <Route exact path={ROUTES.PROFILE} component={ProfilePage} />
+                <Route exact path={ROUTES.CAROUSEL} component={CarouselPage} />
 
             </Switch>
         </Router>
@@ -70,7 +72,6 @@ export default withAuthentication(App);
 // TODO: let users browse and Like/pass on users just like OkCupid (display # of wanted kids beside photo!)
 
 // *** TODO: PROFILE STUFF ***
-// TODO: Expand "doesDrugs, smokes, drinks" bools into options like "Never, rarely, sometimes, often"
 // TODO: Convert "select age" to "select birthdate" and calculate user age based on birthdate (low priority)
 
 // *** TODO: ADMIN PAGE ***
@@ -85,11 +86,12 @@ export default withAuthentication(App);
 // TODO: add option to upload & send images in a chat
 
 // *** TODO: Misc ***
-// TODO: Make Authentication-Only pages redirect to the login/signup page if nonauthenticated
+// TODO: Make Authentication-Only pages redirect to the login/signup page if browser is nonauthenticated
 // TODO: design the "user profile page"
 // TODO: Convert to Redux & Global state mgmt
 // TODO: For each .catch() error, send a msg to the Firestore database and store the error, the page it came from, and the user info
 // TODO: Build a sales page for Premium Account Upgrades (give: 10 photos max, see who liked you, and _______?)
+// TODO: Create unit tests
 
 // TODO: Probably at the same time as "convert to redux & global state mgmt", do something like:
 // "if authUser & profile info are present in state, use them. If they aren't loaded into state yet, do getAuthUserAndProfileInfo"

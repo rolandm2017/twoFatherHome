@@ -187,7 +187,7 @@ class UploadPhotosPage extends Component {
 
     checkState = () => {
         console.log(this.state)
-        // this.deleteFolderContents("/GwsCYszJSkgWcZkWG6mc78Nyv032")
+        // this.deleteFolderContents("/5mpkbjQKUFcebDk4ynY6haz66t83")
     }
 
     deleteFolderContents(path) {

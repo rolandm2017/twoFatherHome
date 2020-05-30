@@ -2,6 +2,9 @@ import React, { Component } from 'react';
 
 // import { withAuthentication, AuthUserContext } from "../Session/"
 import { withFirebase } from '../Firebase';
+import { withRouter } from "react-router-dom";
+
+import * as ROUTES from "../../constants/routes"
 
 import ChatroomBox from './ChatroomBox'
 
@@ -30,6 +33,7 @@ class InboxPage extends Component {
                     this.getInboxByUID(authUser.uid) // the first step towards filling the Inbox pg with chatroom info
                 } else {
                     this.setState({ authUser: null })
+                    this.props.history.push(ROUTES.SIGN_IN)
                     console.log("12:", authUser)
                 }
                 // console.log("5:", this.props.firebase.getUserName()
@@ -112,4 +116,4 @@ function Rooms({ rooms, currentUser }) {
     }
 }
 
-export default withFirebase(InboxPage);
+export default withRouter(withFirebase(InboxPage));

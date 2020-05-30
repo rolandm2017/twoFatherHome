@@ -19,14 +19,14 @@ const Navigation = () => (
 
 const NavigationAuth = () => (
     <ul>
-        {/* <li>
-            <Link to={ROUTES.LANDING}>Landing</Link>
-        </li> */}
         <li>
             <Link to={ROUTES.HOME}>Home</Link>
         </li>
         <li>
             <Link to={ROUTES.INBOX}>Inbox</Link>
+        </li>
+        <li>
+            <Link to={ROUTES.CAROUSEL}>Find Matches</Link>
         </li>
         <li>
             <Link to={ROUTES.PROFILE}>Profile</Link>
