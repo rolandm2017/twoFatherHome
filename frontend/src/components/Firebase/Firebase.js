@@ -161,12 +161,12 @@ class Firebase {
     addLike = (targetUser, fromUser) => {
         let updatedLikes;
 
-        this.fs.collection("users").doc().get().then(doc => {
+        this.fs.collection("users").doc(fromUser).get().then(doc => {
             updatedLikes = doc.data().likes
             this.fs.collection("users").doc(fromUser).update({
                 likes: updatedLikes
             })
-        }).catch(err => console.log(err))
+        }).catch(err => console.log(err)) // FIXME: TypeError: Cannot read property 'lieks' of undefined
 
         this.fs.collection("likes").doc(targetUser).get().then(doc => {
             if (doc.exists) {

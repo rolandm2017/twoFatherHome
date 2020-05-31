@@ -155,8 +155,11 @@ class Carousel extends Component {
         this.moveQueueForward()
     }
 
-    getNewProfile = profileIndex => {
-
+    getNewProfile = (profileIndex, position) => {
+        // retrieves info from potentialProfiles by profileIndex
+        const profileToLoad = this.state.potentialProfiles[profileIndex]
+        console.log(profileToLoad)
+        this.loadProfile(profileToLoad, position)
     }
 
     moveQueueForward = () => {
@@ -182,11 +185,20 @@ class Carousel extends Component {
         const prevProfile = this.state.prevProfile
         // prevPrevProfile is not on the list because it gets "bumped off"
 
+        let newProfile;
+        // what to do for case where there IS no next profile to load.
+        if (currentIndex >= this.state.potentialProfiles.length) {
+            newProfile = []
+            this.setState({ nextNextProfile: newProfile })
+        } else {
+            newProfile = this.getNewProfile(currentIndex + 2, 2) // returns the profile info to load into state
+        }
+
         // currentIndex + 2 because after moving the index one to the right we still have to get the profile 2 further to the right
-        const newProfile = this.getNewProfile(currentIndex + 2)
+        // 2 for 2nd arg so getNewProfile can pass down 2 as the position to .loadProfile
 
         // move viewfinder one to the right
-        this.setState({ nextNextProfile: newProfile })
+        // this.setState({ nextNextProfile: newProfile }) // state update handled by getNewProfile (follow logic to end of loadProfile)
         this.setState({ nextProfile: nextNextProfile })
         this.setState({ currentProfile: nextProfile })
         this.setState({ prevProfile: currentProfile })
@@ -214,9 +226,11 @@ class Carousel extends Component {
             // if at index 0 to 2, there is no profile to load; prevProfile and prevPrevProfile are still in memory
             if (currentIndex <= 2) {
                 newProfile = []
+                this.setState({ prevPrevProfile: newProfile })
             } else {
                 // currentIndex-2 b/c after moving index one to the left we still must get the profile 2 further to the left
-                newProfile = this.getNewProfile(currentIndex - 2)
+                // -2 for 2nd arg so getNewProfile can pass down -2 as the position to .loadProfile
+                newProfile = this.getNewProfile(currentIndex - 2, -2) // returns the profile info to load into state
             }
 
             // move viewfinder one to the left
@@ -224,7 +238,7 @@ class Carousel extends Component {
             this.setState({ nextProfile: currentProfile })
             this.setState({ currentProfile: prevProfile })
             this.setState({ prevProfile: prevPrevProfile })
-            this.setState({ prevPrevProfile: newProfile })
+            // this.setState({ prevPrevProfile: newProfile }) // state update handled by getNewProfile (follow logic to end of loadProfile)
 
             // update the potentialProfilesIndex for next time
             this.setState({ potentialProfilesIndex: currentIndex })
