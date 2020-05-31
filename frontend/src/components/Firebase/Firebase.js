@@ -139,7 +139,7 @@ class Firebase {
     }
 
     retrieveNewProfiles = async (uid, previouslySeenProfileIds) => {
-        console.log(uid, previouslySeenProfileIds)
+        // console.log(uid, previouslySeenProfileIds)
 
         return new Promise(resolve => {
             this.fs.collection("users").get().then(snapshot => {
@@ -196,72 +196,25 @@ class Firebase {
         return msgContent
     })
 
-    // makeUsersList = () => //
-
     // *** Images API ***
-
-    // uploadFile = (userUID, number, file) => {
-    //     // file structure: images/userUID/profilePic-number.jpg
-    //     // const storageRef = this.storage.ref();
-    //     // create a reference to "profilePic(number).jpg"
-    //     // const profilePicRef = storageRef.child(`profilePic-${number}.jpg`)
-    //     // create a ref to "images/profilePic-userUID-number.jpg"
-    //     // const profilePicImagesRef = storageRef.child(`images/profilePic-${userUID}-${number}.jpg`)
-
-    //     // https://stackoverflow.com/questions/41304405/firebase-storage-web-how-to-upload-a-file
-
-    //     const storageReference = this.storage.ref(`image/${userUID}/profilePic-${number}`)
-
-    //     const uploadTask = storageReference.put(file)
-
-    //     uploadTask.on("state_changed", function progress(snapshot) {
-    //         let percentage = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-    //         this.setState({ uploadPercent: percentage }) // TODO: Figure out how I'm gonna get this value into UploadPhotosPage.js
-    //         // maybe it will just work? does calling .setState here set the state of the component that calls the function?
-    //     }, function error(err) {
-    //         // TODO: improve this. tell the user about an upload error and prompt them to try again?
-    //         console.log(err)
-    //         // A full list of error codes is available at
-    //         // https://firebase.google.com/docs/storage/web/handle-errors
-    //         switch (err.code) {
-    //             case 'storage/unauthorized':
-    //                 // User doesn't have permission to access the object
-    //                 break;
-    //             case 'storage/canceled':
-    //                 // User canceled the upload
-    //                 break;
-    //             case 'storage/unknown':
-    //                 // Unknown error occurred, inspect error.serverResponse
-    //                 break;
-    //             default:
-    //                 console.log("error type not listed in switch statement: ", err)
-    //                 break;
-    //         }
-    //     }, function complete() {
-    //         // TODO: what to do when the upload is complete? Set userMsg to "finished upload"?
-    //         // TODO: when upload is complete, trigger uploaded photo being added to "user photos" display section on page
-
-    //         // get download URL:
-    //         uploadTask.snapshot.ref.getDownloadURL().then(function (downloadURL) {
-    //             console.log('File available at', downloadURL);
-    //             return downloadURL
-    //         });
-    //     })
-    // }
 
     getProfileURLsByUID = uid => {
         const storageRef = this.storage.ref(uid)
         const URLs = [];
+        let counter = 0
 
+        // Here Be Dragons
         const sorryAboutPromiseHell = new Promise(resolve => {
             storageRef.listAll().then(function (results) {
                 results.items.forEach(function (imageRef) {
-                    let counter = 0
                     imageRef.getDownloadURL().then(function (url) {
                         URLs.push(url)
                         counter++
+                        console.log("Counter:", counter, uid)
                         if (counter === results.items.length) {
+                            console.log("URLs:", URLs, uid)
                             resolve(URLs)
+                            // return URLs
                         }
                     }).catch(error => {
                         console.log("error from getDownloadURL():", error)

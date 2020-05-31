@@ -96,6 +96,7 @@ export default withAuthentication(App);
 // TODO: For each .catch() error, send a msg to the Firestore database and store the error, the page it came from, and the user info
 // TODO: Build a sales page for Premium Account Upgrades (give: 10 photos max, see who liked you, and _______?)
 // TODO: Create unit tests
+// TODO: somehow shrink pictures so they're smaller on the server... don't wanna load 10x3 MB photos in the carousel...
 
 // TODO: Probably at the same time as "convert to redux & global state mgmt", do something like:
 // "if authUser & profile info are present in state, use them. If they aren't loaded into state yet, do getAuthUserAndProfileInfo"

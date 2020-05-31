@@ -16,11 +16,10 @@ class Carousel extends Component {
             potentialProfilesIndex: 0,
             queue: [],
             queueIndex: 0,
-            nextProfile: null,
             previousProfile: null,
             currentUserProfileURLs: [],
             viewedProfiles: [],
-            currentProfile: [],
+            currentProfile: null,
             nextProfile: [],
             nextNextProfile: [],
             prevProfile: [],
@@ -85,7 +84,7 @@ class Carousel extends Component {
 
         // add the potential profiles to state
         listOfPotentialProfiles.then(resultingProfiles => {
-            console.log("HEY", resultingProfiles)
+            // console.log("HEY", resultingProfiles)
             this.setState({ potentialProfiles: resultingProfiles })
 
             // step 2: select 3 from the list of potential profiles... one for Current, one for Next, one for NextNext
@@ -101,43 +100,37 @@ class Carousel extends Component {
     // NOTE: The idea is to keep all of the profiles in the Queue LOADED so the BrowsingUser's experience is pleasant
 
     loadProfile = (uid, position) => {
+        // FIXME: Code gets to "0" but not further
         // loads profile "uid" into position "position" in the carousel. Positions are -2, -1, 0, 1, 2.
         const userInfo = this.props.firebase.getUserInfo(uid)
         // retrieve the user's associated profile pics
-        console.log("1")
         const profileURLs = this.props.firebase.getProfileURLsByUID(uid)
-        console.log("2:", profileURLs)
-        profileURLs.then(wtf => console.log(wtf))
-        // const storageRef = this.props.firebase.storage.ref(uid)
-        // const URLs = [];
 
-        // storageRef.listAll().then(function (results) {
-        //     results.items.forEach(function (imageRef) {
-        //         imageRef.getDownloadURL().then(function (url) {
-        //             URLs.push(url)
-        //         }).catch(error => {
-        //             console.log("error from getDownloadURL():", error)
-        //         })
-        //     })
-        // }).catch(function (error) {
-        //     console.log("error in listAll():", error)
-        // })
+        console.log("LOADING:", position, userInfo, profileURLs, uid)
+        Promise.all([userInfo, profileURLs]).then(infoAndURLs => {
+            console.log("V:", position, infoAndURLs, uid)
+            // load userInfo and profile pic URLs into corresponding state
+            if (position === -2) {
+                this.setState({ prevPrevProfile: infoAndURLs })
+                console.log("Position -2")
+            } else if (position === -1) {
+                console.log("Position -1")
+                this.setState({ prevProfile: infoAndURLs })
+            } else if (position === 0) {
+                console.log("Position 0")
+                this.setState({ currentProfile: infoAndURLs })
+            } else if (position === 1) {
+                console.log("Position 1")
+                this.setState({ nextProfile: infoAndURLs })
+            } else if (position === 2) {
+                console.log("Position 2")
+                this.setState({ nextNextProfile: infoAndURLs })
+            } else {
+                throw new Error("You shouldn't be able to get here you know.")
+            }
+        })
 
 
-        // load userInfo and profile pic URLs into corresponding state
-        // if (position === -2) {
-        //     this.setState({ prevPrevProfile: info })
-        // } else if (position === -1) {
-        //     this.setState({ prevProfile: info })
-        // } else if (position === 0) {
-        //     this.setState({ currentProfile: info })
-        // } else if (position === 1) {
-        //     this.setState({ nextProfile: info })
-        // } else if (position === 2) {
-        //     this.setState({ nextNextProfile: info })
-        // } else {
-        //     throw new Error("You shouldn't be able to get here you know.")
-        // }
     }
 
     queueProfile = (amountToQueue) => {
@@ -193,42 +186,7 @@ class Carousel extends Component {
                 <h3>Previous User</h3>
 
                 <div>
-
-                    <h3>Current User</h3>
-
-                    <h3>Username:</h3><p>{this.state.username}</p>
-
-                    <h3>Current User Profile Pics:</h3>
-                    <div>
-                        {this.state.currentUserProfileURLs.length > 0 ? this.state.currentUserProfileURLs.map((url, index) => {
-                            return <div key={index}>
-                                <img src={url[0]} alt={`Profile Pic ${index}`} width="150" height="200" />
-                            </div>
-                        }) : "User has no profile pics!"}
-                    </div>
-
-                    <h3>Location:</h3><p>{this.state.city}, {this.state.state}, {this.state.country}</p>
-
-                    <h3>Age:</h3><p>{this.state.age}</p>
-
-                    <h3>Intend to have {this.state.kids} kids.</h3>
-
-                    <h3>Family Values:</h3><p>{this.state.familyValues}</p>
-
-                    <h3>Interests:</h3><p>{this.state.interests}</p>
-
-                    <h3>Has pets:</h3><p>{this.state.hasPets ? "yes" : "no"}</p>
-
-                    <h3>Diet:</h3><p>{this.state.diet}</p>
-
-                    <h3>Drinks:</h3><p>{this.state.drinks}</p>
-
-                    <h3>Smokes:</h3><p>{this.state.smokes}</p>
-
-                    <h3>Does drugs:</h3><p>{this.state.doesDrugs}</p>
-
-                    <button onClick={this.likeUser}>Like</button>
-                    <button onClick={this.passOnUser}>Pass</button>
+                    {this.state.currentProfile ? <Profile values={this.state} /> : "Loading..."}
                 </div>
 
                 <button onClick={this.nextUser}>Next</button>
@@ -237,6 +195,54 @@ class Carousel extends Component {
                 <h3>Next User</h3>
 
                 <button onClick={this.testState}>Test State</button>
+            </div>
+        )
+    }
+}
+
+class Profile extends Component {
+    render() {
+        return (
+            <div>
+                <h3>Current User</h3>
+
+                <h3>Username:</h3><p>{this.props.values.currentProfile[0].username}</p>
+
+                <h3>Current User Profile Pics:</h3>
+                <div>
+                    {this.props.values.currentUserProfileURLs.length > 0 ?
+                        this.props.values.currentUserProfileURLs.map((url, index) => {
+                            return <div key={index}>
+                                <img src={url[0]} alt={`Profile Pic ${index}`} width="150" height="200" />
+                            </div>
+                        }) : "User has no profile pics!"}
+                </div>
+
+                <h3>Location:</h3>
+                <p>{this.props.values.currentProfile[0].city},
+                    {this.props.values.currentProfile[0].state},
+                    {this.props.values.currentProfile[0].country}</p>
+
+                <h3>Age:</h3><p>{this.props.values.currentProfile[0].age}</p>
+
+                <h3>Intend to have {this.props.values.currentProfile[0].kids} kids.</h3>
+
+                <h3>Family Values:</h3><p>{this.props.values.currentProfile[0].familyValues}</p>
+
+                <h3>Interests:</h3><p>{this.props.values.currentProfile[0].interests}</p>
+
+                <h3>Has pets:</h3><p>{this.props.values.currentProfile[0].hasPets ? "yes" : "no"}</p>
+
+                <h3>Diet:</h3><p>{this.props.values.currentProfile[0].diet}</p>
+
+                <h3>Drinks:</h3><p>{this.props.values.currentProfile[0].drinks}</p>
+
+                <h3>Smokes:</h3><p>{this.props.values.currentProfile[0].smokes}</p>
+
+                <h3>Does drugs:</h3><p>{this.props.values.currentProfile[0].doesDrugs}</p>
+
+                <button onClick={this.likeUser}>Like</button>
+                <button onClick={this.passOnUser}>Pass</button>
             </div>
         )
     }
