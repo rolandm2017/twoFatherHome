@@ -19,7 +19,25 @@ class Carousel extends Component {
             nextProfile: null,
             previousProfile: null,
             currentUserProfileURLs: [],
-            viewedProfiles: []
+            viewedProfiles: [],
+            currentProfile: [],
+            nextProfile: [],
+            nextNextProfile: [],
+            prevProfile: [],
+            prevPrevProfile: [],
+            username: null,
+            city: null,
+            state: null,
+            country: null,
+            age: null,
+            kids: null,
+            familyValues: null,
+            interests: null,
+            hasPets: null,
+            diet: null,
+            drinks: null,
+            smokes: null,
+            doesDrugs: null
         }
     }
 
@@ -29,6 +47,7 @@ class Carousel extends Component {
                 if (authUser) {
                     this.setState({ authUser: authUser });
                     this.populateCarousel(authUser.uid)
+                    // this.selectProfileByQueueIndex(0)
                 } else {
                     this.setState({ authUser: null })
                     // redirect to login screen since no user is signed in
@@ -50,6 +69,15 @@ class Carousel extends Component {
     // step 8: if the user clicks "pass", simply go to the next profile. the user who was Passed on remains available in the queue.`
     // step 9: if the user clicks "next", simply go to the next profile.
 
+    // I'm trying to build a page that shows a carousel of profile pics from users signed up for 
+    // my dating site.I want the carousel to show a "previous", a "current" and "next" user, with an option to Like or Pass on
+    // the current user.The hard part is, I want the page to have the profile pics and info of the current, nextUser, previousUser,
+    // and nextNextUser all loaded up and ready to go in memory, so the browsing user never has to watch the site load something
+    // in the carousel.Therefore I have to have a list of profiles I could show to the browsing user, and store 5 profiles
+    // worth of info in the page's state... 
+
+    // TODO: Exclude profiles already Liked by the authUser from listOfPotentialProfiles
+
     populateCarousel = authUserUID => {
         // Step 1: get a list of potential profiles. do this only one time.
         // retrieve new user profiles to add to the queue for display in the carousel
@@ -57,12 +85,59 @@ class Carousel extends Component {
 
         // add the potential profiles to state
         listOfPotentialProfiles.then(resultingProfiles => {
+            console.log("HEY", resultingProfiles)
             this.setState({ potentialProfiles: resultingProfiles })
 
-            // step 2: select 3 from the list of potential profiles.
+            // step 2: select 3 from the list of potential profiles... one for Current, one for Next, one for NextNext
+            this.loadProfile(resultingProfiles[0], 0)
+            this.loadProfile(resultingProfiles[1], 1)
+            this.loadProfile(resultingProfiles[2], 2)
+
             // queue 3 profiles
-            this.queueProfile(2) // int is 2 for now because there is only 2 profiles that aren't currentUser in the test database
+            // this.queueProfile(2) // int is 2 for now because there is only 2 profiles that aren't currentUser in the test database
         })
+    }
+
+    // NOTE: The idea is to keep all of the profiles in the Queue LOADED so the BrowsingUser's experience is pleasant
+
+    loadProfile = (uid, position) => {
+        // loads profile "uid" into position "position" in the carousel. Positions are -2, -1, 0, 1, 2.
+        const userInfo = this.props.firebase.getUserInfo(uid)
+        // retrieve the user's associated profile pics
+        console.log("1")
+        const profileURLs = this.props.firebase.getProfileURLsByUID(uid)
+        console.log("2:", profileURLs)
+        profileURLs.then(wtf => console.log(wtf))
+        // const storageRef = this.props.firebase.storage.ref(uid)
+        // const URLs = [];
+
+        // storageRef.listAll().then(function (results) {
+        //     results.items.forEach(function (imageRef) {
+        //         imageRef.getDownloadURL().then(function (url) {
+        //             URLs.push(url)
+        //         }).catch(error => {
+        //             console.log("error from getDownloadURL():", error)
+        //         })
+        //     })
+        // }).catch(function (error) {
+        //     console.log("error in listAll():", error)
+        // })
+
+
+        // load userInfo and profile pic URLs into corresponding state
+        // if (position === -2) {
+        //     this.setState({ prevPrevProfile: info })
+        // } else if (position === -1) {
+        //     this.setState({ prevProfile: info })
+        // } else if (position === 0) {
+        //     this.setState({ currentProfile: info })
+        // } else if (position === 1) {
+        //     this.setState({ nextProfile: info })
+        // } else if (position === 2) {
+        //     this.setState({ nextNextProfile: info })
+        // } else {
+        //     throw new Error("You shouldn't be able to get here you know.")
+        // }
     }
 
     queueProfile = (amountToQueue) => {
@@ -90,18 +165,21 @@ class Carousel extends Component {
     }
 
     // goal: turn the uid into a displayed profile under "Current User" && a displayed profile PIC under "Next User"
-    getProfileByQueueIndex = queueIndex => {
-        // retrieves the uid at index queueIndex and returns it ???? 
+    // selectProfileByQueueIndex = queueIndex => {
+    //     // retrieves the uid at index queueIndex and sets it to the currentProfile
+    //     const uidAtQueueIndex = this.state.queue[queueIndex]
+    //     console.log("TEST9999:", uidAtQueueIndex)
+    //     const userInfo = this.props.firebase.getUserInfo(uidAtQueueIndex)
+    //     console.log(userInfo)
+    // }
 
-    }
+    // showNextProfile = () => {
+    //     // rotates the profile currently in view when the Next button is clicked.
+    // }
 
-    showNextProfile = () => {
-        // rotates the profile currently in view when the Next button is clicked.
-    }
+    // getProfilePics = uid => {
 
-    getProfilePics = uid => {
-
-    }
+    // }
 
     testState = () => {
         console.log(this.state)
@@ -122,11 +200,9 @@ class Carousel extends Component {
 
                     <h3>Current User Profile Pics:</h3>
                     <div>
-                        {/* // fill me in! */}
                         {this.state.currentUserProfileURLs.length > 0 ? this.state.currentUserProfileURLs.map((url, index) => {
                             return <div key={index}>
                                 <img src={url[0]} alt={`Profile Pic ${index}`} width="150" height="200" />
-                                <button onClick={() => this.deleteImage(this.state.authUser.uid, url[1])}>Delete</button>
                             </div>
                         }) : "User has no profile pics!"}
                     </div>
@@ -145,12 +221,18 @@ class Carousel extends Component {
 
                     <h3>Diet:</h3><p>{this.state.diet}</p>
 
-                    <h3>Drinks:</h3><p>{this.state.drinks ? "yes" : "no"}</p>
+                    <h3>Drinks:</h3><p>{this.state.drinks}</p>
 
-                    <h3>Smokes:</h3><p>{this.state.smokes ? "yes" : "no"}</p>
+                    <h3>Smokes:</h3><p>{this.state.smokes}</p>
 
-                    <h3>Does drugs:</h3><p>{this.state.doesDrugs ? "yes" : "no"}</p>
+                    <h3>Does drugs:</h3><p>{this.state.doesDrugs}</p>
+
+                    <button onClick={this.likeUser}>Like</button>
+                    <button onClick={this.passOnUser}>Pass</button>
                 </div>
+
+                <button onClick={this.nextUser}>Next</button>
+                <button onClick={this.previousUser}>Previous</button>
 
                 <h3>Next User</h3>
 

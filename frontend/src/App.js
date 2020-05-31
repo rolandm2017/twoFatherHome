@@ -73,6 +73,10 @@ export default withAuthentication(App);
 
 // *** TODO: PROFILE STUFF ***
 // TODO: Convert "select age" to "select birthdate" and calculate user age based on birthdate (low priority)
+// TODO: Limit Usernames to 20 char, limit full names to 40 char, limit interests to 200 char
+// TODO: Let users put underscores in their usernames
+// FIXME: Cannot read property 'length' of undefined at createProfilePage line 132, "else if lastName.length < 2"
+// ---------> caused by lack of a last name present in the CreateProfilePage form.
 
 // *** TODO: ADMIN PAGE ***
 // todo: add admin page **

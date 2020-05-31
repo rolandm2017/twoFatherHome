@@ -133,11 +133,11 @@ class ProfilePage extends Component {
 
                 <h3>Diet:</h3><p>{this.state.diet}</p>
 
-                <h3>Drinks:</h3><p>{this.state.drinks ? "yes" : "no"}</p>
+                <h3>Drinks:</h3><p>{this.state.drinks}</p>
 
-                <h3>Smokes:</h3><p>{this.state.smokes ? "yes" : "no"}</p>
+                <h3>Smokes:</h3><p>{this.state.smokes}</p>
 
-                <h3>Does drugs:</h3><p>{this.state.doesDrugs ? "yes" : "no"}</p>
+                <h3>Does drugs:</h3><p>{this.state.doesDrugs}</p>
 
                 <button onClick={this.checkState}>Test State</button>
             </div>
