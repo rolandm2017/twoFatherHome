@@ -82,11 +82,11 @@ class Firebase {
 
     getUsernameByUID = (uid) => this.fs.collection("users").doc(uid).get().then(doc => {
         return doc.data().username
-    })
+    }).catch(err => console.log(err))
 
     getUserInfo = uid => this.fs.collection("users").doc(uid).get().then(doc => {
         return doc.data()
-    }) // TODO: mk all users in the database keyed by their UID value. create unique auth accts for each user so this works
+    }).catch(err => console.log(err))
 
     // creates a profile with docId "uid"... this has so many args, consider splitting it into two funcs/two pages...
     createProfile = (uid, fullName, username, city, state, country, age, kids, familyValues,

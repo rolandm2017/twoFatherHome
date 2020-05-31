@@ -20,10 +20,10 @@ class Carousel extends Component {
             // currentUserProfileURLs: [],
             viewedProfiles: [],
             currentProfile: null,
-            nextProfile: [],
-            nextNextProfile: [],
-            prevProfile: [],
-            prevPrevProfile: []
+            nextProfile: null,
+            nextNextProfile: null,
+            prevProfile: null,
+            prevPrevProfile: null
             // username: null,
             // city: null,
             // state: null,
@@ -157,8 +157,9 @@ class Carousel extends Component {
 
     getNewProfile = (profileIndex, position) => {
         // retrieves info from potentialProfiles by profileIndex
+        console.log(profileIndex, this.state.potentialProfiles)
         const profileToLoad = this.state.potentialProfiles[profileIndex]
-        console.log(profileToLoad)
+        console.log("UDNEFINED:", profileToLoad)
         this.loadProfile(profileToLoad, position)
     }
 
@@ -186,16 +187,17 @@ class Carousel extends Component {
         // prevPrevProfile is not on the list because it gets "bumped off"
 
         let newProfile;
-        // what to do for case where there IS no next profile to load.
-        if (currentIndex >= this.state.potentialProfiles.length) {
-            newProfile = []
+        console.log("CHECKVAL:", currentIndex)
+        if (currentIndex >= this.state.potentialProfiles.length - 2) { // what to do for case where there IS no next profile to load.
+            newProfile = null
+            console.log("end of the queue!")
             this.setState({ nextNextProfile: newProfile })
         } else {
+            // currentIndex + 2 because after moving the index one to the right we still have to get the profile 2 further to the right
+            // 2 for 2nd arg so getNewProfile can pass down 2 as the position to .loadProfile
+            console.log("WTF:", currentIndex + 2)
             newProfile = this.getNewProfile(currentIndex + 2, 2) // returns the profile info to load into state
         }
-
-        // currentIndex + 2 because after moving the index one to the right we still have to get the profile 2 further to the right
-        // 2 for 2nd arg so getNewProfile can pass down 2 as the position to .loadProfile
 
         // move viewfinder one to the right
         // this.setState({ nextNextProfile: newProfile }) // state update handled by getNewProfile (follow logic to end of loadProfile)
@@ -224,8 +226,9 @@ class Carousel extends Component {
             // TODO: what if we r on currentIndex=1? currentIndex-2 is then out of range
             let newProfile;
             // if at index 0 to 2, there is no profile to load; prevProfile and prevPrevProfile are still in memory
+
             if (currentIndex <= 2) {
-                newProfile = []
+                newProfile = null
                 this.setState({ prevPrevProfile: newProfile })
             } else {
                 // currentIndex-2 b/c after moving index one to the left we still must get the profile 2 further to the left
@@ -257,7 +260,7 @@ class Carousel extends Component {
                 <h1>Browse Users</h1>
 
                 <h3>Previous User</h3>
-                {this.state.prevProfile.length > 0 ?
+                {this.state.prevProfile !== null ?
                     <div>
                         <h4>{this.state.prevProfile[0].username}</h4>
                         <img src={this.state.prevProfile[1][0]} alt="Profile Pic" width="150" height="200" />
@@ -266,20 +269,26 @@ class Carousel extends Component {
                 }
 
                 <div>
-                    {this.state.currentProfile ? <Profile values={this.state} /> : "Loading..."}
+                    {this.state.nextProfile === null ? "No more users in the system! To help the site grow, tell some friends about the site!" :
+                        this.state.currentProfile ? <Profile values={this.state} /> : "Loading..."}
+                    {}
                 </div>
                 <div>
                     <button onClick={this.moveQueueForward}>Pass</button>
                     <button onClick={this.likeUser}>Like</button>
                 </div>
 
-                <div>
-                    <button onClick={this.moveQueueBackward}>Previous</button>
+                {this.state.prevProfile === null ? <div>
                     <button onClick={this.moveQueueForward}>Next</button>
-                </div>
+                </div> :
+                    <div>
+                        <button onClick={this.moveQueueBackward}>Previous</button>
+                        <button onClick={this.moveQueueForward}>Next</button>
+                    </div>
+                }
 
                 <h3>Next User</h3>
-                {this.state.nextProfile.length > 0 ?
+                {this.state.nextProfile !== null ?
                     <div>
                         <h4>{this.state.nextProfile[0].username}</h4>
                         <img src={this.state.nextProfile[1][0]} alt="Profile Pic" width="150" height="200" />
