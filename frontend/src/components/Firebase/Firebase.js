@@ -138,17 +138,22 @@ class Firebase {
         })
     }
 
-    retrieveNewProfiles = (uid, previouslySeenProfileIds) => {
-        this.fs.collection("users").get().then(snapshot => {
-            const newProfileIds = []
-            snapshot.forEach(doc => {
-                // if the profile ID is NOT included in the list of previously seen profiles...
-                // AND the profile ID is NOT that of the authenticated user ("uid")
-                if (!previouslySeenProfileIds.includes(doc.id) && doc.id !== uid) {
-                    newProfileIds.push(doc.id)
-                }
+    retrieveNewProfiles = async (uid, previouslySeenProfileIds) => {
+        console.log(uid, previouslySeenProfileIds)
+
+        return new Promise(resolve => {
+            this.fs.collection("users").get().then(snapshot => {
+                const newProfileIds = []
+                snapshot.forEach(doc => {
+                    // if the profile ID is NOT included in the list of previously seen profiles...
+                    // AND the profile ID is NOT that of the authenticated user ("uid")
+                    const docIsIncluded = previouslySeenProfileIds.includes(doc.id)
+                    if (!docIsIncluded && doc.id !== uid) { // FIXME: test this biconditional
+                        newProfileIds.push(doc.id)
+                    }
+                })
+                resolve(newProfileIds)
             })
-            return newProfileIds
         })
     }
 
