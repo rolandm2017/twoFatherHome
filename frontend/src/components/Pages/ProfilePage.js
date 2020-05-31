@@ -123,7 +123,10 @@ class ProfilePage extends Component {
 
                 <h3>Age:</h3><p>{this.state.age}</p>
 
-                <h3>Intend to have {this.state.kids} kids.</h3>
+                {this.props.values.currentProfile[0].kids == 1 ?
+                    <h3>Intending to have {this.props.values.currentProfile[0].kids} kid.</h3> :
+                    <h3>Intending to have {this.props.values.currentProfile[0].kids} kids.</h3>
+                }
 
                 <h3>Family Values:</h3><p>{this.state.familyValues}</p>
 

@@ -17,26 +17,26 @@ class Carousel extends Component {
             queue: [],
             queueIndex: 0,
             previousProfile: null,
-            currentUserProfileURLs: [],
+            // currentUserProfileURLs: [],
             viewedProfiles: [],
             currentProfile: null,
             nextProfile: [],
             nextNextProfile: [],
             prevProfile: [],
-            prevPrevProfile: [],
-            username: null,
-            city: null,
-            state: null,
-            country: null,
-            age: null,
-            kids: null,
-            familyValues: null,
-            interests: null,
-            hasPets: null,
-            diet: null,
-            drinks: null,
-            smokes: null,
-            doesDrugs: null
+            prevPrevProfile: []
+            // username: null,
+            // city: null,
+            // state: null,
+            // country: null,
+            // age: null,
+            // kids: null,
+            // familyValues: null,
+            // interests: null,
+            // hasPets: null,
+            // diet: null,
+            // drinks: null,
+            // smokes: null,
+            // doesDrugs: null
         }
     }
 
@@ -77,6 +77,12 @@ class Carousel extends Component {
 
     // TODO: Exclude profiles already Liked by the authUser from listOfPotentialProfiles
 
+    // TODO: make "Like" button add User to BrowsingUser's list of Liked ppl. Also add BrowsingUser to User's Likes List.
+    // TODO: Make "Like" button move the queue forward. Position 0 -> -1, Position 1 -> 0, Position 2 -> 1, etc
+
+    // TODO: make "next" button and "pass" button move the queue forward.
+    // TODO: make "Previous" button move the queue backward.
+
     populateCarousel = authUserUID => {
         // Step 1: get a list of potential profiles. do this only one time.
         // retrieve new user profiles to add to the queue for display in the carousel
@@ -109,70 +115,48 @@ class Carousel extends Component {
         console.log("LOADING:", position, userInfo, profileURLs, uid)
         Promise.all([userInfo, profileURLs]).then(infoAndURLs => {
             console.log("V:", position, infoAndURLs, uid)
+            const infoURLsAndUID = infoAndURLs;
+            infoURLsAndUID.push(uid)
             // load userInfo and profile pic URLs into corresponding state
             if (position === -2) {
-                this.setState({ prevPrevProfile: infoAndURLs })
                 console.log("Position -2")
+                this.setState({ prevPrevProfile: infoURLsAndUID })
+                this.loadPhotos(infoAndURLs[1], position)
             } else if (position === -1) {
                 console.log("Position -1")
-                this.setState({ prevProfile: infoAndURLs })
+                this.setState({ prevProfile: infoURLsAndUID })
+                this.loadPhotos(infoAndURLs[1], position)
             } else if (position === 0) {
                 console.log("Position 0")
-                this.setState({ currentProfile: infoAndURLs })
+                this.setState({ currentProfile: infoURLsAndUID })
+                this.loadPhotos(infoAndURLs[1], position)
             } else if (position === 1) {
                 console.log("Position 1")
-                this.setState({ nextProfile: infoAndURLs })
+                this.setState({ nextProfile: infoURLsAndUID })
+                this.loadPhotos(infoAndURLs[1], position)
             } else if (position === 2) {
                 console.log("Position 2")
-                this.setState({ nextNextProfile: infoAndURLs })
+                this.setState({ nextNextProfile: infoURLsAndUID })
+                this.loadPhotos(infoAndURLs[1], position)
             } else {
                 throw new Error("You shouldn't be able to get here you know.")
             }
         })
-
-
     }
 
-    queueProfile = (amountToQueue) => {
-        const currentQueue = this.state.queue;
-        // adds profiles to the queue, starting from index "index", ending at index "index + amountToQueue"
-        const startIndex = this.state.potentialProfilesIndex;
-        let endIndex = this.state.potentialProfilesIndex + amountToQueue
+    loadPhotos = (URLs, position) => {
+        // if position = 0, load 3. else, load 1
+        if (position === 0) {
+            this.setState({ currentUserProfileURLs: URLs })
+        } else {
 
-        console.log("10001:", this.state.potentialProfiles)
-        // make sure we don't try to retrieve an index that does not exist
-        if (this.state.potentialProfiles) { // check if potentialProfiles is empty array
-            if (endIndex > this.state.potentialProfiles.length) {
-                endIndex = this.state.potentialProfiles.length;
-            }
         }
-
-        // update potentialProfilesIndex so it is ready for the next time this func is called
-        this.setState({ potentialProfilesIndex: endIndex })
-
-        // assign new values to the queue
-        for (let i = startIndex; i < endIndex; i++) {
-            currentQueue.push(this.state.potentialProfiles[i])
-        }
-        this.setState({ queue: currentQueue })
     }
 
-    // goal: turn the uid into a displayed profile under "Current User" && a displayed profile PIC under "Next User"
-    // selectProfileByQueueIndex = queueIndex => {
-    //     // retrieves the uid at index queueIndex and sets it to the currentProfile
-    //     const uidAtQueueIndex = this.state.queue[queueIndex]
-    //     console.log("TEST9999:", uidAtQueueIndex)
-    //     const userInfo = this.props.firebase.getUserInfo(uidAtQueueIndex)
-    //     console.log(userInfo)
-    // }
-
-    // showNextProfile = () => {
-    //     // rotates the profile currently in view when the Next button is clicked.
-    // }
-
-    // getProfilePics = uid => {
-
-    // }
+    likeUser = () => {
+        this.props.firebase.addLike(this.state.currentProfile[2], this.state.authUser.uid)
+        // this.
+    }
 
     testState = () => {
         console.log(this.state)
@@ -184,21 +168,43 @@ class Carousel extends Component {
                 <h1>Browse Users</h1>
 
                 <h3>Previous User</h3>
+                {this.state.prevProfile.length > 0 ?
+                    <div>
+                        <h4>{this.state.prevProfile[0].username}</h4>
+                        <img src={this.state.prevProfile[1][0]} alt="Profile Pic" width="150" height="200" />
+                    </div> :
+                    <p>No Previous User</p>
+                }
 
                 <div>
                     {this.state.currentProfile ? <Profile values={this.state} /> : "Loading..."}
                 </div>
+                <div>
+                    <button onClick={this.passOnUser}>Pass</button>
+                    <button onClick={this.likeUser}>Like</button>
+                </div>
 
-                <button onClick={this.nextUser}>Next</button>
-                <button onClick={this.previousUser}>Previous</button>
+                <div>
+                    <button onClick={this.previousUser}>Previous</button>
+                    <button onClick={this.nextUser}>Next</button>
+                </div>
 
                 <h3>Next User</h3>
+                {this.state.nextProfile.length > 0 ?
+                    <div>
+                        <h4>{this.state.nextProfile[0].username}</h4>
+                        <img src={this.state.nextProfile[1][0]} alt="Profile Pic" width="150" height="200" />
+                    </div> :
+                    <p>No Next User</p>
+                }
 
                 <button onClick={this.testState}>Test State</button>
             </div>
         )
     }
 }
+
+// FIXME: profile images should show up. 
 
 class Profile extends Component {
     render() {
@@ -210,10 +216,10 @@ class Profile extends Component {
 
                 <h3>Current User Profile Pics:</h3>
                 <div>
-                    {this.props.values.currentUserProfileURLs.length > 0 ?
-                        this.props.values.currentUserProfileURLs.map((url, index) => {
+                    {this.props.values.currentProfile[1].length > 0 ?
+                        this.props.values.currentProfile[1].map((url, index) => {
                             return <div key={index}>
-                                <img src={url[0]} alt={`Profile Pic ${index}`} width="150" height="200" />
+                                <img src={url} alt={`Profile Pic ${index}`} width="150" height="200" />
                             </div>
                         }) : "User has no profile pics!"}
                 </div>
@@ -225,7 +231,10 @@ class Profile extends Component {
 
                 <h3>Age:</h3><p>{this.props.values.currentProfile[0].age}</p>
 
-                <h3>Intend to have {this.props.values.currentProfile[0].kids} kids.</h3>
+                {this.props.values.currentProfile[0].kids == 1 ?
+                    <h3>Intends to have {this.props.values.currentProfile[0].kids} kid.</h3> :
+                    <h3>Intends to have {this.props.values.currentProfile[0].kids} kids.</h3>
+                }
 
                 <h3>Family Values:</h3><p>{this.props.values.currentProfile[0].familyValues}</p>
 
@@ -240,9 +249,6 @@ class Profile extends Component {
                 <h3>Smokes:</h3><p>{this.props.values.currentProfile[0].smokes}</p>
 
                 <h3>Does drugs:</h3><p>{this.props.values.currentProfile[0].doesDrugs}</p>
-
-                <button onClick={this.likeUser}>Like</button>
-                <button onClick={this.passOnUser}>Pass</button>
             </div>
         )
     }

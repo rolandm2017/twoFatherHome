@@ -107,7 +107,8 @@ class Firebase {
             smokes: smokes,
             drugs: doesDrugs,
             signedUpAt: this.timestamp,
-            hasPremium: false
+            hasPremium: false,
+            likes: ""
         })
 
     editProfile = (uid, city, state, country, kids, familyValues, interests, hasPets, diet, drinks, smokes, doesDrugs) => {
@@ -154,6 +155,32 @@ class Firebase {
                 })
                 resolve(newProfileIds)
             })
+        })
+    }
+
+    addLike = (targetUser, fromUser) => {
+        let updatedLikes;
+
+        this.fs.collection("users").doc().get().then(doc => {
+            updatedLikes = doc.data().likes
+            this.fs.collection("users").doc(fromUser).update({
+                likes: updatedLikes
+            })
+        }).catch(err => console.log(err))
+
+        this.fs.collection("likes").doc(targetUser).get().then(doc => {
+            if (doc.exists) {
+                const currentLikes = doc.data().likedBy
+                this.fs.collection("likes").doc(targetUser).update({
+                    likedBy: currentLikes + "," + fromUser
+                }).catch(err => console.log(err))
+            } else {
+                // init condition where targetUser has no document in the "likes" collection 
+                console.log("Document does not exist")
+                this.fs.collection("likes").doc(targetUser).set({
+                    likedBy: fromUser
+                }).catch(err => console.log(err))
+            }
         })
     }
 
