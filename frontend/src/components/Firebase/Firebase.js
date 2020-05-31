@@ -139,7 +139,7 @@ class Firebase {
         })
     }
 
-    retrieveNewProfiles = async (uid, previouslySeenProfileIds) => {
+    retrieveNewProfileUIDs = async (uid, previouslySeenProfileIds) => {
         // console.log(uid, previouslySeenProfileIds)
 
         return new Promise(resolve => {
@@ -237,9 +237,9 @@ class Firebase {
                     imageRef.getDownloadURL().then(function (url) {
                         URLs.push(url)
                         counter++
-                        console.log("Counter:", counter, uid)
+                        // console.log("Counter:", counter, uid)
                         if (counter === results.items.length) {
-                            console.log("URLs:", URLs, uid)
+                            // console.log("URLs:", URLs, uid)
                             resolve(URLs)
                             // return URLs
                         }

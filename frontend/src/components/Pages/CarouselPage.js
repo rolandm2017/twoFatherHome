@@ -86,20 +86,17 @@ class Carousel extends Component {
     populateCarousel = authUserUID => {
         // Step 1: get a list of potential profiles. do this only one time.
         // retrieve new user profiles to add to the queue for display in the carousel
-        const listOfPotentialProfiles = this.props.firebase.retrieveNewProfiles(authUserUID, this.state.viewedProfiles)
+        const listOfPotentialProfilesUIDs = this.props.firebase.retrieveNewProfileUIDs(authUserUID, this.state.viewedProfiles)
 
         // add the potential profiles to state
-        listOfPotentialProfiles.then(resultingProfiles => {
+        listOfPotentialProfilesUIDs.then(profileUIDs => {
             // console.log("HEY", resultingProfiles)
-            this.setState({ potentialProfiles: resultingProfiles })
+            this.setState({ potentialProfiles: profileUIDs })
 
             // step 2: select 3 from the list of potential profiles... one for Current, one for Next, one for NextNext
-            this.loadProfile(resultingProfiles[0], 0)
-            this.loadProfile(resultingProfiles[1], 1)
-            this.loadProfile(resultingProfiles[2], 2)
-
-            // queue 3 profiles
-            // this.queueProfile(2) // int is 2 for now because there is only 2 profiles that aren't currentUser in the test database
+            this.loadProfile(profileUIDs[0], 0)
+            this.loadProfile(profileUIDs[1], 1)
+            this.loadProfile(profileUIDs[2], 2)
         })
     }
 
@@ -112,9 +109,9 @@ class Carousel extends Component {
         // retrieve the user's associated profile pics
         const profileURLs = this.props.firebase.getProfileURLsByUID(uid)
 
-        console.log("LOADING:", position, userInfo, profileURLs, uid)
+        // console.log("LOADING:", position, userInfo, profileURLs, uid)
         Promise.all([userInfo, profileURLs]).then(infoAndURLs => {
-            console.log("V:", position, infoAndURLs, uid)
+            // console.log("V:", position, infoAndURLs, uid)
             const infoURLsAndUID = infoAndURLs;
             infoURLsAndUID.push(uid)
             // load userInfo and profile pic URLs into corresponding state
@@ -155,7 +152,85 @@ class Carousel extends Component {
 
     likeUser = () => {
         this.props.firebase.addLike(this.state.currentProfile[2], this.state.authUser.uid)
-        // this.
+        this.moveQueueForward()
+    }
+
+    getNewProfile = profileIndex => {
+
+    }
+
+    moveQueueForward = () => {
+        // moves queue position 0 -> -1, 1 -> 0, 2 -> 1 etc
+        // the first time the user clicks this on the pg, the following things should happen:
+        // nextProfile -> currentProfile
+        // nextNextProfile -> nextProfile
+        // NEW profile => nextNextProfile
+        // currentProfile -> prevProfile
+        // && if it is the 2nd click: prevProfile -> prevPrevProfile
+        // can the queue simply move left and right along the potentialProfiles list?
+
+        // TODO: handle the edge case where the user has moveQueueForwarded to the end of potentialProfiles 
+        // ("out of users! to help the site grow, tell a few of your friends about the site and what it offers.")
+
+        // start by using the value of potentialProfilesIndex + 1 as currentIndex because we are moving the queue one position right
+        const currentIndex = this.state.potentialProfilesIndex + 1
+
+        // start state
+        const nextNextProfile = this.state.nextNextProfile
+        const nextProfile = this.state.nextProfile
+        const currentProfile = this.state.currentProfile
+        const prevProfile = this.state.prevProfile
+        // prevPrevProfile is not on the list because it gets "bumped off"
+
+        // currentIndex + 2 because after moving the index one to the right we still have to get the profile 2 further to the right
+        const newProfile = this.getNewProfile(currentIndex + 2)
+
+        // move viewfinder one to the right
+        this.setState({ nextNextProfile: newProfile })
+        this.setState({ nextProfile: nextNextProfile })
+        this.setState({ currentProfile: nextProfile })
+        this.setState({ prevProfile: currentProfile })
+        this.setState({ prevPrevProfile: prevProfile })
+
+        // update the potentialProfilesIndex for next time
+        this.setState({ potentialProfilesIndex: currentIndex })
+    }
+
+    moveQueueBackward = () => {
+        // moveQueueForward but in reverse
+        if (this.state.potentialProfilesIndex > 0) { // if there is a profile prior to the currentProfile in the queue...
+            // start by using the value of potentialProfilesIndex - 1 as currentIndex b/c we are moving the queue one position left
+            const currentIndex = this.state.potentialProfilesIndex - 1
+
+            // start state
+            const nextProfile = this.state.nextProfile
+            const currentProfile = this.state.currentProfile
+            const prevProfile = this.state.prevProfile
+            const prevPrevProfile = this.state.prevPrevProfile
+            // nextNextProfile is not on the list because it gets "bumped off"
+
+            // TODO: what if we r on currentIndex=1? currentIndex-2 is then out of range
+            let newProfile;
+            // if at index 0 to 2, there is no profile to load; prevProfile and prevPrevProfile are still in memory
+            if (currentIndex <= 2) {
+                newProfile = []
+            } else {
+                // currentIndex-2 b/c after moving index one to the left we still must get the profile 2 further to the left
+                newProfile = this.getNewProfile(currentIndex - 2)
+            }
+
+            // move viewfinder one to the left
+            this.setState({ nextNextProfile: nextProfile })
+            this.setState({ nextProfile: currentProfile })
+            this.setState({ currentProfile: prevProfile })
+            this.setState({ prevProfile: prevPrevProfile })
+            this.setState({ prevPrevProfile: newProfile })
+
+            // update the potentialProfilesIndex for next time
+            this.setState({ potentialProfilesIndex: currentIndex })
+        } else {
+            // tell the user they can't go back because there is no user to go back to
+        }
     }
 
     testState = () => {
@@ -180,13 +255,13 @@ class Carousel extends Component {
                     {this.state.currentProfile ? <Profile values={this.state} /> : "Loading..."}
                 </div>
                 <div>
-                    <button onClick={this.passOnUser}>Pass</button>
+                    <button onClick={this.moveQueueForward}>Pass</button>
                     <button onClick={this.likeUser}>Like</button>
                 </div>
 
                 <div>
-                    <button onClick={this.previousUser}>Previous</button>
-                    <button onClick={this.nextUser}>Next</button>
+                    <button onClick={this.moveQueueBackward}>Previous</button>
+                    <button onClick={this.moveQueueForward}>Next</button>
                 </div>
 
                 <h3>Next User</h3>
@@ -231,7 +306,7 @@ class Profile extends Component {
 
                 <h3>Age:</h3><p>{this.props.values.currentProfile[0].age}</p>
 
-                {this.props.values.currentProfile[0].kids == 1 ?
+                {this.props.values.currentProfile[0].kids === "1" ?
                     <h3>Intends to have {this.props.values.currentProfile[0].kids} kid.</h3> :
                     <h3>Intends to have {this.props.values.currentProfile[0].kids} kids.</h3>
                 }
