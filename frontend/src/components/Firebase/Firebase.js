@@ -139,44 +139,44 @@ class Firebase {
         })
     }
 
-    retrieveNewProfileUIDs = async (uid, previouslySeenProfileIds) => {
-        // console.log(uid, previouslySeenProfileIds)
-
-        return new Promise(resolve => {
-            this.fs.collection("users").get().then(snapshot => {
-                const newProfileIds = []
-                snapshot.forEach(doc => {
-                    // if the profile ID is NOT included in the list of previously seen profiles...
-                    // AND the profile ID is NOT that of the authenticated user ("uid")
-                    const docIsIncluded = previouslySeenProfileIds.includes(doc.id)
-                    if (!docIsIncluded && doc.id !== uid) { // FIXME: test this biconditional
-                        newProfileIds.push(doc.id)
-                    }
+    retrieveNewProfileUIDs = authUserUID => {
+        return new Promise((resolve, reject) => {
+            this.fs.collection("users").doc(authUserUID).get().then(doc => {
+                const alreadyLikedProfiles = doc.data().likes.split(",") // split the UIDs by the , delimiter
+                this.fs.collection("users").get().then(snapshot => {
+                    const newProfileIds = []
+                    snapshot.forEach(doc => {
+                        // if the profile ID is NOT included in the list of users already liked by the user...
+                        // AND the profile ID is NOT that of the authenticated user ("authUserUID")
+                        const docIsIncluded = alreadyLikedProfiles.includes(doc.id)
+                        if (!docIsIncluded && doc.id !== authUserUID) { // TODO: write unit test for this biconditional
+                            newProfileIds.push(doc.id)
+                        }
+                    })
+                    resolve(newProfileIds)
+                }).catch(err => {
+                    console.log(err)
+                    reject(err)
                 })
-                resolve(newProfileIds)
             })
         })
     }
 
     addLike = (targetUserUID, fromUserUID) => {
-        // TODO: add LikedBy as both UID and Username (separate fields) so its human readable
-        // FIXME: .update() called with invalid data. unsupported field value: undefined
-        let updatedLikes;
-
         // in this .collection("users") block, we tell the users db that user fromUserUID has liked targetUserUID
         // by adding targetUserUID to fromUserUID's list of likes, which is a field in the doc with fromUserUID's UID.
         this.fs.collection("users").doc(fromUserUID).get().then(doc => {
-            updatedLikes = doc.data().likes
+            const updatedLikes = doc.data().likes
             if (updatedLikes) {
                 this.fs.collection("users").doc(fromUserUID).update({
-                    likes: updatedLikes
+                    likes: updatedLikes + "," + targetUserUID
                 })
             } else { // for the base case where doc.data().likes does not exist yet
-
+                this.fs.collection("users").doc(fromUserUID).update({
+                    likes: targetUserUID
+                })
             }
-        }).catch(err => console.log(err)) // FIXME: TypeError: Cannot read property 'likes' of undefined
-
-        // TODO: make the "likes" collection docs have field: "document_owner_username" and "likedByUsernames"
+        }).catch(err => console.log(err))
 
         // in this block, we tell the "likes" database that user targetUserUID has been liked by fromUserUID
         // by adding fromUserUID to targetUserUID's "likedBy" list.
@@ -189,7 +189,7 @@ class Firebase {
                 this.getUsernameByUID(fromUserUID).then(fromUserUsername => {
                     this.fs.collection("likes").doc(targetUserUID).update({
                         likedByUsernames: currentUsers + "," + fromUserUsername,
-                        likedBy: currentLikes + "," + fromUserUID
+                        likedByUID: currentLikes + "," + fromUserUID
                     }).catch(err => console.log(err))
                 })
             } else {
@@ -200,9 +200,9 @@ class Firebase {
                     // retrieve the username of the liking user so it can be added to the likedByUsernames field
                     this.getUsernameByUID(fromUserUID).then(fromUserUsername => {
                         this.fs.collection("likes").doc(targetUserUID).set({
-                            username: targetUserUsername,
+                            doc_owner_username: targetUserUsername,
                             likedByUsernames: fromUserUsername,
-                            likedBy: fromUserUID
+                            likedByUID: fromUserUID
                         }).catch(err => console.log(err))
                     })
                 })

@@ -14,29 +14,15 @@ class Carousel extends Component {
             users: [],
             potentialProfiles: [],
             potentialProfilesIndex: 0,
-            queue: [],
-            queueIndex: 0,
+            // queue: [],
+            // queueIndex: 0,
             previousProfile: null,
-            // currentUserProfileURLs: [],
-            viewedProfiles: [],
+            // viewedProfiles: [],
             currentProfile: null,
             nextProfile: null,
             nextNextProfile: null,
             prevProfile: null,
             prevPrevProfile: null
-            // username: null,
-            // city: null,
-            // state: null,
-            // country: null,
-            // age: null,
-            // kids: null,
-            // familyValues: null,
-            // interests: null,
-            // hasPets: null,
-            // diet: null,
-            // drinks: null,
-            // smokes: null,
-            // doesDrugs: null
         }
     }
 
@@ -46,7 +32,6 @@ class Carousel extends Component {
                 if (authUser) {
                     this.setState({ authUser: authUser });
                     this.populateCarousel(authUser.uid)
-                    // this.selectProfileByQueueIndex(0)
                 } else {
                     this.setState({ authUser: null })
                     // redirect to login screen since no user is signed in
@@ -65,28 +50,15 @@ class Carousel extends Component {
     // step 5: display the profile info of the user in the "selected" position. allow the viewer to "Like" or "Pass" on the profile.
     // step 6: if the user clicks "Next", "Like" or "Pass", go to the next profile.
     // step 7: if the user clicks "Like", add the viewer to the user's list of Likes in the database.
-    // step 8: if the user clicks "pass", simply go to the next profile. the user who was Passed on remains available in the queue.`
+    // step 8: if the user clicks "pass", simply go to the next profile. the user who was Passed on remains available in the queue.
     // step 9: if the user clicks "next", simply go to the next profile.
 
-    // I'm trying to build a page that shows a carousel of profile pics from users signed up for 
-    // my dating site.I want the carousel to show a "previous", a "current" and "next" user, with an option to Like or Pass on
-    // the current user.The hard part is, I want the page to have the profile pics and info of the current, nextUser, previousUser,
-    // and nextNextUser all loaded up and ready to go in memory, so the browsing user never has to watch the site load something
-    // in the carousel.Therefore I have to have a list of profiles I could show to the browsing user, and store 5 profiles
-    // worth of info in the page's state... 
-
     // TODO: Exclude profiles already Liked by the authUser from listOfPotentialProfiles
-
-    // TODO: make "Like" button add User to BrowsingUser's list of Liked ppl. Also add BrowsingUser to User's Likes List.
-    // TODO: Make "Like" button move the queue forward. Position 0 -> -1, Position 1 -> 0, Position 2 -> 1, etc
-
-    // TODO: make "next" button and "pass" button move the queue forward.
-    // TODO: make "Previous" button move the queue backward.
 
     populateCarousel = authUserUID => {
         // Step 1: get a list of potential profiles. do this only one time.
         // retrieve new user profiles to add to the queue for display in the carousel
-        const listOfPotentialProfilesUIDs = this.props.firebase.retrieveNewProfileUIDs(authUserUID, this.state.viewedProfiles)
+        const listOfPotentialProfilesUIDs = this.props.firebase.retrieveNewProfileUIDs(authUserUID)
 
         // add the potential profiles to state
         listOfPotentialProfilesUIDs.then(profileUIDs => {
@@ -100,18 +72,16 @@ class Carousel extends Component {
         })
     }
 
-    // NOTE: The idea is to keep all of the profiles in the Queue LOADED so the BrowsingUser's experience is pleasant
+    // NOTE: The idea is to keep all of the profiles in the Queue LOADED so the BrowsingUser's experience is pleasant.
+    // Do all the loading off-screen.
 
     loadProfile = (uid, position) => {
-        // FIXME: Code gets to "0" but not further
         // loads profile "uid" into position "position" in the carousel. Positions are -2, -1, 0, 1, 2.
         const userInfo = this.props.firebase.getUserInfo(uid)
         // retrieve the user's associated profile pics
         const profileURLs = this.props.firebase.getProfileURLsByUID(uid)
 
-        // console.log("LOADING:", position, userInfo, profileURLs, uid)
         Promise.all([userInfo, profileURLs]).then(infoAndURLs => {
-            // console.log("V:", position, infoAndURLs, uid)
             const infoURLsAndUID = infoAndURLs;
             infoURLsAndUID.push(uid)
             // load userInfo and profile pic URLs into corresponding state
@@ -171,9 +141,6 @@ class Carousel extends Component {
         // && if it is the 2nd click: prevProfile -> prevPrevProfile
         // can the queue simply move left and right along the potentialProfiles list?
 
-        // TODO: handle the edge case where the user has moveQueueForwarded to the end of potentialProfiles 
-        // ("out of users! to help the site grow, tell a few of your friends about the site and what it offers.")
-
         // start by using the value of potentialProfilesIndex + 1 as currentIndex because we are moving the queue one position right
         const currentIndex = this.state.potentialProfilesIndex + 1
 
@@ -221,10 +188,8 @@ class Carousel extends Component {
             const prevPrevProfile = this.state.prevPrevProfile
             // nextNextProfile is not on the list because it gets "bumped off"
 
-            // TODO: what if we r on currentIndex=1? currentIndex-2 is then out of range
             let newProfile;
             // if at index 0 to 2, there is no profile to load; prevProfile and prevPrevProfile are still in memory
-
             if (currentIndex <= 2) {
                 console.log("beginning of queue!")
                 newProfile = null
