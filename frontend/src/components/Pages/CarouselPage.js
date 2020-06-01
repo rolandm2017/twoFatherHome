@@ -25,7 +25,7 @@ class Carousel extends Component {
             prevPrevProfile: null,
             alertMsg: null,
             userMsg: null,
-            canSendMsg: false
+            sendMsgBtnIsDisabled: true
         }
     }
 
@@ -254,27 +254,36 @@ class Carousel extends Component {
     handleChange = event => {
         this.setState({ userMsg: event.target.value })
 
+        // console.log(event.target.value.length)
         if (event.target.value.length > 0) {
-            this.setState({ canSendMsg: true })
+            // console.log("WTF")
+            this.setState({ sendMsgBtnIsDisabled: false })
         } else {
-            this.setState({ canSendMsg: false })
+            this.setState({ sendMsgBtnIsDisabled: true })
         }
     }
+
+    // FIXME: send msg btn is disabled despite 3 char msg in input
+    // TESTME: sendMessage func, sendMessageToUser func
+
+    // TODO: prevent authUser from msging users twice by (1) sending a msg (2) going fwd then back & (3) sending a new msg
 
     sendMessage = () => {
         // send a message to the targetUser from authUser via firebase
         console.log("TEST:", this.state.userMsg)
         if (this.state.userMsg.length > 0) {
             // send the message
-            const senderUID
-            // this.props.firebase.sendMessageOrSomething
+            const senderUID = this.state.authUser.uid
+            const recipientUID = this.state.currentProfile[2]
+            this.props.firebase.sendMessageToUser(senderUID, recipientUID, this.state.userMsg)
+
             // clear out the "send message" input field & disable the "Send Message" button (can't msg same user twice)
             // in preparation for loading the next viewed profile
             this.setState({ userMsg: "" })
-            this.setState({ canSendMsg: false })
+            this.setState({ sendMsgBtnIsDisabled: false })
         } else { // this block should never occur because the SendMsg btn will be disabled unless there is text in the msgBay
             console.log("How did you get to this code?")
-            this.setState({ canSendMsg: false })
+            this.setState({ sendMsgBtnIsDisabled: true })
         }
         // somehow inform user that his msg has to be at least of length 1 or more to send a msg (i guess enable SendMsg btn)
     }
@@ -318,7 +327,7 @@ class Carousel extends Component {
                             username={this.state.currentProfile[0].username}
                             sendMessage={this.sendMessage}
                             handleChange={this.handleChange}
-                            canSendMsg={this.state.canSendMsg} /> :
+                            sendMsgBtnIsDisabled={this.state.sendMsgBtnIsDisabled} /> :
                         null
                     }
                 </div>
@@ -416,7 +425,7 @@ class MessageBay extends Component {
                 <h4>Send A Message To {this.props.username}</h4>
                 <textarea id="sendMessageInput" name="messageBay"
                     placeholder={"Start something special..."} onChange={(event) => this.props.handleChange(event)}></textarea>
-                <button type="submit" onClick={this.props.sendMessage} disabled={this.props.canSendMsg}>Send Message</button>
+                <button type="submit" onClick={this.props.sendMessage} disabled={this.props.sendMsgBtnIsDisabled}>Send Message</button>
             </div >
         )
     }
