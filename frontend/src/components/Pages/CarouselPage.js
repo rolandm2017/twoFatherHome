@@ -22,7 +22,8 @@ class Carousel extends Component {
             nextProfile: null,
             nextNextProfile: null,
             prevProfile: null,
-            prevPrevProfile: null
+            prevPrevProfile: null,
+            alertMsg: null
         }
     }
 
@@ -53,8 +54,6 @@ class Carousel extends Component {
     // step 8: if the user clicks "pass", simply go to the next profile. the user who was Passed on remains available in the queue.
     // step 9: if the user clicks "next", simply go to the next profile.
 
-    // TODO: Exclude profiles already Liked by the authUser from listOfPotentialProfiles
-
     populateCarousel = authUserUID => {
         // Step 1: get a list of potential profiles. do this only one time.
         // retrieve new user profiles to add to the queue for display in the carousel
@@ -62,13 +61,23 @@ class Carousel extends Component {
 
         // add the potential profiles to state
         listOfPotentialProfilesUIDs.then(profileUIDs => {
-            // console.log("HEY", resultingProfiles)
+            console.log("HEY", profileUIDs)
             this.setState({ potentialProfiles: profileUIDs })
 
-            // step 2: select 3 from the list of potential profiles... one for Current, one for Next, one for NextNext
-            this.loadProfile(profileUIDs[0], 0)
-            this.loadProfile(profileUIDs[1], 1)
-            this.loadProfile(profileUIDs[2], 2)
+            if (profileUIDs.length >= 3) {
+                // step 2: select 3 from the list of potential profiles... one for Current, one for Next, one for NextNext
+                this.loadProfile(profileUIDs[0], 0)
+                this.loadProfile(profileUIDs[1], 1)
+                this.loadProfile(profileUIDs[2], 2)
+            } else if (profileUIDs.length === 2) {
+                this.loadProfile(profileUIDs[0], 0)
+                this.loadProfile(profileUIDs[1], 1)
+            } else if (profileUIDs.length === 1) {
+                this.loadProfile(profileUIDs[0], 0)
+            } else {
+                const alertMsg = "No profiles could be loaded. It could be an error or else you're the first user on the site!"
+                this.setState({ userMessage: alertMsg })
+            }
         })
     }
 
@@ -77,6 +86,7 @@ class Carousel extends Component {
 
     loadProfile = (uid, position) => {
         // loads profile "uid" into position "position" in the carousel. Positions are -2, -1, 0, 1, 2.
+        console.log("test UID:", uid)
         const userInfo = this.props.firebase.getUserInfo(uid)
         // retrieve the user's associated profile pics
         const profileURLs = this.props.firebase.getProfileURLsByUID(uid)
@@ -116,13 +126,28 @@ class Carousel extends Component {
         if (position === 0) {
             this.setState({ currentUserProfileURLs: URLs })
         } else {
-
+            // TODO: figure out what loadPhotos is supposed to do. finish it. currently only position=0 works
         }
     }
 
+    // TODO: When the authUser likes a user, remove that user from the potentialProfiles list.
     likeUser = () => {
+        // remove the liked account from the potentialProfiles list
+        const uidToRemove = this.state.currentProfile[2]
+        console.log("current:", this.state.currentProfile)
+        console.log("original:", this.state.potentialProfiles)
+        const updatedProfiles = this.state.potentialProfiles.filter(profileUID => profileUID !== uidToRemove)
+        console.log("UPDATED:", updatedProfiles)
+        this.setState({ potentialProfiles: updatedProfiles })
+
+        // move queue forward without moving prevUser and prevPrevUser back 1...
+        this.moveQueueForward(true)
+
+        // add the like info to firestore
         this.props.firebase.addLike(this.state.currentProfile[2], this.state.authUser.uid)
-        this.moveQueueForward()
+
+        // move the queue forward
+        this.moveQueueForward(false)
     }
 
     getNewProfile = (profileIndex, position) => {
@@ -131,7 +156,8 @@ class Carousel extends Component {
         this.loadProfile(profileToLoad, position)
     }
 
-    moveQueueForward = () => {
+    moveQueueForward = (doneByLike) => {
+        console.log("doneByLike:", doneByLike)
         // moves queue position 0 -> -1, 1 -> 0, 2 -> 1 etc
         // the first time the user clicks this on the pg, the following things should happen:
         // nextProfile -> currentProfile
@@ -164,15 +190,21 @@ class Carousel extends Component {
             newProfile = this.getNewProfile(currentIndex + 2, 2) // returns the profile info to load into state
         }
 
-        // move viewfinder one to the right
-        // this.setState({ nextNextProfile: newProfile }) // state update handled by getNewProfile (follow logic to end of loadProfile)
-        this.setState({ nextProfile: nextNextProfile })
-        this.setState({ currentProfile: nextProfile })
-        this.setState({ prevProfile: currentProfile })
-        this.setState({ prevPrevProfile: prevProfile })
+        if (doneByLike) { // special case where func is activated by the authUser Liking a profile.
+            // in this case, prevProfile & prevPrevProfile do not change, and neither does the currentIndex.
+            this.setState({ nextProfile: nextNextProfile })
+            this.setState({ currentProfile: nextProfile })
+        } else {
+            // move viewfinder one to the right
+            // this.setState({ nextNextProfile: newProfile }) // state update handled by getNewProfile (follow logic to end of loadProfile)
+            this.setState({ nextProfile: nextNextProfile })
+            this.setState({ currentProfile: nextProfile })
+            this.setState({ prevProfile: currentProfile })
+            this.setState({ prevPrevProfile: prevProfile })
 
-        // update the potentialProfilesIndex for next time
-        this.setState({ potentialProfilesIndex: currentIndex })
+            // update the potentialProfilesIndex for next time
+            this.setState({ potentialProfilesIndex: currentIndex })
+        }
     }
 
     moveQueueBackward = () => {
@@ -223,6 +255,8 @@ class Carousel extends Component {
             <div>
                 <h1>Browse Users</h1>
 
+                {this.state.alertMsg ? <h4>{this.state.alertMsg}</h4> : null}
+
                 <h3>Previous User</h3>
                 {this.state.prevProfile !== null ?
                     <div>
@@ -233,22 +267,35 @@ class Carousel extends Component {
                 }
 
                 <div>
-                    {this.state.nextProfile === null ? "No more users in the system! To help the site grow, tell some friends about the site!" :
+                    {this.state.currentProfile === null ?
+                        <div>
+                            <h3>Current User</h3>
+                            <p>No more users in the system! To help the site grow, tell some friends about the site!</p>
+                        </div> :
                         this.state.currentProfile ? <Profile values={this.state} /> : "Loading..."}
-                    {}
-                </div>
-                <div>
-                    <button onClick={this.moveQueueForward}>Pass</button>
-                    <button onClick={this.likeUser}>Like</button>
                 </div>
 
-                {this.state.prevProfile === null ? <div>
-                    <button onClick={this.moveQueueForward}>Next</button>
-                </div> :
+                {/* // TODO: clean up some of these ternary statements... they are hard to read */}
+
+                {this.state.currentProfile ?
                     <div>
-                        <button onClick={this.moveQueueBackward}>Previous</button>
-                        <button onClick={this.moveQueueForward}>Next</button>
-                    </div>
+                        <button onClick={() => this.moveQueueForward(false)}>Pass</button>
+                        <button onClick={this.likeUser}>Like</button>
+                    </div> : null
+                }
+
+                {this.state.prevProfile === null ?
+                    <div>
+                        <button onClick={() => this.moveQueueForward(false)}>Next</button>
+                    </div> :
+                    this.state.nextProfile === null ?
+                        <div>
+                            <button onClick={this.moveQueueBackward}>Previous</button>
+                        </div> :
+                        <div>
+                            <button onClick={this.moveQueueBackward}>Previous</button>
+                            <button onClick={() => this.moveQueueForward(false)}>Next</button>
+                        </div>
                 }
 
                 <h3>Next User</h3>
