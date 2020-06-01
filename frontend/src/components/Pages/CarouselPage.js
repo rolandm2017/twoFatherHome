@@ -23,7 +23,9 @@ class Carousel extends Component {
             nextNextProfile: null,
             prevProfile: null,
             prevPrevProfile: null,
-            alertMsg: null
+            alertMsg: null,
+            userMsg: null,
+            canSendMsg: false
         }
     }
 
@@ -61,7 +63,7 @@ class Carousel extends Component {
 
         // add the potential profiles to state
         listOfPotentialProfilesUIDs.then(profileUIDs => {
-            console.log("HEY", profileUIDs)
+            // console.log("HEY", profileUIDs)
             this.setState({ potentialProfiles: profileUIDs })
 
             if (profileUIDs.length >= 3) {
@@ -86,7 +88,7 @@ class Carousel extends Component {
 
     loadProfile = (uid, position) => {
         // loads profile "uid" into position "position" in the carousel. Positions are -2, -1, 0, 1, 2.
-        console.log("test UID:", uid)
+        // console.log("test UID:", uid)
         const userInfo = this.props.firebase.getUserInfo(uid)
         // retrieve the user's associated profile pics
         const profileURLs = this.props.firebase.getProfileURLsByUID(uid)
@@ -98,39 +100,38 @@ class Carousel extends Component {
             if (position === -2) {
                 console.log("Position -2")
                 this.setState({ prevPrevProfile: infoURLsAndUID })
-                this.loadPhotos(infoAndURLs[1], position)
+                // this.loadPhotos(infoAndURLs[1], position)
             } else if (position === -1) {
                 console.log("Position -1")
                 this.setState({ prevProfile: infoURLsAndUID })
-                this.loadPhotos(infoAndURLs[1], position)
+                // this.loadPhotos(infoAndURLs[1], position)
             } else if (position === 0) {
                 console.log("Position 0")
                 this.setState({ currentProfile: infoURLsAndUID })
-                this.loadPhotos(infoAndURLs[1], position)
+                // this.loadPhotos(infoAndURLs[1], position)
             } else if (position === 1) {
                 console.log("Position 1")
                 this.setState({ nextProfile: infoURLsAndUID })
-                this.loadPhotos(infoAndURLs[1], position)
+                // this.loadPhotos(infoAndURLs[1], position)
             } else if (position === 2) {
                 console.log("Position 2")
                 this.setState({ nextNextProfile: infoURLsAndUID })
-                this.loadPhotos(infoAndURLs[1], position)
+                // this.loadPhotos(infoAndURLs[1], position)
             } else {
                 throw new Error("You shouldn't be able to get here you know.")
             }
         })
     }
 
-    loadPhotos = (URLs, position) => {
-        // if position = 0, load 3. else, load 1
-        if (position === 0) {
-            this.setState({ currentUserProfileURLs: URLs })
-        } else {
-            // TODO: figure out what loadPhotos is supposed to do. finish it. currently only position=0 works
-        }
-    }
+    // loadPhotos = (URLs, position) => {
+    //     // if position = 0, load 3. else, load 1
+    //     if (position === 0) {
+    //         this.setState({ currentUserProfileURLs: URLs })
+    //     } else {
+    //         // TODO: figure out what loadPhotos is supposed to do. finish it. currently only position=0 works
+    //     }
+    // }
 
-    // TODO: When the authUser likes a user, remove that user from the potentialProfiles list.
     likeUser = () => {
         // remove the liked account from the potentialProfiles list
         const uidToRemove = this.state.currentProfile[2]
@@ -141,13 +142,10 @@ class Carousel extends Component {
         this.setState({ potentialProfiles: updatedProfiles })
 
         // move queue forward without moving prevUser and prevPrevUser back 1...
-        this.moveQueueForward(true)
+        this.moveQueueForward("like") // "like" as the arg triggers diff behavior.
 
         // add the like info to firestore
         this.props.firebase.addLike(this.state.currentProfile[2], this.state.authUser.uid)
-
-        // move the queue forward
-        this.moveQueueForward(false)
     }
 
     getNewProfile = (profileIndex, position) => {
@@ -156,8 +154,7 @@ class Carousel extends Component {
         this.loadProfile(profileToLoad, position)
     }
 
-    moveQueueForward = (doneByLike) => {
-        console.log("doneByLike:", doneByLike)
+    moveQueueForward = (doneByLike = false) => {
         // moves queue position 0 -> -1, 1 -> 0, 2 -> 1 etc
         // the first time the user clicks this on the pg, the following things should happen:
         // nextProfile -> currentProfile
@@ -177,6 +174,9 @@ class Carousel extends Component {
         const prevProfile = this.state.prevProfile
         // prevPrevProfile is not on the list because it gets "bumped off"
 
+        // clear out userMsg in state to avoid buggy messages being sent when user has partially typed a message
+        this.setState({ userMsg: "" })
+
         let newProfile;
         // console.log("CHECKVAL:", currentIndex)
         if (currentIndex >= this.state.potentialProfiles.length - 2) { // what to do for case where there IS no next profile to load.
@@ -190,7 +190,7 @@ class Carousel extends Component {
             newProfile = this.getNewProfile(currentIndex + 2, 2) // returns the profile info to load into state
         }
 
-        if (doneByLike) { // special case where func is activated by the authUser Liking a profile.
+        if (doneByLike === "like") { // special case where func is activated by the authUser Liking a profile.
             // in this case, prevProfile & prevPrevProfile do not change, and neither does the currentIndex.
             this.setState({ nextProfile: nextNextProfile })
             this.setState({ currentProfile: nextProfile })
@@ -220,6 +220,9 @@ class Carousel extends Component {
             const prevPrevProfile = this.state.prevPrevProfile
             // nextNextProfile is not on the list because it gets "bumped off"
 
+            // clear out userMsg in state to avoid buggy messages being sent when user has partially typed a message
+            this.setState({ userMsg: "" })
+
             let newProfile;
             // if at index 0 to 2, there is no profile to load; prevProfile and prevPrevProfile are still in memory
             if (currentIndex <= 2) {
@@ -246,6 +249,36 @@ class Carousel extends Component {
         }
     }
 
+    // TODO: connect the input form to a firebase.sendMessage function
+
+    handleChange = event => {
+        this.setState({ userMsg: event.target.value })
+
+        if (event.target.value.length > 0) {
+            this.setState({ canSendMsg: true })
+        } else {
+            this.setState({ canSendMsg: false })
+        }
+    }
+
+    sendMessage = () => {
+        // send a message to the targetUser from authUser via firebase
+        console.log("TEST:", this.state.userMsg)
+        if (this.state.userMsg.length > 0) {
+            // send the message
+            const senderUID
+            // this.props.firebase.sendMessageOrSomething
+            // clear out the "send message" input field & disable the "Send Message" button (can't msg same user twice)
+            // in preparation for loading the next viewed profile
+            this.setState({ userMsg: "" })
+            this.setState({ canSendMsg: false })
+        } else { // this block should never occur because the SendMsg btn will be disabled unless there is text in the msgBay
+            console.log("How did you get to this code?")
+            this.setState({ canSendMsg: false })
+        }
+        // somehow inform user that his msg has to be at least of length 1 or more to send a msg (i guess enable SendMsg btn)
+    }
+
     testState = () => {
         console.log(this.state)
     }
@@ -253,7 +286,11 @@ class Carousel extends Component {
     render() {
         return (
             <div>
+
+
                 <h1>Browse Users</h1>
+
+                <h4>Message users you've liked from your Inbox!</h4>
 
                 {this.state.alertMsg ? <h4>{this.state.alertMsg}</h4> : null}
 
@@ -275,18 +312,28 @@ class Carousel extends Component {
                         this.state.currentProfile ? <Profile values={this.state} /> : "Loading..."}
                 </div>
 
+                <div>
+                    {this.state.currentProfile ?
+                        <MessageBay
+                            username={this.state.currentProfile[0].username}
+                            sendMessage={this.sendMessage}
+                            handleChange={this.handleChange}
+                            canSendMsg={this.state.canSendMsg} /> :
+                        null
+                    }
+                </div>
                 {/* // TODO: clean up some of these ternary statements... they are hard to read */}
 
                 {this.state.currentProfile ?
                     <div>
-                        <button onClick={() => this.moveQueueForward(false)}>Pass</button>
+                        <button onClick={this.moveQueueForward}>Pass</button>
                         <button onClick={this.likeUser}>Like</button>
                     </div> : null
                 }
 
                 {this.state.prevProfile === null ?
                     <div>
-                        <button onClick={() => this.moveQueueForward(false)}>Next</button>
+                        <button onClick={this.moveQueueForward}>Next</button>
                     </div> :
                     this.state.nextProfile === null ?
                         <div>
@@ -294,7 +341,7 @@ class Carousel extends Component {
                         </div> :
                         <div>
                             <button onClick={this.moveQueueBackward}>Previous</button>
-                            <button onClick={() => this.moveQueueForward(false)}>Next</button>
+                            <button onClick={this.moveQueueForward}>Next</button>
                         </div>
                 }
 
@@ -313,7 +360,6 @@ class Carousel extends Component {
     }
 }
 
-// FIXME: profile images should show up. 
 
 class Profile extends Component {
     render() {
@@ -359,6 +405,19 @@ class Profile extends Component {
 
                 <h3>Does drugs:</h3><p>{this.props.values.currentProfile[0].doesDrugs}</p>
             </div>
+        )
+    }
+}
+
+class MessageBay extends Component {
+    render() {
+        return (
+            <div>
+                <h4>Send A Message To {this.props.username}</h4>
+                <textarea id="sendMessageInput" name="messageBay"
+                    placeholder={"Start something special..."} onChange={(event) => this.props.handleChange(event)}></textarea>
+                <button type="submit" onClick={this.props.sendMessage} disabled={this.props.canSendMsg}>Send Message</button>
+            </div >
         )
     }
 }

@@ -212,6 +212,21 @@ class Firebase {
 
     // *** Firestore Messages API ***
 
+    // note: messages database has the following format...
+    // collection "chatrooms" contains docs with randomly generated IDs.
+    // each chatrooms doc is a chatroom.
+    // each chatrooms doc contains a createdAt field, a roomNum (unimportant?), and a user1 & user2 field (who can view the chat)
+    // the important part is that the doc ID is randomly generated, and contains a user1 & user2 field
+    // a chatrooms doc contains a subcollection "messages", which contains docs with randomly generated IDs.
+    // each messages doc is a message in a chatroom.
+    // each message doc contains fields time, approxMsgNum, recipient, sender, content.
+
+    // TODO: refactor Messages API to use user1 & user2 field instead of "users" field. Should be easy.
+
+    sendMessageToUser = (senderUsername, recipientUsername, content) => {
+        // magic
+    }
+
     // return all chatroom ids where user is present in the list of users... as a promise
     getUsersChatroomsWithPromise = user => {
         return new Promise(resolve => {

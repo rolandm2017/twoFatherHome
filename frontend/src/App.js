@@ -68,35 +68,40 @@ const App = () => (
 export default withAuthentication(App);
 
 // *** TODO: Carousel ***
-// TODO: add page where user can browse other users's profiles
-// TODO: let users browse and Like/pass on users just like OkCupid (display # of wanted kids beside photo!)
 
 // *** TODO: PROFILE STUFF ***
 // TODO: Convert "select age" to "select birthdate" and calculate user age based on birthdate (low priority)
-// TODO: Limit Usernames to 20 char, limit full names to 40 char, limit interests to 200 char
-// TODO: Let users put underscores in their usernames
-// FIXME: Cannot read property 'length' of undefined at createProfilePage line 132, "else if lastName.length < 2"
+// TESTME: Cannot read property 'length' of undefined at createProfilePage line 132, "else if lastName.length < 2"
 // ---------> caused by lack of a last name present in the CreateProfilePage form.
 
 // *** TODO: ADMIN PAGE ***
 // todo: add admin page **
 // todo: allow admin to see list of all signed up users
 // todo: allow admin to delete a user(?)
+// todo: figure out how to turn a user into an admin.
 
 // *** TODO: INBOX & MESSAGES ***
 // todo: create inbox page
+// TODO: show list of users Liked by AuthUser on inboxPg so authUser can send 1 msg to them
+// todo: show list of users who liked authUser
+// TODO: show list of Mutual Likes
+// todo: allow user to send 1 msg to any user... and unlimited msgs to a user who has Liked him
 // todo: create two dummy accounts and send some messages between them to test the inbox page's logic
-// TODO: Add notification for new messages somewhere in the UI so users can see it
+// TODO: Add notification for new messages somewhere in the UI so users can see it, irrespective of page.
 // TODO: add option to upload & send images in a chat
+
+// *** TODO: FORUMS ***
+// TODO: Add a forum for users to post about family related topics & whatever else they're interested in.
+// -------> use out-of-the-box code... so you don't have to write it all yourself.
 
 // *** TODO: Misc ***
 // TODO: Make Authentication-Only pages redirect to the login/signup page if browser is nonauthenticated
-// TODO: design the "user profile page"
 // TODO: Convert to Redux & Global state mgmt
 // TODO: For each .catch() error, send a msg to the Firestore database and store the error, the page it came from, and the user info
 // TODO: Build a sales page for Premium Account Upgrades (give: 10 photos max, see who liked you, and _______?)
-// TODO: Create unit tests
+// TODO: Create unit tests ***
 // TODO: somehow shrink pictures so they're smaller on the server... don't wanna load 10x3 MB photos in the carousel...
+// TODO: Figure out how to send a weekly email telling readers about the new users who have signed up to the site this week.
 
 // TODO: Probably at the same time as "convert to redux & global state mgmt", do something like:
 // "if authUser & profile info are present in state, use them. If they aren't loaded into state yet, do getAuthUserAndProfileInfo"

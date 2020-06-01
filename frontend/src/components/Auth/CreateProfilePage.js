@@ -123,17 +123,27 @@ class CreateProfilePage extends Component {
 
     validateFullName = () => { // "first name & last name both must be longer than 1 char and contains a whitespace" rule 
         const fullname = this.state.fullName;
+        if (fullname.length > 60) {
+            this.displayMessage("Name length must be 60 characters or less.")
+            return false
+        }
         if (/^[A-Za-z.-\s]+$/.test(fullname)) {
             const firstName = fullname.split(" ")[0]
             const lastName = fullname.split(" ")[1]
-            if (firstName.length < 2) {
-                this.displayMessage("Name length must be 2 or greater.")
-                return false
-            } else if (lastName.length < 2) {
-                this.displayMessage("Name length must be 2 or greater.")
-                return false
+            if (firstName && lastName) {
+                if (firstName.length < 2) {
+                    this.displayMessage("Name length must be 2 or greater.")
+                    return false
+                } else if (lastName.length < 2) {
+                    this.displayMessage("Name length must be 2 or greater.")
+                    return false
+                } else {
+                    return true;
+                }
             } else {
-                return true;
+                // TEST: what happens if you try to create a profile w/ fullName "Jared "? (the whitespace is important)
+                this.displayMessage("Must have both a first name and a last name.")
+                return false
             }
         } else {
             this.displayMessage("Only alphabetical characters, periods, hyphens and spaces are allowed in full names.")
@@ -143,19 +153,25 @@ class CreateProfilePage extends Component {
 
     validateUsername = () => {
         const username = this.state.username;
+
         // https://stackoverflow.com/questions/41597685/javascript-test-string-for-only-letters-and-numbers
         if (username) {
-            if (/^[A-Za-z0-9]+$/.test(username)) {
+            if (username.length > 25) {
+                this.displayMessage("Usernames must be 25 characters or less.")
+                return false
+            }
+
+            if (/^[A-Za-z0-9\w]+$/.test(username)) {
                 console.log(username, "is a fine name")
                 return true;
             } else {
                 console.log("something's wrong with the username")
-                this.displayMessage("Usernames can only use letters and numbers. Please edit your username.")
+                this.displayMessage("Usernames can only use letters, numbers and underscores. Please edit your username.")
                 return false;
             }
         } else {
             console.log("Username wasn't filled in")
-            this.displayMessage("Please fill in a username. Letters and numbers only.")
+            this.displayMessage("Please fill in a username. Letters, numbers and underscores only.")
             return false
         }
     }
@@ -237,6 +253,11 @@ class CreateProfilePage extends Component {
     validateInterests = () => {
         // should only see alphanumeric chars here, and commas
         if (this.state.interests) {
+            if (this.state.interests.length > 201) {
+                this.displayMessage("Interests has a maximum length of 200 characters.")
+                return false
+            }
+
             // this if statement checks: a) length of "interests" is greater than 5, and b) there is at least 2 interests
             if (this.state.interests.length > 5 && this.state.interests.indexOf(",") > -1) {
                 if (/^[A-Za-z0-9,\s]+$/.test(this.state.interests)) { // note: [,] adds comma to the regex
@@ -251,9 +272,11 @@ class CreateProfilePage extends Component {
                 this.displayMessage("")
                 return false // return false if the "interests" list is less than 5 chars long
             }
+        } else {
+            this.displayMessage("Please fill in at least two interests.")
+            console.log("Interests wasn't filled in")
+            return false
         }
-        this.displayMessage("Please fill in at least two interests.")
-        console.log("Interests wasn't filled in")
     }
 
     validateDiet = () => {
