@@ -158,28 +158,54 @@ class Firebase {
         })
     }
 
-    addLike = (targetUser, fromUser) => {
+    addLike = (targetUserUID, fromUserUID) => {
+        // TODO: add LikedBy as both UID and Username (separate fields) so its human readable
+        // FIXME: .update() called with invalid data. unsupported field value: undefined
         let updatedLikes;
 
-        this.fs.collection("users").doc(fromUser).get().then(doc => {
+        // in this .collection("users") block, we tell the users db that user fromUserUID has liked targetUserUID
+        // by adding targetUserUID to fromUserUID's list of likes, which is a field in the doc with fromUserUID's UID.
+        this.fs.collection("users").doc(fromUserUID).get().then(doc => {
             updatedLikes = doc.data().likes
-            this.fs.collection("users").doc(fromUser).update({
-                likes: updatedLikes
-            })
-        }).catch(err => console.log(err)) // FIXME: TypeError: Cannot read property 'lieks' of undefined
+            if (updatedLikes) {
+                this.fs.collection("users").doc(fromUserUID).update({
+                    likes: updatedLikes
+                })
+            } else { // for the base case where doc.data().likes does not exist yet
 
-        this.fs.collection("likes").doc(targetUser).get().then(doc => {
+            }
+        }).catch(err => console.log(err)) // FIXME: TypeError: Cannot read property 'likes' of undefined
+
+        // TODO: make the "likes" collection docs have field: "document_owner_username" and "likedByUsernames"
+
+        // in this block, we tell the "likes" database that user targetUserUID has been liked by fromUserUID
+        // by adding fromUserUID to targetUserUID's "likedBy" list.
+        this.fs.collection("likes").doc(targetUserUID).get().then(doc => {
             if (doc.exists) {
                 const currentLikes = doc.data().likedBy
-                this.fs.collection("likes").doc(targetUser).update({
-                    likedBy: currentLikes + "," + fromUser
-                }).catch(err => console.log(err))
+                const currentUsers = doc.data().likedByUsernames
+
+                // retrieve the username of the liking user so it can be added to the likedByUsernames field
+                this.getUsernameByUID(fromUserUID).then(fromUserUsername => {
+                    this.fs.collection("likes").doc(targetUserUID).update({
+                        likedByUsernames: currentUsers + "," + fromUserUsername,
+                        likedBy: currentLikes + "," + fromUserUID
+                    }).catch(err => console.log(err))
+                })
             } else {
-                // init condition where targetUser has no document in the "likes" collection 
+                // init condition where targetUserUID has no document in the "likes" collection
                 console.log("Document does not exist")
-                this.fs.collection("likes").doc(targetUser).set({
-                    likedBy: fromUser
-                }).catch(err => console.log(err))
+                // retrieve the username of the targetUser so it can be added to the username field
+                this.getUsernameByUID(targetUserUID).then(targetUserUsername => {
+                    // retrieve the username of the liking user so it can be added to the likedByUsernames field
+                    this.getUsernameByUID(fromUserUID).then(fromUserUsername => {
+                        this.fs.collection("likes").doc(targetUserUID).set({
+                            username: targetUserUsername,
+                            likedByUsernames: fromUserUsername,
+                            likedBy: fromUserUID
+                        }).catch(err => console.log(err))
+                    })
+                })
             }
         })
     }

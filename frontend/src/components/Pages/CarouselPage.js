@@ -157,9 +157,7 @@ class Carousel extends Component {
 
     getNewProfile = (profileIndex, position) => {
         // retrieves info from potentialProfiles by profileIndex
-        console.log(profileIndex, this.state.potentialProfiles)
         const profileToLoad = this.state.potentialProfiles[profileIndex]
-        console.log("UDNEFINED:", profileToLoad)
         this.loadProfile(profileToLoad, position)
     }
 
@@ -187,15 +185,15 @@ class Carousel extends Component {
         // prevPrevProfile is not on the list because it gets "bumped off"
 
         let newProfile;
-        console.log("CHECKVAL:", currentIndex)
+        // console.log("CHECKVAL:", currentIndex)
         if (currentIndex >= this.state.potentialProfiles.length - 2) { // what to do for case where there IS no next profile to load.
-            newProfile = null
             console.log("end of the queue!")
+            newProfile = null
             this.setState({ nextNextProfile: newProfile })
         } else {
             // currentIndex + 2 because after moving the index one to the right we still have to get the profile 2 further to the right
             // 2 for 2nd arg so getNewProfile can pass down 2 as the position to .loadProfile
-            console.log("WTF:", currentIndex + 2)
+            // console.log("WTF:", currentIndex + 2)
             newProfile = this.getNewProfile(currentIndex + 2, 2) // returns the profile info to load into state
         }
 
@@ -228,6 +226,7 @@ class Carousel extends Component {
             // if at index 0 to 2, there is no profile to load; prevProfile and prevPrevProfile are still in memory
 
             if (currentIndex <= 2) {
+                console.log("beginning of queue!")
                 newProfile = null
                 this.setState({ prevPrevProfile: newProfile })
             } else {
