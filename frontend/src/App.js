@@ -86,7 +86,7 @@ export default withAuthentication(App);
 // todo: create inbox page
 // TODO: Debug Messages API. Three fuctions untested
 // TODO: show list of users Liked by AuthUser on inboxPg so authUser can send 1 msg to them
-// todo: show list of users who liked authUser
+// todo: show list of yet-to-be-liked users who liked authUser, but greyed out UNLESS authUser is premium.
 // TODO: show list of Mutual Likes
 // todo: allow user to send 1 msg to any user... and unlimited msgs to a user who has Liked him
 // todo: create two dummy accounts and send some messages between them to test the inbox page's logic

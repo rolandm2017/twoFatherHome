@@ -14,16 +14,17 @@ class Carousel extends Component {
             users: [],
             potentialProfiles: [],
             potentialProfilesIndex: 0,
-            previousProfile: null,
+
+            // note: a profile is an object with keys profileInfo, imgURLs, profileUID, hasBeenMessagedByAuthUser
             currentProfile: null,
             nextProfile: null,
             nextNextProfile: null,
             prevProfile: null,
             prevPrevProfile: null,
+
             alertMsg: null,
             userMsg: null,
-            sendMsgBtnIsDisabled: true,
-            userHasBeenMessaged: false
+            sendMsgBtnIsDisabled: true
         }
     }
 
@@ -33,7 +34,6 @@ class Carousel extends Component {
                 if (authUser) {
                     this.setState({ authUser: authUser });
                     this.populateCarousel(authUser.uid)
-                    this.checkIfCurrentProfileHasBeenMessaged()
                 } else {
                     this.setState({ authUser: null })
                     // redirect to login screen since no user is signed in
@@ -92,45 +92,46 @@ class Carousel extends Component {
         // retrieve the user's associated profile pics
         const profileURLs = this.props.firebase.getProfileURLsByUID(uid)
         // check if user has been messaged by the authUser already
-        const hasBeenMessagedAlready = this.props.firebase.userHasBeenContacted(this.state.authUser.uid, uid) // (sender, recipient)
+        const hasBeenMessagedByAuthUser = this.props.firebase.userHasBeenContacted(this.state.authUser.uid, uid) // (sender, recipient)
 
-        Promise.all([userInfo, profileURLs, hasBeenMessagedAlready]).then(infoAndURLs => {
-            const infoURLsAndUID = [infoAndURLs[0], infoAndURLs[1]];
-            infoURLsAndUID.push(uid)
-            // move hasBeenMessagedAlready bool to the 3rd position in infoURLsAndUID to avoid having to rewrite code
-            infoURLsAndUID.push(infoAndURLs[2])
-            // load userInfo and profile pic URLs into corresponding state
+        Promise.all([userInfo, profileURLs, hasBeenMessagedByAuthUser]).then(infoAndURLsAndMsgBool => {
+            const infoURLsUIDandHasBeenMessagedBool = {
+                profileInfo: infoAndURLsAndMsgBool[0],
+                imgURLs: infoAndURLsAndMsgBool[1],
+                profileUID: uid,
+                hasBeenMessagedByAuthUser: infoAndURLsAndMsgBool[2]
+            };
+
+            // load userInfo, profile pic URLs, profileUID, hasBeenMsgd bool into corresponding state
             if (position === -2) {
-                console.log("Position -2")
-                this.setState({ prevPrevProfile: infoURLsAndUID })
-                // this.loadPhotos(infoAndURLs[1], position)
+                // console.log("Position -2")
+                this.setState({ prevPrevProfile: infoURLsUIDandHasBeenMessagedBool })
             } else if (position === -1) {
-                console.log("Position -1")
-                this.setState({ prevProfile: infoURLsAndUID })
-                // this.loadPhotos(infoAndURLs[1], position)
+                // console.log("Position -1")
+                this.setState({ prevProfile: infoURLsUIDandHasBeenMessagedBool })
             } else if (position === 0) {
-                console.log("Position 0")
-                this.setState({ currentProfile: infoURLsAndUID })
-                // this.loadPhotos(infoAndURLs[1], position)
+                // console.log("Position 0")
+                this.setState({ currentProfile: infoURLsUIDandHasBeenMessagedBool })
             } else if (position === 1) {
-                console.log("Position 1")
-                this.setState({ nextProfile: infoURLsAndUID })
-                // this.loadPhotos(infoAndURLs[1], position)
+                // console.log("Position 1")
+                this.setState({ nextProfile: infoURLsUIDandHasBeenMessagedBool })
             } else if (position === 2) {
-                console.log("Position 2")
-                this.setState({ nextNextProfile: infoURLsAndUID })
-                // this.loadPhotos(infoAndURLs[1], position)
+                // console.log("Position 2")
+                this.setState({ nextNextProfile: infoURLsUIDandHasBeenMessagedBool })
             } else {
                 throw new Error("You shouldn't be able to get here you know.")
             }
         })
     }
 
-    checkIfCurrentProfileHasBeenMessaged = ()
+    // TODO: prompt authUser to send a msg before removing the Liked account from the potentialProfiles list 
+    // IF authUser hasn't msg'd yet
+    // TODO: remove the Liked account from the PotentialProfiles list IF authUser declines opportunity to msg after liking.
+    // something like: "Do you want to introduce yourself? --> {option1: "Yes, give me a sec", option2: "No, I'll msg them later"}
 
     likeUser = () => {
         // remove the liked account from the potentialProfiles list
-        const uidToRemove = this.state.currentProfile[2]
+        const uidToRemove = this.state.currentProfile.profileUID
         console.log("current:", this.state.currentProfile)
         console.log("original:", this.state.potentialProfiles)
         const updatedProfiles = this.state.potentialProfiles.filter(profileUID => profileUID !== uidToRemove)
@@ -141,7 +142,7 @@ class Carousel extends Component {
         this.moveQueueForward("like") // "like" as the arg triggers diff behavior.
 
         // add the like info to firestore
-        this.props.firebase.addLike(this.state.currentProfile[2], this.state.authUser.uid)
+        this.props.firebase.addLike(this.state.currentProfile.profileUID, this.state.authUser.uid)
     }
 
     getNewProfile = (profileIndex, position) => {
@@ -172,6 +173,18 @@ class Carousel extends Component {
 
         // clear out userMsg in state to avoid buggy messages being sent when user has partially typed a message
         this.setState({ userMsg: "" })
+
+        // enable the sendMsg btn if the nextUser hasn't been msg'd yet
+        if (!nextProfile.hasBeenMessagedByAuthUser) {
+            this.setState({ sendMsgBtnIsDisabled: false })
+        } else {
+            this.setState({ sendMsgBtnIsDisabled: true })
+        }
+
+        // FIXME: TypeError: Cannot read property 'hasBeenMessagedByAuthUser' of null
+        // at line 173. so nextProfile was null, so this.state.nextProfile was null, which is WTF since nextUser shows as hannahk
+
+        // enable the sendMsg btn if the prevUser hasn't been msg'd yet
 
         let newProfile;
         // console.log("CHECKVAL:", currentIndex)
@@ -219,6 +232,13 @@ class Carousel extends Component {
             // clear out userMsg in state to avoid buggy messages being sent when user has partially typed a message
             this.setState({ userMsg: "" })
 
+            // enable the sendMsg btn if the prevUser hasn't been msg'd yet
+            if (!prevProfile.hasBeenMessagedByAuthUser) {
+                this.setState({ sendMsgBtnIsDisabled: false })
+            } else {
+                this.setState({ sendMsgBtnIsDisabled: true })
+            }
+
             let newProfile;
             // if at index 0 to 2, there is no profile to load; prevProfile and prevPrevProfile are still in memory
             if (currentIndex <= 2) {
@@ -245,29 +265,19 @@ class Carousel extends Component {
         }
     }
 
-    // TODO: connect the input form to a firebase.sendMessage function
-
     handleChange = event => {
+        // update the userMsg
         this.setState({ userMsg: event.target.value })
 
-        // console.log(event.target.value.length)
+        // if the message length is greater than 0, enable the button
         if (event.target.value.length > 0) {
-            // console.log("WTF")
             this.setState({ sendMsgBtnIsDisabled: false })
         } else {
             this.setState({ sendMsgBtnIsDisabled: true })
         }
     }
 
-    // FIXME: send msg btn is disabled despite 3 char msg in input
-    // TESTME: sendMessage func, sendMessageToUser func
-
-    // TODO: prevent authUser from msging users twice by (1) sending a msg (2) going fwd then back & (3) sending a new msg
-    // ------> disable the sendMsg btn if authUserUID is detected in currentUser's likedByUID list.
-    // set userHasBeenMessaged to True if currentUser has already been msg'd by authUser &&
-    // prevent sendMsgBtnIsDisabled from becoming false if userHasBeenMessaged is true
-
-    // TODO: disable the Send Message btn for this profile if a message has been sent to the user.
+    // TODO: save position in the queue during page refresh so authUser doesn't lose his spot
 
     sendMessage = () => {
         // send a message to the targetUser from authUser via firebase
@@ -275,16 +285,16 @@ class Carousel extends Component {
         if (this.state.userMsg.length > 0) {
             // send the message
             const senderUID = this.state.authUser.uid
-            const recipientUID = this.state.currentProfile[2]
+            const recipientUID = this.state.currentProfile.profileUID
             this.props.firebase.sendMessageToUser(senderUID, recipientUID, this.state.userMsg)
 
             // clear out the "send message" input field & disable the "Send Message" button (can't msg same user twice)
             // in preparation for loading the next viewed profile
             this.setState({ userMsg: "" })
-            this.setState({ sendMsgBtnIsDisabled: false })
+            this.setState({ sendMsgBtnIsDisabled: true })
         } else { // this block should never occur because the SendMsg btn will be disabled unless there is text in the msgBay
             console.log("How did you get to this code?")
-            this.setState({ sendMsgBtnIsDisabled: true })
+            this.setState({ sendMsgBtnIsDisabled: false })
         }
         // somehow inform user that his msg has to be at least of length 1 or more to send a msg (i guess enable SendMsg btn)
     }
@@ -307,8 +317,8 @@ class Carousel extends Component {
                 <h3>Previous User</h3>
                 {this.state.prevProfile !== null ?
                     <div>
-                        <h4>{this.state.prevProfile[0].username}</h4>
-                        <img src={this.state.prevProfile[1][0]} alt="Profile Pic" width="150" height="200" />
+                        <h4>{this.state.prevProfile.profileInfo.username}</h4>
+                        <img src={this.state.prevProfile.imgURLs[0]} alt="Profile Pic" width="150" height="200" />
                     </div> :
                     <p>No Previous User</p>
                 }
@@ -325,10 +335,11 @@ class Carousel extends Component {
                 <div>
                     {this.state.currentProfile ?
                         <MessageBay
-                            username={this.state.currentProfile[0].username}
+                            username={this.state.currentProfile.profileInfo.username}
                             sendMessage={this.sendMessage}
                             handleChange={this.handleChange}
-                            sendMsgBtnIsDisabled={this.state.sendMsgBtnIsDisabled && this.state.currentProfile[3]} /> :
+                            sendMsgBtnIsDisabled={this.state.sendMsgBtnIsDisabled ||
+                                this.state.currentProfile.hasBeenMessagedByAuthUser} /> :
                         null
                     }
                 </div>
@@ -358,8 +369,8 @@ class Carousel extends Component {
                 <h3>Next User</h3>
                 {this.state.nextProfile !== null ?
                     <div>
-                        <h4>{this.state.nextProfile[0].username}</h4>
-                        <img src={this.state.nextProfile[1][0]} alt="Profile Pic" width="150" height="200" />
+                        <h4>{this.state.nextProfile.profileInfo.username}</h4>
+                        <img src={this.state.nextProfile.imgURLs[0]} alt="Profile Pic" width="150" height="200" />
                     </div> :
                     <p>No Next User</p>
                 }
@@ -377,12 +388,12 @@ class Profile extends Component {
             <div>
                 <h3>Current User</h3>
 
-                <h3>Username:</h3><p>{this.props.values.currentProfile[0].username}</p>
+                <h3>Username:</h3><p>{this.props.values.currentProfile.profileInfo.username}</p>
 
                 <h3>Current User Profile Pics:</h3>
                 <div>
-                    {this.props.values.currentProfile[1].length > 0 ?
-                        this.props.values.currentProfile[1].map((url, index) => {
+                    {this.props.values.currentProfile.imgURLs.length > 0 ?
+                        this.props.values.currentProfile.imgURLs.map((url, index) => {
                             return <div key={index}>
                                 <img src={url} alt={`Profile Pic ${index}`} width="150" height="200" />
                             </div>
@@ -390,30 +401,30 @@ class Profile extends Component {
                 </div>
 
                 <h3>Location:</h3>
-                <p>{this.props.values.currentProfile[0].city},
-                    {this.props.values.currentProfile[0].state},
-                    {this.props.values.currentProfile[0].country}</p>
+                <p>{this.props.values.currentProfile.profileInfo.city},
+                    {this.props.values.currentProfile.profileInfo.state},
+                    {this.props.values.currentProfile.profileInfo.country}</p>
 
-                <h3>Age:</h3><p>{this.props.values.currentProfile[0].age}</p>
+                <h3>Age:</h3><p>{this.props.values.currentProfile.profileInfo.age}</p>
 
-                {this.props.values.currentProfile[0].kids === "1" ?
-                    <h3>Intends to have {this.props.values.currentProfile[0].kids} kid.</h3> :
-                    <h3>Intends to have {this.props.values.currentProfile[0].kids} kids.</h3>
+                {this.props.values.currentProfile.profileInfo.kids === "1" ?
+                    <h3>Intends to have {this.props.values.currentProfile.profileInfo.kids} kid.</h3> :
+                    <h3>Intends to have {this.props.values.currentProfile.profileInfo.kids} kids.</h3>
                 }
 
-                <h3>Family Values:</h3><p>{this.props.values.currentProfile[0].familyValues}</p>
+                <h3>Family Values:</h3><p>{this.props.values.currentProfile.profileInfo.familyValues}</p>
 
-                <h3>Interests:</h3><p>{this.props.values.currentProfile[0].interests}</p>
+                <h3>Interests:</h3><p>{this.props.values.currentProfile.profileInfo.interests}</p>
 
-                <h3>Has pets:</h3><p>{this.props.values.currentProfile[0].hasPets ? "yes" : "no"}</p>
+                <h3>Has pets:</h3><p>{this.props.values.currentProfile.profileInfo.hasPets ? "yes" : "no"}</p>
 
-                <h3>Diet:</h3><p>{this.props.values.currentProfile[0].diet}</p>
+                <h3>Diet:</h3><p>{this.props.values.currentProfile.profileInfo.diet}</p>
 
-                <h3>Drinks:</h3><p>{this.props.values.currentProfile[0].drinks}</p>
+                <h3>Drinks:</h3><p>{this.props.values.currentProfile.profileInfo.drinks}</p>
 
-                <h3>Smokes:</h3><p>{this.props.values.currentProfile[0].smokes}</p>
+                <h3>Smokes:</h3><p>{this.props.values.currentProfile.profileInfo.smokes}</p>
 
-                <h3>Does drugs:</h3><p>{this.props.values.currentProfile[0].doesDrugs}</p>
+                <h3>Does drugs:</h3><p>{this.props.values.currentProfile.profileInfo.doesDrugs}</p>
             </div>
         )
     }
@@ -424,10 +435,17 @@ class MessageBay extends Component {
         return (
             <div>
                 <h4>Send A Message To {this.props.username}</h4>
-                <textarea id="sendMessageInput" name="messageBay"
-                    placeholder={"Start something special..."} onChange={(event) => this.props.handleChange(event)}></textarea>
+                <textarea
+                    id="sendMessageInput"
+                    name="messageBay"
+                    placeholder={
+                        this.props.sendMsgBtnIsDisabled ?
+                            "You've already used your introduction." :
+                            "Start something special..."}
+                    onChange={(event) => this.props.handleChange(event)}></textarea>
                 <button type="submit" onClick={this.props.sendMessage} disabled={this.props.sendMsgBtnIsDisabled}>Send Message</button>
-            </div >
+                <p>{this.props.sendMsgBtnIsDisabled ? "Message sent!" : null}</p>
+            </div>
         )
     }
 }

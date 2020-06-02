@@ -241,10 +241,8 @@ class Firebase {
 
     // TODO: Look for opportunities to refactor using .where()
 
-    // TODO: refactor Messages API to use user1 & user2 field instead of "users" field. Should be easy.
-
     sendMessageToUser = (senderUID, recipientUID, content) => {
-        // figure out which chatroom has users "senderUID" and "recipientUID"
+        // ### figure out which chatroom has users "senderUID" and "recipientUID"
         let activeChatroomId = null;
         const sortedUIDs = [senderUID, recipientUID].sort()
         const UIDsAsString = sortedUIDs[0] + "," + sortedUIDs[1]
@@ -271,16 +269,17 @@ class Firebase {
                 // create a chatrooms doc, use the docId from the docRef object to select the newly created doc, and
                 // then create the first messages doc.
 
-                // create the chatrooms doc... get user1username, user2username, then set the doc
-                const user1username = this.getUsernameByUID(sortedUIDs[0])
-                const user2username = this.getUsernameByUID(sortedUIDs[1])
-                Promise.all([user1username, user2username]).then(usernames => {
+                // create the chatrooms doc... get user0username, user1username, then set the doc
+                const senderUsername = this.getUsernameByUID(senderUID)
+                const recipientUsername = this.getUsernameByUID(recipientUID)
+                Promise.all([senderUsername, recipientUsername]).then(usernames => {
                     const chatroomCreated = new Promise((resolve, reject) => {
                         this.fs.collection("chatrooms").doc(UIDsAsString).set({
+                            // check the correspondence: inputs are user1, user2, therefore usernames user[0] = user1, user[1] = user2
                             user1: usernames[0],
-                            user1uid: sortedUIDs[0],
+                            user1uid: senderUID,
                             user2: usernames[1],
-                            user2uid: sortedUIDs[1],
+                            user2uid: recipientUID,
                             users: usernames[0] + "," + usernames[1],
                             usersUIDs: sortedUIDs,
                             createdAt: this.timestamp
@@ -292,13 +291,14 @@ class Firebase {
                         })
                     })
                     chatroomCreated.then(finished => {
-
                         this.fs.collection("chatrooms").doc(UIDsAsString).collection("messages").add({
                             // create the first msg doc
                             approxMsgNum: 0,
                             content: content,
-                            recipientUID: recipientUID,
                             senderUID: senderUID,
+                            senderUsername: usernames[0],
+                            recipientUID: recipientUID,
+                            recipientUsername: usersnames[1],
                             time: this.timestamp
                         }).catch(err => console.log(err))
                     })
@@ -306,6 +306,10 @@ class Firebase {
             } else {
                 // note: approxMsgNum is necessary because it is used when retrieving the most recent 10 msgs in getChatroomMsgs
                 // need to retrieve approxMsgNum and activeChatroomId before proceeding
+
+                // get usernames for the creation of the msg doc
+                const senderUsername = this.getUsernameByUID(senderUID)
+                const recipientUsername = this.getUsernameByUID(recipientUID)
 
                 const approxMsgNum = new Promise((resolve, reject) => {
                     this.fs.collection("chatrooms").doc(activeChatroomId).collection("messages")
@@ -325,12 +329,14 @@ class Firebase {
                 })
 
                 // create the new message with the approxMsgNum incremented by 1
-                approxMsgNum.then(approxMsgNum => {
+                Promise.all([approxMsgNum, senderUsername, recipientUsername]).then(values => {
                     this.fs.collection("chatrooms").doc(activeChatroomId).collection("messages").add({
-                        approxMsgNum: approxMsgNum + 1,
+                        approxMsgNum: values[0] + 1,
                         content: content,
-                        recipientUID: recipientUID,
                         senderUID: senderUID,
+                        senderUsername: values[1],
+                        recipientUID: recipientUID,
+                        recipientUsername: values[2],
                         time: this.timestamp
                     })
                 })
@@ -338,13 +344,9 @@ class Firebase {
         })
     }
 
-    // TODO: revisit the messages API and see where you can update getUsersChatroomsWithPromise, getUsersChatrooms, getChatroomMessages
-    // use .where(). refactor database structure if necessary to use .where().
     // Beware The Refactor Rabbit Hole
-    // TODO: refactor Chatrooms and Messages collection to feature user1 & user2, both by uid & username
 
     // return all chatroom ids where user is present in the list of users... as a promise
-    // TODO: convert from .get() to .where()
     getUsersChatroomsWithPromise = userUID => { // functions by uid
         return new Promise(resolve => {
             // FIXME: somehow pass an option to retrieve only the most recent 10 chatrooms.
@@ -387,15 +389,14 @@ class Firebase {
     }
 
     // return all chatroom ids where user is present in the list of users
-    // TODO: convert from .get() to .where()
     getUsersChatrooms = user => { // functions by username
-        // FIXME: somehow pass an option to retrieve only the most recent 10 chatrooms.
+        // TODO: somehow pass an option to retrieve only the most recent 10 chatrooms.
         return new Promise(resolve => {
             const scanForFirstUser = new Promise((resolve, reject) => {
                 this.fs.collection("chatrooms").where("user1", "==", user).get().then(snapshot => {
                     const rooms = [];
                     snapshot.forEach(doc => {
-                        rooms.push([{ chatroomId: doc.id }, { user1: doc.data().user1 }, { user2: doc.data().user2 }])
+                        rooms.push({ chatroomId: doc.id, user1: doc.data().user1, user2: doc.data().user2 })
                     })
                     resolve(rooms)
                 }).catch(err => {
@@ -407,7 +408,7 @@ class Firebase {
                 this.fs.collection("chatrooms").where("user2", "==", user).get().then(snapshot => {
                     const rooms = [];
                     snapshot.forEach(doc => {
-                        rooms.push([{ chatroomId: doc.id }, { user1: doc.data().user1 }, { user2: doc.data().user2 }])
+                        rooms.push({ chatroomId: doc.id, user1: doc.data().user1, user2: doc.data().user2 })
                     })
                     resolve(rooms)
                 }).catch(err => {
@@ -420,7 +421,8 @@ class Firebase {
                 for (const scan in scans) { // there are 2 scans
                     const rooms = scans[scan]
                     for (const room in rooms) {
-                        usersChatroomsByUsername.push(rooms[room])
+                        const roomObject = rooms[room]
+                        usersChatroomsByUsername.push(roomObject)
                     }
                 }
 
@@ -431,22 +433,48 @@ class Firebase {
     }
 
     // does what it says.
-    // TODO: convert from .get() to .where()
-    getMostRecentChatroomMessages = (userOneUID, userTwoUID) => {
+    getMostRecentChatroomMessages = (UIDs) => {
         // retrieves most recent 10 messages between userOne and userTwo
-        const sortedUIDs = [userOneUID, userTwoUID].sort()
-        // TODO: figure out if .orderBy("approxMsgNum", "desc") returns e.g. 25, 24, 23, 22... or 1, 2, 3, 4 (want: 25, 24, 23, 22...)
-        const get10msgs = this.fs.collection("chatrooms").doc(sortedUIDs).collection("messages").orderBy("approxMsgNum", "desc").limit(10)
-        get10msgs.then(snapshot => {
-            const msgContent = [];
-            snapshot.forEach(doc => {
-                msgContent.push(doc.data())
+        return new Promise((resolve, reject) => {
+            const sortedUIDs = UIDs.split(",").sort().join(",") // UIDs should already be in order but do this line just in case
+            // TODO: figure out if .orderBy("approxMsgNum", "desc") returns e.g. 25, 24, 23, 22... or 1, 2, 3, 4 (want: 25, 24, 23, 22...)
+            const get10msgs = this.fs.collection("chatrooms").doc(sortedUIDs).collection("messages").orderBy("approxMsgNum", "desc").limit(10).get()
+            console.log("10:", get10msgs)
+            get10msgs.then(snapshot => {
+                const msgContent = [];
+                snapshot.forEach(doc => {
+                    msgContent.push(doc.data())
+                })
+                console.log("Content:", msgContent)
+                resolve(msgContent)
+            }).catch(err => {
+                console.log(err)
+                reject(err)
             })
-            return msgContent
         })
     }
 
     // *** Images API ***
+
+    userHasBeenContacted = (senderUID, recipientUID) => {
+        // checks if there is already a chatroom for the two users. returns true if there is.
+        const sortedUIDs = [senderUID, recipientUID].sort()
+        const sortedUIDsString = sortedUIDs[0] + "," + sortedUIDs[1]
+        return new Promise((resolve, reject) => {
+            this.fs.collection("chatrooms").doc(sortedUIDsString).get().then(doc => {
+                if (doc.exists) {
+                    console.log(sortedUIDsString + " exists")
+                    resolve(true)
+                } else {
+                    console.log(sortedUIDsString + " DNE")
+                    resolve(false)
+                }
+            }).catch(err => {
+                console.log(err)
+                reject(err)
+            })
+        })
+    }
 
     getProfileURLsByUID = uid => {
         const storageRef = this.storage.ref(uid)

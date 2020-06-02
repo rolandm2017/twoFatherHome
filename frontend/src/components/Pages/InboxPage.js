@@ -20,6 +20,9 @@ class InboxPage extends Component {
         };
     }
 
+    // TODO: make the inbox page show chatrooms again
+    // TODO: allow the authUser to view a chatroom on its own page with data loaded up
+
     componentDidMount() {
         // ### retrieve user's chatrooms from database and populate the render() method with them
         // connect to the database
@@ -28,14 +31,12 @@ class InboxPage extends Component {
         this.listener = this.props.firebase.auth.onAuthStateChanged(
             authUser => {
                 if (authUser) {
-                    console.log("4:", authUser.uid);
                     this.setState({ authUser: authUser });
                     // the first step towards filling the Inbox pg with chatroom info
                     this.getInboxByUID(authUser.uid)
                 } else {
                     this.setState({ authUser: null })
                     this.props.history.push(ROUTES.SIGN_IN)
-                    console.log("12:", authUser)
                 }
             }
         );
@@ -51,17 +52,18 @@ class InboxPage extends Component {
         this.props.firebase.getUsernameByUID(userUID).then(username => { // retrieve the username associated with the UID
             this.setState({ currentUsername: username }) // forward the username to state
             this.props.firebase.getUsersChatrooms(username).then(rooms => { //  retrieve chatrooms associated with the username
-                // this.setState({ rooms: results });
-                console.log("11:", rooms)
-                rooms.forEach(room => { // then, for each room get its messages by roomId (room[0])...
-                    this.props.firebase.getChatroomMessages(room[0]).then(messages => {
-                        messages.forEach(doc => { // ...and for each doc in the messages...
-                            jsxContent.push([room[1], doc]) // ...add the room participants ("room[1]") & the doc, incl .content...
-                            // console.log("25:", jsxContent) // check how the array is doing
+                // a room has the form [{chatroomId: chatroomId}, {user1: user1username}, {user2: user2username}]
+                // console.log("11:", rooms)
+                rooms.forEach(room => { // then, for each room get its messages by roomId (which is stored as .chatroomId)...
+                    // console.log("ROOM:", room)
+                    this.props.firebase.getMostRecentChatroomMessages(room.chatroomId).then(messages => {
+                        console.log("MSGS:", messages)
+                        messages.forEach(msgContent => { // ...and for each doc in the messages...
+                            console.log("DOC:", msgContent)
+                            jsxContent.push(msgContent) // ...add the msgContent, which is essentially a firestore doc... 
                         })
-                    }).then(x => { // ...and finally, store jsxContent in state...
-                        console.log("30:", this.state.jsxContent) // check what will be set as state.content
                         this.setState({ content: jsxContent })
+                        console.log("JSX:", jsxContent)
                     })
                 })
             })
