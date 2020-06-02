@@ -246,45 +246,81 @@ class Firebase {
     sendMessageToUser = (senderUID, recipientUID, content) => {
         // figure out which chatroom has users "senderUID" and "recipientUID"
         let activeChatroomId = null;
-        let approxMsgNum = -1; // -1 so it will be 0 once incremented lower down in the code
-        const option1 = senderUID + "," + recipientUID
-        const option2 = recipientUID + "," + senderUID
+        const sortedUIDs = [senderUID, recipientUID].sort()
+        const UIDsAsString = sortedUIDs[0] + "," + sortedUIDs[1]
         console.log("999:", senderUID, recipientUID, content)
 
-        // ONLY ONE of these two calls should a) return even one document and b) update the activeChatroomId
-        this.fs.collection("chatrooms").where("users", "==", option1).get().then(doc => {
-            if (doc.exists) {
-                console.log("ONE:", doc.id)
-                activeChatroomId = doc.id
-                approxMsgNum = doc.data().approxMsgNum
-            }
-        }).catch(err => console.log(err))
-        this.fs.collection("chatrooms").where("users", "==", option2).get().then(doc => {
-            if (doc.exists) {
-                console.log("TWO:", doc.id)
-                activeChatroomId = doc.id
-                approxMsgNum = doc.data().approxMsgNum
-            }
-        }).catch(err => console.log(err))
+        // should only return 1 doc, ever.
+        const scanForChatroom = new Promise((resolve, reject) => {
+            this.fs.collection("chatrooms").where("usersUIDs", "==", UIDsAsString).get().then(doc => {
+                if (doc.exists) {
+                    // sets activeChatroomId to the doc id of the chatroom assigned to the 2 users
+                    activeChatroomId = doc.id // if there is a returned doc, change value from "null" to "doc.id" 
+                }
+                resolve(activeChatroomId)
+            }).catch(err => console.log(err), reject(err))
+        })
 
-        approxMsgNum = approxMsgNum + 1 // increment approxMsgNum
+        // either create a new chatroom & first msg, or add a new msg if there is an activeChatroom
+        scanForChatroom.then(activeChatroomId => {
+            // if null, we cannot get an approxMsgNum from a previous msg, because the chatroom is new & there are no msgs
+            if (activeChatroomId === null) {
+                // create a chatrooms doc, use the docId from the docRef object to select the newly created doc, and
+                // then create the first messages doc.
 
-        // if NEITHER of those two calls found a doc, then we need to create a chatroom doc
-        if (activeChatroomId === null) { // "if its still null"
-            // create a chatrooms doc, use the docId from the docRef object to select the newly created doc, and
-            // then create the first messages doc.
-            this.fs.collection("chatrooms").add({
-                users: option1, // could've just as well used "option2"
-                createdAt: this.timestamp
-            }).then(docRef => {
-                this.fs.collection("chatrooms").doc(docRef.id).collection("messages").add({
-                    approxMsgNum: approxMsgNum,
-                    content: content,
-                    recipient: recipientUID,
-                    sender: senderUID,
-                    time: this.timestamp // FIXME: () or no ()?
+                // create the chatrooms doc
+                this.fs.collection("chatrooms").doc(UIDsAsString).set({
+                    user1: user1username,
+                    user1uid: sortedUIDs[0],
+                    user2: user2username,
+                    user2uid: sortedUIDs[1],
+                    users: user1username + "," + user2username,
+                    usersUIDs: sortedUIDs,
+                    createdAt: this.timestamp
+                }).then(docRef => {
+                    console.log("DOCREF:", docRef)
+                    // create the first msg doc
+                    this.fs.collection("chatrooms").doc(docRef.id).collection("messages").add({
+                        approxMsgNum: 0,
+                        content: content,
+                        recipientUID: recipientUID,
+                        senderUID: senderUID,
+                        time: this.timestamp
+                    }).catch(err => console.log(err))
+                }).catch(err => console.log(err))
+            } else {
+                const approxMsgNum = new Promise((resolve, reject) => {
+                    this.fs.collection("chatrooms").doc(activeChatroomId).collection("messages")
+                        .orderBy("approxMsgNum", "desc").limit(1).get().then(doc => {
+                            // doc should always exist
+                            if (doc.exists) {
+                                resolve(doc.data().approxMsgNum) // report the approxMsgNum to the constant
+                            } else {
+                                // TODO: report error to firestore error logging database.
+                                throw new Error("Unexpectedly, there is no doc to retrieve an approxMsgNum from")
+                            }
+                        }).catch(err => console.log(err), reject(err))
                 })
-            }).catch(err => console.log(err))
+
+                // create the new message with the approxMsgNum incremented by 1
+                approxMsgNum.then(approxMsgNum => {
+                    this.fs.collection("chatrooms").doc(activeChatroomId).collection("messages").add({
+                        approxMsgNum: approxMsgNum + 1,
+                        content: content,
+                        recipientUID: recipientUID,
+                        senderUID: senderUID,
+                        time: this.timestamp
+                    })
+                })
+            }
+        })
+
+        // note: approxMsgNum is necessary because it is used when retrieving the most recent 10 msgs in getChatroomMsgs
+        // need to retrieve approxMsgNum and activeChatroomId before proceeding
+
+        // "if its still null, then we need to make a chatroom doc for the 2 users"
+        if (activeChatroomId === null) {
+
         } else { // this else block happens if activeChatroomId was set successfully.
             console.log("ACTIVE:", activeChatroomId)
             // use the activeChatroomId to select the correct chatrooms doc, and add its messages doc
@@ -293,7 +329,7 @@ class Firebase {
                 content: content,
                 recipient: recipientUID,
                 sender: senderUID,
-                time: this.timestamp // FIXME: () or no ()?
+                time: this.timestamp
             }).catch(err => console.log(err))
         }
     }
@@ -301,20 +337,40 @@ class Firebase {
     // TODO: revisit the messages API and see where you can update getUsersChatroomsWithPromise, getUsersChatrooms, getChatroomMessages
     // use .where(). refactor database structure if necessary to use .where().
     // Beware The Refactor Rabbit Hole
+    // TODO: refactor Chatrooms and Messages collection to feature user1 & user2, both by uid & username
 
     // return all chatroom ids where user is present in the list of users... as a promise
     // TODO: convert from .get() to .where()
-    getUsersChatroomsWithPromise = userUID => {
+    getUsersChatroomsWithPromise = userUID => { // functions by uid
         return new Promise(resolve => {
-            this.fs.collection("chatrooms").get().then(snapshot => {
-                const rooms = [];
-                snapshot.forEach(doc => {
-                    const users = doc.data().users.split(",")
-                    if (users[0] === userUID || users[1] === userUID) {
-                        rooms.push([doc.id, doc.data().users])
+            // FIXME: somehow pass an option to retrieve only the most recent 10 chatrooms.
+            const scanFirstUserField = new Promise((resolve, reject) => {
+                this.fs.collection("chatrooms").where("user1uid", "==", userUID).get().then(snapshot => {
+                    const rooms = [];
+                    snapshot.forEach(doc => {
+                        rooms.push([{ chatroomId: doc.id }, { user1: doc.data().user1 }, { user2: doc.data().user2 }])
+                    })
+                    resolve(rooms)
+                }).catch(err => console.log(err), reject(err))
+            })
+            const scanSecondUserField = new Promise((resolve, reject) => {
+                this.fs.collection("chatrooms").where("user2uid", "==", userUID).get().then(snapshot => {
+                    const rooms = [];
+                    snapshot.forEach(doc => {
+                        rooms.push([{ chatroomId: doc.id }, { user1: doc.data().user1 }, { user2: doc.data().user2 }])
+                    })
+                    resolve(rooms)
+                }).catch(err => console.log(err), reject(err))
+            })
+            Promise.all([scanFirstUserField, scanSecondUserField]).then(scans => {
+                const usersChatroomsByUsername = []
+                for (const scan in scans) { // there are 2 scans
+                    const rooms = scans[scan]
+                    for (const room in rooms) {
+                        usersChatroomsByUsername.push(rooms[room])
                     }
-                })
-                resolve(rooms)
+                }
+                resolve(usersChatroomsByUsername)
             })
         }
         )
@@ -322,26 +378,53 @@ class Firebase {
 
     // return all chatroom ids where user is present in the list of users
     // TODO: convert from .get() to .where()
-    getUsersChatrooms = user => this.fs.collection("chatrooms").get().then(snapshot => {
-        const rooms = [];
-        snapshot.forEach(doc => {
-            const users = doc.data().users.split(",")
-            if (users[0] === user || users[1] === user) {
-                rooms.push([doc.id, doc.data().users])
-            }
+    getUsersChatrooms = user => { // functions by username
+        // FIXME: somehow pass an option to retrieve only the most recent 10 chatrooms.
+        const scanForFirstUser = new Promise((resolve, reject) => {
+            this.fs.collection("chatrooms").where("user1", "==", user).get().then(snapshot => {
+                const rooms = [];
+                snapshot.forEach(doc => {
+                    rooms.push([{ chatroomId: doc.id }, { user1: doc.data().user1 }, { user2: doc.data().user2 }])
+                })
+                resolve(rooms)
+            }).catch(err => console.log(err), reject(err))
         })
-        return rooms
-    })
+        const scanForSecondUser = new Promise((resolve, reject) => {
+            this.fs.collection("chatrooms").where("user2", "==", user).get().then(snapshot => {
+                const rooms = [];
+                snapshot.forEach(doc => {
+                    rooms.push([{ chatroomId: doc.id }, { user1: doc.data().user1 }, { user2: doc.data().user2 }])
+                })
+                resolve(rooms)
+            }).catch(err => console.log(err), reject(err))
+        })
+        Promise.all([scanForFirstUser, scanForSecondUser]).then(scans => {
+            const usersChatroomsByUsername = []
+            for (const scan in scans) { // there are 2 scans
+                const rooms = scans[scan]
+                for (const room in rooms) {
+                    usersChatroomsByUsername.push(rooms[room])
+                }
+            }
+            return usersChatroomsByUsername
+        })
+    }
 
     // does what it says.
     // TODO: convert from .get() to .where()
-    getChatroomMessages = roomId => this.fs.collection("chatrooms").doc(roomId).collection("messages").get().then(snapshot => {
-        const msgContent = [];
-        snapshot.forEach(doc => {
-            msgContent.push(doc.data())
+    getMostRecentChatroomMessages = (userOneUID, userTwoUID) => {
+        // retrieves most recent 10 messages between userOne and userTwo
+        const sortedUIDs = [userOneUID, userTwoUID].sort()
+        // TODO: figure out if .orderBy("approxMsgNum", "desc") returns e.g. 25, 24, 23, 22... or 1, 2, 3, 4 (want: 25, 24, 23, 22...)
+        const get10msgs = this.fs.collection("chatrooms").doc(sortedUIDs).collection("messages").orderBy("approxMsgNum", "desc").limit(10)
+        get10msgs.then(snapshot => {
+            const msgContent = [];
+            snapshot.forEach(doc => {
+                msgContent.push(doc.data())
+            })
+            return msgContent
         })
-        return msgContent
-    })
+    }
 
     // *** Images API ***
 

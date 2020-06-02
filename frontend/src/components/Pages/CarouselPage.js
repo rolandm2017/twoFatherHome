@@ -14,10 +14,7 @@ class Carousel extends Component {
             users: [],
             potentialProfiles: [],
             potentialProfilesIndex: 0,
-            // queue: [],
-            // queueIndex: 0,
             previousProfile: null,
-            // viewedProfiles: [],
             currentProfile: null,
             nextProfile: null,
             nextNextProfile: null,
@@ -25,7 +22,8 @@ class Carousel extends Component {
             prevPrevProfile: null,
             alertMsg: null,
             userMsg: null,
-            sendMsgBtnIsDisabled: true
+            sendMsgBtnIsDisabled: true,
+            userHasBeenMessaged: false
         }
     }
 
@@ -267,6 +265,9 @@ class Carousel extends Component {
     // TESTME: sendMessage func, sendMessageToUser func
 
     // TODO: prevent authUser from msging users twice by (1) sending a msg (2) going fwd then back & (3) sending a new msg
+    // ------> disable the sendMsg btn if authUserUID is detected in currentUser's likedByUID list.
+    // set userHasBeenMessaged to True if currentUser has already been msg'd by authUser &&
+    // prevent sendMsgBtnIsDisabled from becoming false if userHasBeenMessaged is true
 
     sendMessage = () => {
         // send a message to the targetUser from authUser via firebase
