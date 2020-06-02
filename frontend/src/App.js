@@ -80,8 +80,11 @@ export default withAuthentication(App);
 // todo: allow admin to delete a user(?)
 // todo: figure out how to turn a user into an admin.
 
+// TODO: Check if Likes database successfully adds second & third usernames&uids to likedBy fields.
+
 // *** TODO: INBOX & MESSAGES ***
 // todo: create inbox page
+// TODO: Debug Messages API. Three fuctions untested
 // TODO: show list of users Liked by AuthUser on inboxPg so authUser can send 1 msg to them
 // todo: show list of users who liked authUser
 // TODO: show list of Mutual Likes

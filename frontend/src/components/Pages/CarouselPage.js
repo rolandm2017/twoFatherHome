@@ -33,6 +33,7 @@ class Carousel extends Component {
                 if (authUser) {
                     this.setState({ authUser: authUser });
                     this.populateCarousel(authUser.uid)
+                    this.checkIfCurrentProfileHasBeenMessaged()
                 } else {
                     this.setState({ authUser: null })
                     // redirect to login screen since no user is signed in
@@ -90,10 +91,14 @@ class Carousel extends Component {
         const userInfo = this.props.firebase.getUserInfo(uid)
         // retrieve the user's associated profile pics
         const profileURLs = this.props.firebase.getProfileURLsByUID(uid)
+        // check if user has been messaged by the authUser already
+        const hasBeenMessagedAlready = this.props.firebase.userHasBeenContacted(this.state.authUser.uid, uid) // (sender, recipient)
 
-        Promise.all([userInfo, profileURLs]).then(infoAndURLs => {
-            const infoURLsAndUID = infoAndURLs;
+        Promise.all([userInfo, profileURLs, hasBeenMessagedAlready]).then(infoAndURLs => {
+            const infoURLsAndUID = [infoAndURLs[0], infoAndURLs[1]];
             infoURLsAndUID.push(uid)
+            // move hasBeenMessagedAlready bool to the 3rd position in infoURLsAndUID to avoid having to rewrite code
+            infoURLsAndUID.push(infoAndURLs[2])
             // load userInfo and profile pic URLs into corresponding state
             if (position === -2) {
                 console.log("Position -2")
@@ -121,14 +126,7 @@ class Carousel extends Component {
         })
     }
 
-    // loadPhotos = (URLs, position) => {
-    //     // if position = 0, load 3. else, load 1
-    //     if (position === 0) {
-    //         this.setState({ currentUserProfileURLs: URLs })
-    //     } else {
-    //         // TODO: figure out what loadPhotos is supposed to do. finish it. currently only position=0 works
-    //     }
-    // }
+    checkIfCurrentProfileHasBeenMessaged = ()
 
     likeUser = () => {
         // remove the liked account from the potentialProfiles list
@@ -269,6 +267,8 @@ class Carousel extends Component {
     // set userHasBeenMessaged to True if currentUser has already been msg'd by authUser &&
     // prevent sendMsgBtnIsDisabled from becoming false if userHasBeenMessaged is true
 
+    // TODO: disable the Send Message btn for this profile if a message has been sent to the user.
+
     sendMessage = () => {
         // send a message to the targetUser from authUser via firebase
         console.log("TEST:", this.state.userMsg)
@@ -328,7 +328,7 @@ class Carousel extends Component {
                             username={this.state.currentProfile[0].username}
                             sendMessage={this.sendMessage}
                             handleChange={this.handleChange}
-                            sendMsgBtnIsDisabled={this.state.sendMsgBtnIsDisabled} /> :
+                            sendMsgBtnIsDisabled={this.state.sendMsgBtnIsDisabled && this.state.currentProfile[3]} /> :
                         null
                     }
                 </div>

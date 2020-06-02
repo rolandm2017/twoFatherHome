@@ -30,16 +30,14 @@ class InboxPage extends Component {
                 if (authUser) {
                     console.log("4:", authUser.uid);
                     this.setState({ authUser: authUser });
-                    this.getInboxByUID(authUser.uid) // the first step towards filling the Inbox pg with chatroom info
+                    // the first step towards filling the Inbox pg with chatroom info
+                    this.getInboxByUID(authUser.uid)
                 } else {
                     this.setState({ authUser: null })
                     this.props.history.push(ROUTES.SIGN_IN)
                     console.log("12:", authUser)
                 }
-                // console.log("5:", this.props.firebase.getUserName()
-                // ? (this.setState({ authUser: authUser }), this.getInboxByUID(authUser.uid))
-            },
-            console.log("0:", this.state.authUser)
+            }
         );
     }
 
@@ -71,7 +69,7 @@ class InboxPage extends Component {
     }
 
     logState = () => {
-        console.log(this.state)
+        console.log(this.state, this.state.authUser.uid)
     }
 
     // TODO: Color the message gray on light blue if it hasn't been read, gray on black if it has
@@ -96,7 +94,6 @@ class InboxPage extends Component {
 
 function Rooms({ rooms, currentUser }) {
     if (!rooms) {
-        console.log("Returning null...", rooms)
         return null;
     } else {
         console.log("returning rooms...")
