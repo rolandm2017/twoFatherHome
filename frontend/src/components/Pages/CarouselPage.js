@@ -4,7 +4,6 @@ import { withFirebase } from '../Firebase';
 import { withRouter } from 'react-router-dom';
 
 import * as ROUTES from "../../constants/routes"
-
 class Carousel extends Component {
     constructor(props) {
         super(props);
@@ -24,9 +23,12 @@ class Carousel extends Component {
 
             alertMsg: null,
             userMsg: null,
-            sendMsgBtnIsDisabled: true
+            sendMsgBtnIsDisabled: false
         }
     }
+
+    // NOTE: condition for a user being excluded from potentialProfiles: user is liked. ...
+    // ...If authUser likes but does not msg, authUser can still msg from the Inbox
 
     componentDidMount() {
         this.listener = this.props.firebase.auth.onAuthStateChanged(
@@ -47,18 +49,25 @@ class Carousel extends Component {
         this.listener(); // prevents a memory leak or something
     }
 
-    // step 3: Pick 1 profile to be the "previous" position, another to be the "selected" position, a third to be "next"
-    // step 4: show one profile pic per user in the carousel. pick the first profile pic in their storage.
-    // step 5: display the profile info of the user in the "selected" position. allow the viewer to "Like" or "Pass" on the profile.
-    // step 6: if the user clicks "Next", "Like" or "Pass", go to the next profile.
-    // step 7: if the user clicks "Like", add the viewer to the user's list of Likes in the database.
-    // step 8: if the user clicks "pass", simply go to the next profile. the user who was Passed on remains available in the queue.
-    // step 9: if the user clicks "next", simply go to the next profile.
+    // FIXME: user ALLCAPS unexpectedly has already been sent a msg despite no msg being present in the db
+
+    // FIXME: I scrolled to the end of the potentialProfiles. When I went back to the beginning, a user was missing from the list
+    // despite not being liked or messaged. refreshing the page fixed the problem.
+
+    // FIXME: the msgBay should clear its displayed value when Next, Like, Pass, Previous etc are clicked.
+
+    // TODO: if authUser already msg'd currentUser, display msg like:
+    // "you already msg'd this user: do you want to like them & enable unlimited two way communication?"
+
+    // TODO: limit the length of messages in the introduction.
 
     populateCarousel = authUserUID => {
         // Step 1: get a list of potential profiles. do this only one time.
         // retrieve new user profiles to add to the queue for display in the carousel
-        const listOfPotentialProfilesUIDs = this.props.firebase.retrieveNewProfileUIDs(authUserUID)
+        const listOfPotentialProfilesUIDs = this.props.firebase.retrieveNewProfileUIDsForCarousel(authUserUID)
+
+        // TODO: when the authUser browses to near the end of the potentialProfiles array, add more profiles to the array.
+        // "go back and add more"
 
         // add the potential profiles to state
         listOfPotentialProfilesUIDs.then(profileUIDs => {
@@ -91,7 +100,8 @@ class Carousel extends Component {
         const userInfo = this.props.firebase.getUserInfo(uid)
         // retrieve the user's associated profile pics
         const profileURLs = this.props.firebase.getProfileURLsByUID(uid)
-        // check if user has been messaged by the authUser already
+        // check if user has been messaged by the authUser already. 
+        // bool value is based on whether the chatrooms collection has a doc with both their UIDs alphabetically as the ID value
         const hasBeenMessagedByAuthUser = this.props.firebase.userHasBeenContacted(this.state.authUser.uid, uid) // (sender, recipient)
 
         Promise.all([userInfo, profileURLs, hasBeenMessagedByAuthUser]).then(infoAndURLsAndMsgBool => {
@@ -129,13 +139,17 @@ class Carousel extends Component {
     // TODO: remove the Liked account from the PotentialProfiles list IF authUser declines opportunity to msg after liking.
     // something like: "Do you want to introduce yourself? --> {option1: "Yes, give me a sec", option2: "No, I'll msg them later"}
 
+
+
+    // TODO: collapse the booleans that decide if sendMsg btn is disabled down to 1... if possible... (low priority)
+
     likeUser = () => {
         // remove the liked account from the potentialProfiles list
         const uidToRemove = this.state.currentProfile.profileUID
-        console.log("current:", this.state.currentProfile)
-        console.log("original:", this.state.potentialProfiles)
+        console.log("current Profile:", this.state.currentProfile)
+        console.log("ORIGINAL potential profiles:", this.state.potentialProfiles)
         const updatedProfiles = this.state.potentialProfiles.filter(profileUID => profileUID !== uidToRemove)
-        console.log("UPDATED:", updatedProfiles)
+        console.log("UPDATED potential profiles:", updatedProfiles)
         this.setState({ potentialProfiles: updatedProfiles })
 
         // move queue forward without moving prevUser and prevPrevUser back 1...
@@ -338,6 +352,7 @@ class Carousel extends Component {
                             username={this.state.currentProfile.profileInfo.username}
                             sendMessage={this.sendMessage}
                             handleChange={this.handleChange}
+                            msgContent={this.state.userMsg}
                             sendMsgBtnIsDisabled={this.state.sendMsgBtnIsDisabled ||
                                 this.state.currentProfile.hasBeenMessagedByAuthUser} /> :
                         null
@@ -438,6 +453,7 @@ class MessageBay extends Component {
                 <textarea
                     id="sendMessageInput"
                     name="messageBay"
+                    value={this.props.msgContent}
                     placeholder={
                         this.props.sendMsgBtnIsDisabled ?
                             "You've already used your introduction." :

@@ -108,7 +108,7 @@ function Rooms({ rooms, currentUser }) {
                     // "if the user on the righthand side of room[0]'s comma is the current user, 
                     // then the sender is on the lefthand side of room[0]"
                     users[1] === currentUser ? sender = users[0] : sender = users[1]
-                    return (<ChatroomBox key={index} user={sender} message={room[1].content} />)
+                    return (<ChatroomBox key={index} user={room.senderUID} message={room[1].content} />)
                 })}
             </ul>
         )

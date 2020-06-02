@@ -73,6 +73,7 @@ export default withAuthentication(App);
 // TODO: Convert "select age" to "select birthdate" and calculate user age based on birthdate (low priority)
 // TESTME: Cannot read property 'length' of undefined at createProfilePage line 132, "else if lastName.length < 2"
 // ---------> caused by lack of a last name present in the CreateProfilePage form.
+// FIXME: user somehow created a profile without a "kids" field ... try to recreate bug. might just be old profiles.
 
 // *** TODO: ADMIN PAGE ***
 // todo: add admin page **
@@ -92,6 +93,15 @@ export default withAuthentication(App);
 // todo: create two dummy accounts and send some messages between them to test the inbox page's logic
 // TODO: Add notification for new messages somewhere in the UI so users can see it, irrespective of page.
 // TODO: add option to upload & send images in a chat
+// TODO: add a limit to the length of chat messages. make it fairly long
+
+// *** TODO: REPORTING ***
+// TODO: allow authUser to report user for having inappropriate photos
+// TODO: allow authuser to report user for sending an inappropriate or rude msg
+// TODO: allow authUser to report user for having an inappropriate username
+// TODO: create a page that says, "don't upload nude photos, don't send rude or inappropriate messages."
+// TODO (low priority): add a banlist based on email
+// TODO: create a database of banned strings for username...
 
 // *** TODO: FORUMS ***
 // TODO: Add a forum for users to post about family related topics & whatever else they're interested in.

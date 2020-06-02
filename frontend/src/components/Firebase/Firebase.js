@@ -139,10 +139,21 @@ class Firebase {
         })
     }
 
-    retrieveNewProfileUIDs = authUserUID => {
+    retrieveNewProfileUIDsForCarousel = authUserUID => {
+        // does what it says it does. retrieves new profiles for the authUser to view in the carousel.
+        // rejects potential users based on the following rules:
+        // 1) no users who already exist in the user's "likes" field
+        // 2) user is not the authUser (obviously)
+
+        // TODO: refactor database and function so that only 10 profiles are loaded.
+
         return new Promise((resolve, reject) => {
+            // get the user doc of the authUser
             this.fs.collection("users").doc(authUserUID).get().then(doc => {
+                // load the profiles liked by the authUser
                 const alreadyLikedProfiles = doc.data().likes.split(",") // split the UIDs by the , delimiter
+                // go into the users collection and get every(!) users doc.
+                // TODO: get only 10 docs instead of every doc. use a limiter
                 this.fs.collection("users").get().then(snapshot => {
                     const newProfileIds = []
                     snapshot.forEach(doc => {
@@ -298,7 +309,7 @@ class Firebase {
                             senderUID: senderUID,
                             senderUsername: usernames[0],
                             recipientUID: recipientUID,
-                            recipientUsername: usersnames[1],
+                            recipientUsername: usernames[1],
                             time: this.timestamp
                         }).catch(err => console.log(err))
                     })
@@ -454,8 +465,6 @@ class Firebase {
         })
     }
 
-    // *** Images API ***
-
     userHasBeenContacted = (senderUID, recipientUID) => {
         // checks if there is already a chatroom for the two users. returns true if there is.
         const sortedUIDs = [senderUID, recipientUID].sort()
@@ -475,6 +484,8 @@ class Firebase {
             })
         })
     }
+
+    // *** Images API ***
 
     getProfileURLsByUID = uid => {
         const storageRef = this.storage.ref(uid)
