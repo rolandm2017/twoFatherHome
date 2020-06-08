@@ -67,6 +67,9 @@ const App = () => (
 
 export default withAuthentication(App);
 
+// *** TODO: Big time stuff ***
+// TODO: Refactor to use classes for msgs, profiles, chatrooms...
+
 // *** TODO: Carousel ***
 
 // *** TODO: PROFILE STUFF ***
@@ -84,7 +87,6 @@ export default withAuthentication(App);
 // TODO: Check if Likes database successfully adds second & third usernames&uids to likedBy fields.
 
 // *** TODO: INBOX & MESSAGES ***
-// todo: create inbox page
 // TODO: Debug Messages API. Three fuctions untested
 // TODO: show list of users Liked by AuthUser on inboxPg so authUser can send 1 msg to them
 // todo: show list of yet-to-be-liked users who liked authUser, but greyed out UNLESS authUser is premium.

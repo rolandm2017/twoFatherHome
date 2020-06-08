@@ -7,6 +7,7 @@ import { withRouter } from "react-router-dom";
 import * as ROUTES from "../../constants/routes"
 
 import ChatroomBox from './ChatroomBox'
+import ProfileBox from "./ProfileBox"
 
 class InboxPage extends Component {
     constructor(props) {
@@ -53,13 +54,13 @@ class InboxPage extends Component {
             this.setState({ currentUsername: username }) // forward the username to state
             this.props.firebase.getUsersChatrooms(username).then(rooms => { //  retrieve chatrooms associated with the username
                 // a room has the form [{chatroomId: chatroomId}, {user1: user1username}, {user2: user2username}]
-                // console.log("11:", rooms)
+                // console.log("getUsersChatrooms output:", rooms)
                 rooms.forEach(room => { // then, for each room get its messages by roomId (which is stored as .chatroomId)...
                     // console.log("ROOM:", room)
                     this.props.firebase.getMostRecentChatroomMessages(room.chatroomId).then(messages => {
-                        console.log("MSGS:", messages)
+                        // console.log("messages:", messages)
                         messages.forEach(msgContent => { // ...and for each doc in the messages...
-                            console.log("DOC:", msgContent)
+                            // console.log("DOC:", msgContent)
                             jsxContent.push(msgContent) // ...add the msgContent, which is essentially a firestore doc... 
                         })
                         this.setState({ content: jsxContent })
@@ -83,10 +84,17 @@ class InboxPage extends Component {
 
                 <h1>Welcome to the Inbox.</h1>
                 <p>The Inbox is for authenticated users only.</p>
-                <p>Look here are your chatrooms:</p>
+                <h3>Look here are your chatrooms:</h3>
                 <ul>
                     <Rooms rooms={this.state.content} currentUser={this.state.currentUsername} />
                 </ul>
+
+                <h3>List of Users You've Liked</h3>
+                <ul>
+                    <Profiles />
+                </ul>
+
+                {/* // TODO: Allow User to click "load more" btn to load 10 more chatrooms (by most recent) & form a scroll */}
 
                 <button onClick={this.logState}>Click Me</button>
             </div >
@@ -95,24 +103,39 @@ class InboxPage extends Component {
 }
 
 function Rooms({ rooms, currentUser }) {
+    // console.log("ROOMS:", rooms, currentUser)
     if (!rooms) {
         return null;
     } else {
         console.log("returning rooms...")
-        // TODO: Make sure user= value is always the user who ISN'T authUser
         return (
             <ul>
                 {rooms.map((room, index) => { // room[0].split(",")[1] 
-                    const users = room[0].split(",")
-                    let sender;
-                    // "if the user on the righthand side of room[0]'s comma is the current user, 
-                    // then the sender is on the lefthand side of room[0]"
-                    users[1] === currentUser ? sender = users[0] : sender = users[1]
-                    return (<ChatroomBox key={index} user={room.senderUID} message={room[1].content} />)
+                    // let sender = room.senderUsername;
+                    // let recipient = room.recipientUsername;
+                    return (<ChatroomBox key={index} recipient={room.recipientUsername} message={room.content} />)
                 })}
             </ul>
         )
     }
 }
+
+function Profiles({ profiles }) {
+    // TODO: Show a list of profiles Liked by the AuthUser & display a "has already been messaged" check
+    // (maybe grey out the profile if it has been msg'd already? or put a green check if profile has been msg'd?)
+    if (!profiles) {
+        return null;
+    } else {
+        return (
+            <div>
+                {profiles.map((profile, index) => {
+                    return (<ProfileBox key={index} username={profile.username} hasBeenMessaged={profile.hasBeenMessaged} />)
+                })}
+            </div>
+        )
+    }
+}
+
+// todo: get list of profiles liked by authUser. get list of ppl messaged by authUser. grey out Liked profiles if they are Msg'd.
 
 export default withRouter(withFirebase(InboxPage));
