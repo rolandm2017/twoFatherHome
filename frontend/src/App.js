@@ -72,6 +72,13 @@ export default withAuthentication(App);
 
 // *** TODO: Carousel ***
 
+// *** TODO: API ***
+// TODO: Go back thru the Messaging and Profile API and search for opportunities to turn "get all docs" into
+// "get doc where..." to save on reads... 8.5k total reads for the last 30 days, let's try to get that down a bit
+// ********************************* HIGH PRIORITY ************************
+// am at 2.2k reads for the past 7 days... 314 a day... I know I didn't view 314 profiles, messages, chatrooms per day...
+
+
 // *** TODO: PROFILE STUFF ***
 // TODO: Convert "select age" to "select birthdate" and calculate user age based on birthdate (low priority)
 // TESTME: Cannot read property 'length' of undefined at createProfilePage line 132, "else if lastName.length < 2"
@@ -87,6 +94,7 @@ export default withAuthentication(App);
 // TODO: Check if Likes database successfully adds second & third usernames&uids to likedBy fields.
 
 // *** TODO: INBOX & MESSAGES ***
+// TODO: What is the solution to determining if a Liked User has been messaged by authUser?
 // TODO: Debug Messages API. Three fuctions untested
 // TODO: show list of users Liked by AuthUser on inboxPg so authUser can send 1 msg to them
 // todo: show list of yet-to-be-liked users who liked authUser, but greyed out UNLESS authUser is premium.

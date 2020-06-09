@@ -17,7 +17,9 @@ class InboxPage extends Component {
             authUser: null,
             rooms: null,
             content: null,
-            currentUsername: null
+            currentUsername: null,
+            likesList: null,
+            profileMemory: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14] // nums are placeholders
         };
     }
 
@@ -35,6 +37,7 @@ class InboxPage extends Component {
                     this.setState({ authUser: authUser });
                     // the first step towards filling the Inbox pg with chatroom info
                     this.getInboxByUID(authUser.uid)
+                    this.getLikesByUID(authUser.uid)
                 } else {
                     this.setState({ authUser: null })
                     this.props.history.push(ROUTES.SIGN_IN)
@@ -71,6 +74,49 @@ class InboxPage extends Component {
         })
     }
 
+    getLikesByUID = uid => {
+        // the "likes" is a list of UIDs for users liked by authUser
+        this.props.firebase.getAuthUsersLikesByUID(uid).then(likes => {
+            // stash the likes in state for later...
+            this.setState({ likesList: likes })
+            // for the first 5 likes in the list, build a space in the displayed Likes List
+
+            console.log("LIKES:", likes)
+            const splitUpLikes = likes.split(",") // splits the csv of likes into an array of likes
+            console.log("split likes: ", splitUpLikes)
+
+            // prepare to iterate over splitUpLikes between 0 and 5 times... a max of 5 times if there is enough liked profiles
+            let iterationLength;
+            let memoryPosition = 5;
+            if (splitUpLikes.length > 4) {
+                iterationLength = 5
+            } else {
+                iterationLength = splitUpLikes.length
+            }
+
+            // loads the Likes into the profile display
+            for (let i = 0; i < iterationLength; i++) {
+                // "splitUpLikes[0], 5", "splitUpLikes[1], 6"...
+                this.loadLike(splitUpLikes[i], memoryPosition + i)
+            }
+        })
+    }
+
+    loadLike = (profileUID, position) => {
+        // retrieve a profile pic, the username, and ______ ??? to display to authUser
+        // also show whether profile hasBeenMessaged already or not
+        const profileInfo = this.props.firebase.getUserInfo(profileUID) // returns doc.data()
+        const urls = this.props.firebase.getProfileURLsByUID(profileUID)
+        console.log("input UID:", profileUID)
+
+        const currentMemory = this.state.profileMemory;
+        Promise.all([profileInfo, urls]).then(values => {
+            currentMemory[position] = values; // inserts a Profile Object & an index of Profile URLs at index "position"
+            console.log("Memory:", currentMemory)
+            this.setState({ profileMemory: currentMemory })
+        })
+    }
+
     logState = () => {
         console.log(this.state, this.state.authUser.uid)
     }
@@ -85,14 +131,14 @@ class InboxPage extends Component {
                 <h1>Welcome to the Inbox.</h1>
                 <p>The Inbox is for authenticated users only.</p>
                 <h3>Look here are your chatrooms:</h3>
-                <ul>
+                <div>
                     <Rooms rooms={this.state.content} currentUser={this.state.currentUsername} />
-                </ul>
+                </div>
 
                 <h3>List of Users You've Liked</h3>
-                <ul>
-                    <Profiles />
-                </ul>
+                <div>
+                    <Profiles profiles={this.state.profileMemory.slice(5, 10)} />
+                </div>
 
                 {/* // TODO: Allow User to click "load more" btn to load 10 more chatrooms (by most recent) & form a scroll */}
 
@@ -123,13 +169,20 @@ function Rooms({ rooms, currentUser }) {
 function Profiles({ profiles }) {
     // TODO: Show a list of profiles Liked by the AuthUser & display a "has already been messaged" check
     // (maybe grey out the profile if it has been msg'd already? or put a green check if profile has been msg'd?)
+    console.log("PROFILES:", profiles)
     if (!profiles) {
         return null;
     } else {
         return (
-            <div>
+            <div style={{ backgroundColor: "red", border: "3px solid black" }}>
                 {profiles.map((profile, index) => {
-                    return (<ProfileBox key={index} username={profile.username} hasBeenMessaged={profile.hasBeenMessaged} />)
+                    // "if profile is integer, aka an unfilled memory position, do nothing"
+                    if (Number.isInteger(profile)) {
+                        return null
+                        // "if the profile has an array, aka a filled memory position, return a ProfileBox"
+                    } else {
+                        return (<ProfileBox key={index} username={profile[0].username} hasBeenMessaged={profile.hasBeenMessaged} />)
+                    }
                 })}
             </div>
         )

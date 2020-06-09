@@ -173,6 +173,8 @@ class Firebase {
         })
     }
 
+    // *** Firestore Likes API ***
+
     addLike = (targetUserUID, fromUserUID) => {
         // in this .collection("users") block, we tell the users db that user fromUserUID has liked targetUserUID
         // by adding targetUserUID to fromUserUID's list of likes, which is a field in the doc with fromUserUID's UID.
@@ -218,6 +220,21 @@ class Firebase {
                     })
                 })
             }
+        })
+    }
+
+    getAuthUsersLikesByUID = uid => {
+        return new Promise((resolve, reject) => {
+            this.fs.collection("users").doc(uid).get().then(doc => {
+                // doc.data().likes is a csv of UIDs pointing at the authUser's liked profiles.
+                // in theory it could grow to a string of 28*10,000 liked accounts... or more...
+                // TODO: what to do when the user's "likes" field contains a thousand liked accounts? do I read them all?
+                const likes = doc.data().likes;
+                resolve(likes)
+            }).catch(err => {
+                console.log(err);
+                reject(err)
+            })
         })
     }
 
