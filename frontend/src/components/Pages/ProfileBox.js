@@ -6,7 +6,8 @@ const ProfileBox = props => {
             <h3>User: </h3>
             <p>{props.username}</p>
             <h3>User has been messaged:</h3>
-            <p>{props.hasBeenMessaged}</p>
+            <p>{props.hasBeenMessaged ? "True!" : "False!"}</p>
+            <img src={props.displayImg} alt="User profile pic" width="300" height="200" />
         </div>
     )
 }

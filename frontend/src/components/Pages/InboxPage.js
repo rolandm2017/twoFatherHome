@@ -107,11 +107,15 @@ class InboxPage extends Component {
         // also show whether profile hasBeenMessaged already or not
         const profileInfo = this.props.firebase.getUserInfo(profileUID) // returns doc.data()
         const urls = this.props.firebase.getProfileURLsByUID(profileUID)
+
+        // handles users who have been contacted by authUser... what about case where authUser has been contacted by someone else?
+        const hasBeenMessaged = this.props.firebase.userHasBeenContacted(this.state.authUser.uid, profileUID)
         console.log("input UID:", profileUID)
 
         const currentMemory = this.state.profileMemory;
-        Promise.all([profileInfo, urls]).then(values => {
-            currentMemory[position] = values; // inserts a Profile Object & an index of Profile URLs at index "position"
+        Promise.all([profileInfo, urls, hasBeenMessaged]).then(values => {
+            const profileObject = { profileInfo: values[0], urls: values[1], hasBeenMessaged: values[2] }
+            currentMemory[position] = profileObject; // inserts a Profile Object & an index of Profile URLs at index "position"
             console.log("Memory:", currentMemory)
             this.setState({ profileMemory: currentMemory })
         })
@@ -156,7 +160,7 @@ function Rooms({ rooms, currentUser }) {
         console.log("returning rooms...")
         return (
             <ul>
-                {rooms.map((room, index) => { // room[0].split(",")[1] 
+                {rooms.map((room, index) => {
                     // let sender = room.senderUsername;
                     // let recipient = room.recipientUsername;
                     return (<ChatroomBox key={index} recipient={room.recipientUsername} message={room.content} />)
@@ -165,6 +169,10 @@ function Rooms({ rooms, currentUser }) {
         )
     }
 }
+
+// TODO: check if Profile displayed in ProfileBox hasBeenMessaged or not.
+// TODO: install a "load more Liked profiles yet-to-be-messaged" btn
+// TODO: Convert the inbox's "likes" list to a "this is ppl you've liked && have not yet messaged" list?
 
 function Profiles({ profiles }) {
     // TODO: Show a list of profiles Liked by the AuthUser & display a "has already been messaged" check
@@ -181,7 +189,11 @@ function Profiles({ profiles }) {
                         return null
                         // "if the profile has an array, aka a filled memory position, return a ProfileBox"
                     } else {
-                        return (<ProfileBox key={index} username={profile[0].username} hasBeenMessaged={profile.hasBeenMessaged} />)
+                        return (<ProfileBox
+                            key={index}
+                            username={profile.profileInfo.username}
+                            hasBeenMessaged={profile.hasBeenMessaged}
+                            displayImg={profile.urls[0]} />)
                     }
                 })}
             </div>
