@@ -114,10 +114,29 @@ class InboxPage extends Component {
 
         const currentMemory = this.state.profileMemory;
         Promise.all([profileInfo, urls, hasBeenMessaged]).then(values => {
-            const profileObject = { profileInfo: values[0], urls: values[1], hasBeenMessaged: values[2] }
+            const profileObject = { profileUID: profileUID, profileInfo: values[0], urls: values[1], hasBeenMessaged: values[2] }
             currentMemory[position] = profileObject; // inserts a Profile Object & an index of Profile URLs at index "position"
             console.log("Memory:", currentMemory)
             this.setState({ profileMemory: currentMemory })
+        })
+    }
+
+    openChatWithUser = (targetUID, checkForMessages) => {
+        console.log(1)
+        // checkForMessages is bool. informs the new ChatroomPage whether to initiate "checkForMsgs" process
+        console.log(targetUID)
+        const senderUsername = this.props.firebase.getUsernameByUID(this.state.authUser.uid)
+        const recipientUsername = this.props.firebase.getUsernameByUID(targetUID)
+
+        Promise.all([senderUsername, recipientUsername]).then(usernames => {
+            this.props.history.push({
+                pathname: ROUTES.CHATROOM,
+                state: {
+                    sender: { username: usernames[0], uid: this.state.authUser.uid },
+                    recipient: { username: usernames[1], uid: targetUID },
+                    checkForMessages: checkForMessages
+                }
+            })
         })
     }
 
@@ -136,12 +155,17 @@ class InboxPage extends Component {
                 <p>The Inbox is for authenticated users only.</p>
                 <h3>Look here are your chatrooms:</h3>
                 <div>
-                    <Rooms rooms={this.state.content} currentUser={this.state.currentUsername} />
+                    <Rooms
+                        rooms={this.state.content}
+                        currentUser={this.state.currentUsername}
+                        openChatFunc={this.openChatWithUser} />
                 </div>
 
                 <h3>List of Users You've Liked</h3>
                 <div>
-                    <Profiles profiles={this.state.profileMemory.slice(5, 10)} />
+                    <Profiles
+                        profiles={this.state.profileMemory.slice(5, 10)}
+                        openChatFunc={this.openChatWithUser} />
                 </div>
 
                 {/* // TODO: Allow User to click "load more" btn to load 10 more chatrooms (by most recent) & form a scroll */}
@@ -152,7 +176,7 @@ class InboxPage extends Component {
     }
 }
 
-function Rooms({ rooms, currentUser }) {
+function Rooms({ rooms, currentUser, openChatFunc }) {
     // console.log("ROOMS:", rooms, currentUser)
     if (!rooms) {
         return null;
@@ -161,23 +185,27 @@ function Rooms({ rooms, currentUser }) {
         return (
             <ul>
                 {rooms.map((room, index) => {
+                    console.log("ROOM!!!!!!:", room)
                     // let sender = room.senderUsername;
                     // let recipient = room.recipientUsername;
-                    return (<ChatroomBox key={index} recipient={room.recipientUsername} message={room.content} />)
+                    return (<ChatroomBox
+                        key={index}
+                        recipient={room.recipientUsername}
+                        message={room.content}
+                        openChat={() => openChatFunc(room.recipientUID, true)} />)
                 })}
             </ul>
         )
     }
 }
 
-// TODO: check if Profile displayed in ProfileBox hasBeenMessaged or not.
 // TODO: install a "load more Liked profiles yet-to-be-messaged" btn
 // TODO: Convert the inbox's "likes" list to a "this is ppl you've liked && have not yet messaged" list?
 
-function Profiles({ profiles }) {
-    // TODO: Show a list of profiles Liked by the AuthUser & display a "has already been messaged" check
-    // (maybe grey out the profile if it has been msg'd already? or put a green check if profile has been msg'd?)
-    console.log("PROFILES:", profiles)
+// TODO: Convert the boring bool "user has been messaged:" value to like... a green checkmark... or a red X for false
+
+function Profiles({ profiles, openChatFunc }) {
+    // console.log("PROFILES:", profiles)
     if (!profiles) {
         return null;
     } else {
@@ -193,7 +221,8 @@ function Profiles({ profiles }) {
                             key={index}
                             username={profile.profileInfo.username}
                             hasBeenMessaged={profile.hasBeenMessaged}
-                            displayImg={profile.urls[0]} />)
+                            displayImg={profile.urls[0]}
+                            openChat={() => openChatFunc(profile.profileUID, false)} />)
                     }
                 })}
             </div>

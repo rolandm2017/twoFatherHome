@@ -290,7 +290,7 @@ class Firebase {
             })
         })
 
-        // either create a new chatroom & first msg, or add a new msg if there is an activeChatroom
+        // ### either create a new chatroom & first msg, or add a new msg if there is an activeChatroom
         scanForChatroom.then(activeChatroomId => {
             // if null, we cannot get an approxMsgNum from a previous msg, because the chatroom is new & there are no msgs
             if (activeChatroomId === null) {
@@ -466,7 +466,8 @@ class Firebase {
         return new Promise((resolve, reject) => {
             const sortedUIDs = UIDs.split(",").sort().join(",") // UIDs should already be in order but do this line just in case
             // TODO: figure out if .orderBy("approxMsgNum", "desc") returns e.g. 25, 24, 23, 22... or 1, 2, 3, 4 (want: 25, 24, 23, 22...)
-            const get10msgs = this.fs.collection("chatrooms").doc(sortedUIDs).collection("messages").orderBy("approxMsgNum", "desc").limit(10).get()
+            const get10msgs = this.fs.collection("chatrooms").doc(sortedUIDs).collection("messages")
+                .orderBy("approxMsgNum", "desc").limit(10).get()
             // console.log("10:", get10msgs)
             get10msgs.then(snapshot => {
                 const msgContent = [];

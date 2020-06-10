@@ -24,6 +24,7 @@ import HomePage from './components/Pages/HomePage';
 import InboxPage from './components/Pages/InboxPage';
 import ProfilePage from './components/Pages/ProfilePage';
 import CarouselPage from "./components/Pages/CarouselPage"
+import ChatroomPage from "./components/Pages/ChatroomPage"
 
 // more authentication-related stuff is kept here
 import SignUpPage from './components/Auth/SignUp';
@@ -44,6 +45,10 @@ const App = () => (
                 <Route exact path={ROUTES.LANDING} component={LandingPage} />
                 <Route exact path={ROUTES.HOME} component={HomePage} />
                 <Route exact path={ROUTES.INBOX} component={InboxPage} />
+                <Route exact path={ROUTES.PROFILE} component={ProfilePage} />
+                <Route exact path={ROUTES.CAROUSEL} component={CarouselPage} />
+                <Route exact path={ROUTES.CHATROOM} component={ChatroomPage} />
+
 
                 <Route exact path={ROUTES.SIGN_UP} component={SignUpPage} />
                 <Route exact path={ROUTES.CREATE_PROFILE} component={CreateProfilePage} />
@@ -57,8 +62,6 @@ const App = () => (
                 <Route exact path={ROUTES.ACCOUNT} component={AccountPage} />
                 <Route exact path={ROUTES.ADMIN} component={AdminPage} />
 
-                <Route exact path={ROUTES.PROFILE} component={ProfilePage} />
-                <Route exact path={ROUTES.CAROUSEL} component={CarouselPage} />
 
             </Switch>
         </Router>
