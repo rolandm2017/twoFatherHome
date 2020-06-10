@@ -50,7 +50,7 @@ class InboxPage extends Component {
         this.listener(); // prevents a memory leak or something
     }
 
-    getInboxByUID(userUID) {
+    getInboxByUID = userUID => {
         // console.log("10:", userUID)
         const jsxContent = []; // make an array to store retrieved data
         this.props.firebase.getUsernameByUID(userUID).then(username => { // retrieve the username associated with the UID
@@ -185,7 +185,7 @@ function Rooms({ rooms, currentUser, openChatFunc }) {
         return (
             <ul>
                 {rooms.map((room, index) => {
-                    console.log("ROOM!!!!!!:", room)
+                    // console.log("ROOM!!!!!!:", room)
                     // let sender = room.senderUsername;
                     // let recipient = room.recipientUsername;
                     return (<ChatroomBox

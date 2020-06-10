@@ -270,6 +270,10 @@ class Firebase {
     // TODO: Look for opportunities to refactor using .where()
 
     sendMessageToUser = (senderUID, recipientUID, content) => {
+        // TODO: refactor so that activeChatroomId is retrieved ONCE when the first msg is sent, and then stored
+        // in state. "if activeChatroomId !== null," do not attempt to re-retrieve the Id. (goal:  minimize fs reads)
+        // ugh.
+
         // ### figure out which chatroom has users "senderUID" and "recipientUID"
         let activeChatroomId = null;
         const sortedUIDs = [senderUID, recipientUID].sort()
@@ -366,7 +370,11 @@ class Firebase {
                         recipientUID: recipientUID,
                         recipientUsername: values[2],
                         time: this.timestamp
+                    }).catch(err => {
+                        console.log(err)
                     })
+                }).catch(err => {
+                    console.log(err)
                 })
             }
         })

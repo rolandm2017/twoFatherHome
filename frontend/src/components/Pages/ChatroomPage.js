@@ -23,9 +23,14 @@ class InboxPage extends Component {
             authUser: null,
             recipient: null,
             sender: null,
-            content: []
+            content: [],
+            newMessage: "",
+            missingData: ""
         };
     }
+
+    // TODO: setup a listener that adds new data to the chat window if the user receives a new msg
+    // while they have the window open
 
     // NOTE: CTRL + F "this.props.history.push" on InboxPage.js to see contents of this.props.location.state
     componentDidMount() {
@@ -38,8 +43,8 @@ class InboxPage extends Component {
                     this.setState({ authUser: authUser })
                     console.log("username for authuser:", authUser.displayName)
                     // display message recipient to authUser
-                    this.setState({ recipient: this.props.location.state.recipient.username })
-                    this.setState({ sender: this.props.location.state.sender.username })
+                    this.setState({ recipient: this.props.location.state.recipient })
+                    this.setState({ sender: this.props.location.state.sender })
 
                     // check for messages if openChatWithUser was informed that 
                     // there ARE messages between authUser and the recipient already
@@ -71,6 +76,7 @@ class InboxPage extends Component {
                 if (authUser) {
                     // generate a list of candidates for a new message here
                     console.log("option1, 2, 3")
+                    this.setState({ missingData: "data is missing!" })
                 } else {
                     this.setState({ authUser: null })
                     this.props.history.push(ROUTES.SIGN_IN)
@@ -97,6 +103,42 @@ class InboxPage extends Component {
         this.setState({ content: memory })
     }
 
+    sendMessage = () => {
+        // turns senderUID, recipientUID, and msgContent into a new message in the system.
+        const msgContent = this.state.newMessage
+        this.props.firebase.sendMessageToUser(this.state.authUser.uid, this.state.recipient.uid, msgContent)
+
+        // show the message in the chat window
+        const messageObj = {
+            approxMsgNum: null,
+            content: msgContent,
+            recipientUID: this.state.recipient.uid,
+            recipientUsername: this.state.recipient.username,
+            senderUID: this.state.sender.uid,
+            senderUsername: this.state.sender.username,
+            time: new Date()
+        }
+        const currentState = this.state.content
+        currentState.push(messageObj)
+        this.setState({ content: currentState })
+        this.setState({ newMessage: "" })
+
+        // TODO: show progress bar for sending the msg. "Sending..." & "Delivered"
+        // TODO: show read tags
+    }
+
+    // addMsgToChatWindow = (msgObject, content) => {
+    //     // a general helper func that adds a message to the state.content.
+    //     // the msg being added to the state.content should go in at the LAST index
+    //     const currentState = this.state.content
+    //     currentState.push(msgObject)
+    //     this.setState({ content: currentState })
+    // }
+
+    handleChange = (event) => {
+        this.setState({ newMessage: event.target.value })
+    }
+
     checkState() {
         console.log(this.state)
     }
@@ -105,7 +147,8 @@ class InboxPage extends Component {
         return (
             <div>
                 <h1>Welcome to the Chatroom.</h1>
-                {this.state.recipient ? <h3>Chatroom with {this.state.recipient}</h3> : null}
+                <h1>{this.state.missingData}</h1>
+                {this.state.recipient ? <h3>Chatroom with {this.state.recipient.username}</h3> : null}
                 <p>Here are your messages:</p>
 
                 <div>
@@ -131,7 +174,12 @@ class InboxPage extends Component {
                         :
                         null
                     }
+                </div>
 
+                {/* // fixme: cannot type in the input field */}
+                <div>
+                    <input type="text" onChange={this.handleChange} value={this.state.newMessage}></input>
+                    <button onClick={this.sendMessage}>Send Message</button>
                 </div>
 
                 <button onClick={this.checkState.bind(this)}>Test Me</button>
