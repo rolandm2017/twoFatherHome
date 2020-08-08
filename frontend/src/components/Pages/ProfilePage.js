@@ -122,7 +122,7 @@ class ProfilePage extends Component {
                 <h3>Location:</h3><p>{this.state.city}, {this.state.state}, {this.state.country}</p>
 
                 <h3>Age:</h3><p>{this.state.age}</p>
-
+                {/* // FIXME: TypeError: Cannot read property 'currentProfile' of undefined */}
                 {this.props.values.currentProfile[0].kids === 1 ?
                     <h3>Intending to have {this.props.values.currentProfile[0].kids} kid.</h3> :
                     <h3>Intending to have {this.props.values.currentProfile[0].kids} kids.</h3>

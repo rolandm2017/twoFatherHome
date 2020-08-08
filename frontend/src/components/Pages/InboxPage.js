@@ -67,7 +67,7 @@ class InboxPage extends Component {
                             jsxContent.push(msgContent) // ...add the msgContent, which is essentially a firestore doc... 
                         })
                         this.setState({ content: jsxContent })
-                        console.log("JSX:", jsxContent)
+                        // console.log("JSX:", jsxContent)
                     })
                 })
             })
@@ -97,7 +97,7 @@ class InboxPage extends Component {
             // loads the Likes into the profile display
             for (let i = 0; i < iterationLength; i++) {
                 // "splitUpLikes[0], 5", "splitUpLikes[1], 6"...
-                this.loadLike(splitUpLikes[i], memoryPosition + i)
+                this.loadLike(splitUpLikes[i], memoryPosition + i) // FIXME: splitUpLikes[i] is "", should be a uid
             }
         })
     }
@@ -105,6 +105,7 @@ class InboxPage extends Component {
     loadLike = (profileUID, position) => {
         // retrieve a profile pic, the username, and ______ ??? to display to authUser
         // also show whether profile hasBeenMessaged already or not
+        console.log("test:", profileUID, typeof profileUID)  // FIXME: profileUID is an empty string, should be the profileUID.
         const profileInfo = this.props.firebase.getUserInfo(profileUID) // returns doc.data()
         const urls = this.props.firebase.getProfileURLsByUID(profileUID)
 
@@ -181,7 +182,7 @@ function Rooms({ rooms, currentUser, openChatFunc }) {
     if (!rooms) {
         return null;
     } else {
-        console.log("returning rooms...")
+        // console.log("returning rooms...")
         return (
             <ul>
                 {rooms.map((room, index) => {

@@ -645,4 +645,4 @@ class AgeSelector extends Component {
     }
 }
 
-export default withRouter(withFirebase(CreateProfilePage));
+export default withRouter(withFirebase(CreateProfilePage)); 
