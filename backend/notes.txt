@@ -1,0 +1,5 @@
+useful thread on routing:
+https://stackoverflow.com/questions/46293496/how-to-separate-routes-from-app-file-in-express-framework
+
+
+https://jasonwatmore.com/post/2020/05/13/node-mongo-api-with-email-sign-up-verification-authentication-forgot-password
