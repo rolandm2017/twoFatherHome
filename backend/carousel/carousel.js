@@ -18,5 +18,14 @@ router.get("/potentialMatches", authorize(), (req, res, next) => {
     // get list of users the currentUser has already liked.
     const alreadyLikedUsers = db.User.findOne({ fetchingMatchesForUser }).likes;  // might use this later
     // get candidates; that is, users who currentUser has not liked nor matched yet.
-    const candidates = await db.Match.find({ likedBy: { $nin: alreadyLikedUsers } }).sortBy({});
+    // TODO: integrate searching lastSeenHistory, sort & get the top 5 (as opposed to getting all, which is what we r doing now)
+    const candidates = await db.Match.find({ likedBy: { $nin: alreadyLikedUsers } });
+    const profiles = [];
+
+    for (let i = 0; i < candidates.length <= 5 ? candidates.length : 5; i++) {
+        const profile = await db.User.findOne({ username: candidates[i].username })
+        profiles.push(getPublicProfileInfo(profile))
+    }
+    // send the 5 profiles we picked
+    res.json(profiles)
 });

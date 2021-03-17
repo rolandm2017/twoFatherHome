@@ -12,9 +12,10 @@ mongoose.connect(config.connectionString, connectionOptions);
 console.log("mongoose is connected to db");
 
 module.exports = {
-    User: require("./models/user.model"),
-    Message: require("./models/message.model"),
-    Notification: require("./models/notification.model"),
+    User: require("../models/user.model"),
+    Message: require("../models/message.model"),
+    Notification: require("../models/notification.model"),
+    Match: require("../models/match.model"),
     isValidId,
 };
 
