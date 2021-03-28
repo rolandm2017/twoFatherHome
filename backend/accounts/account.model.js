@@ -3,14 +3,16 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const ObjectId = Schema.ObjectId;
 
+const LEAVE_THIS_FALSE = false;
+
 const userSchema = new Schema({
     username: { type: String, required: true },
-    email: { type: String, required: true, select: false }, // FALSE so it doesn't get sent to client accidentally
-    fullName: { type: String, required: true, select: false }, // FALSE so it doesn't get sent to client accidentally
-    dateOfBirth: { type: Date, required: true, select: false }, // FALSE so it doesn't get sent to client accidentally
+    email: { type: String, required: true, select: LEAVE_THIS_FALSE }, // FALSE so it doesn't get sent to client accidentally
+    fullName: { type: String, required: true, select: LEAVE_THIS_FALSE }, // FALSE so it doesn't get sent to client accidentally
+    dateOfBirth: { type: Date, required: true, select: LEAVE_THIS_FALSE }, // FALSE so it doesn't get sent to client accidentally
 
     // account security stuff -- should this be in a separate db from info displayed on their profile?
-    passwordHash: { type: String, required: true, select: false }, // FALSE so it doesn't get sent to client accidentally
+    passwordHash: { type: String, required: true, select: LEAVE_THIS_FALSE }, // FALSE so it doesn't get sent to client accidentally
     accountCreatedAt: { type: Date, required: true },
     verificationCode: { type: String, required: true },
     joinDate: { type: Date, required: true },

@@ -2,6 +2,9 @@ const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
+const http = require("http");
+const { Server } = require("socket.io");
+const io = new Server();
 
 // socket configuration
 const WebSockets = require("./utils/WebSockets.js");
@@ -46,7 +49,7 @@ app.use(api + "/signup/validate", require("./accountCreation/accountCreation"));
 // *** *** ***
 // CRUD for User account info, including their bio & user settings
 
-app.use(api + "/user", require("./userActions/userActions")); // TODO: implement profile editing & settings editing
+// app.use(api + "/user", require("./userActions/userActions")); // TODO: implement profile editing & settings editing
 
 // *** *** ***
 // *** *** ***
@@ -73,10 +76,10 @@ app.use(api + "/user", require("./userActions/userActions")); // TODO: implement
 // for chatroom code boilerplate, see: https://www.freecodecamp.org/news/create-a-professional-node-express/
 
 // /** Create HTTP server. */
-const server = http.createServer(app);
+const server = http.createServer(app); // makes a http server using express, I think.
 // /** Create socket connection */
-global.io = socketio.listen(server);
-global.io.on("connection", WebSockets.connection);
+global.io = io.listen(server); // Attaches the Server to an engine.io instance on new http.Server and assigns to global.io
+global.io.on("connection", WebSockets.connection); // feeds a websockets connection upon connection...?
 // /** Listen on provided port, on all network interfaces. */
 server.listen(port);
 // /** Event listener for HTTP server "listening" event. */
@@ -84,6 +87,6 @@ server.on("listening", () => {
     console.log(`Listening on port:: http://localhost:${port}/`);
 });
 
-app.listen(port, () => {
-    console.log(`Example app listening at http://127.0.0.1:${port}`);
-});
+// app.listen(port, () => {
+//     console.log(`Example app listening at http://127.0.0.1:${port}`);
+// });
