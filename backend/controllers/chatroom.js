@@ -4,7 +4,7 @@ const makeValidation = require("@withvoid/make-validation");
 const ChatRoomModel = require("../models/chatRoom.model.js").chatRoomModel;
 const CHAT_ROOM_TYPES = require("../models/chatRoom.model.js").CHAT_ROOM_TYPES;
 const ChatMessageModel = require("../models/chatMessage.model.js");
-const UserModel = require("../models/User.js");
+const UserModel = require("../accounts/account.model.js");
 
 // for chatroom code boilerplate, see: https://www.freecodecamp.org/news/create-a-professional-node-express/
 

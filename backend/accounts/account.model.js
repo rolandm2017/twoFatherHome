@@ -4,14 +4,17 @@ const Schema = mongoose.Schema;
 const ObjectId = Schema.ObjectId;
 
 const userSchema = new Schema({
-    fullName: { type: String, required: true },
-    email: { type: String, required: true },
-    dateOfBirth: { type: Date, required: true },
     username: { type: String, required: true },
-    passwordHash: { type: String, required: true },
+    email: { type: String, required: true, select: false }, // FALSE so it doesn't get sent to client accidentally
+    fullName: { type: String, required: true, select: false }, // FALSE so it doesn't get sent to client accidentally
+    dateOfBirth: { type: Date, required: true, select: false }, // FALSE so it doesn't get sent to client accidentally
+
+    // account security stuff -- should this be in a separate db from info displayed on their profile?
+    passwordHash: { type: String, required: true, select: false }, // FALSE so it doesn't get sent to client accidentally
     accountCreatedAt: { type: Date, required: true },
     verificationCode: { type: String, required: true },
-    accountVerifiedAt: { type: Date },
+    joinDate: { type: Date, required: true },
+    accountVerifiedAt: { type: Date, required: true },
     failedVerifications: { type: Number, required: true },
     activeAccount: { type: Boolean, required: true }, // "finished signup?"
     accountType: { type: String, required: true }, // user, moderator, admin,
@@ -23,20 +26,31 @@ const userSchema = new Schema({
     verifiedAt: { type: Date },
     lastUpdatedInfo: { type: Date },
     acceptsTermsAndConditions: { type: Boolean, required: true },
+
+    // account status
+    suspended: { type: Boolean, required: true },
+    accountType: { type: String, required: true }, // user, moderator, admin, verified
+
+    // personal info to display on the profile
+    bio: { type: String, required: true },
+    location: { type: String, required: false },
+    // birthday: { type: Date, required: true },
+    city: { type: String, required: true },
+    state: { type: String, required: true },
+    country: { type: String, required: true },
+    age: { type: Number, required: true },
+    familySize: { type: Number, required: true },
+    familyValues: { type: Array, required: true },
+    interests: { type: Array, required: true },
+    hasPets: { type: Boolean, required: true },
+    diet: { type: String, required: true },
+    drinks: { type: Boolean, required: true },
+    smokes: { type: Boolean, required: true },
+    drugs: { type: Boolean, required: true }, // TODO: say something like, "if you do drugs, this isn't the site for you."
+    hasPremium: { type: Boolean, required: true },
+
+    likes: { type: Array, required: true }, // likes = swipes.
+    blockList: { type: Array, required: true },
 });
-
-// schema.virtual("isVerified").get(function () {
-//     return !!(this.verified || this.passwordReset);
-// });
-
-// schema.set("toJSON", {
-//     virtuals: true,
-//     versionKey: false,
-//     transform: function (doc, ret) {
-//         // remove these props when object is serialized
-//         delete ret._id;
-//         delete ret.passwordHash;
-//     },
-// });
 
 module.exports = mongoose.model("User", userSchema);

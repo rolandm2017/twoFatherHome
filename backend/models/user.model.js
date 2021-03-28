@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const ObjectId = Schema.ObjectId;
 
-const UserTypes = {
+const USER_TYPES = {
     // instead of writing "admin", write UserTypes.ADMIN, so there's no typos.
     ADMIN: "admin",
     MODERATOR: "moderator",
@@ -41,6 +41,6 @@ const userSchema = new Schema(
 );
 
 module.exports = {
-    CHAT_ROOM_TYPES: CHAT_ROOM_TYPES,
+    USER_TYPES: USER_TYPES,
     userModel: mongoose.model("User", userSchema),
 };

@@ -1,7 +1,7 @@
-import ChatRoomModel from "../models/ChatRoom.js";
-import ChatMessageModel from "../models/ChatMessage.js";
+const ChatRoomModel = require("../models/chatRoom.model.js");
+const ChatMessageModel = require("../models/chatMessage.model.js");
 
-export default {
+module.exports = {
     deleteRoomById: async (req, res) => {
         try {
             const { roomId } = req.params;

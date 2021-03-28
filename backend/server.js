@@ -46,7 +46,7 @@ app.use(api + "/signup/validate", require("./accountCreation/accountCreation"));
 // *** *** ***
 // CRUD for User account info, including their bio & user settings
 
-app.use(api + "/user", require("./userActions/userActions"));
+app.use(api + "/user", require("./userActions/userActions")); // TODO: implement profile editing & settings editing
 
 // *** *** ***
 // *** *** ***
