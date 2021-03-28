@@ -1,7 +1,7 @@
-import mongoose from "mongoose";
-import { v4 as uuidv4 } from "uuid";
+const mongoose = require("mongoose");
+const uuidv4 = require("uuid").v4;
 
-export const CHAT_ROOM_TYPES = {
+const CHAT_ROOM_TYPES = {
     CONSUMER_TO_CONSUMER: "consumer-to-consumer",
     CONSUMER_TO_SUPPORT: "consumer-to-support",
 };
@@ -88,4 +88,7 @@ chatRoomSchema.statics.initiateChat = async function (
     }
 };
 
-export default mongoose.model("ChatRoom", chatRoomSchema);
+module.exports = {
+    CHAT_ROOM_TYPES: CHAT_ROOM_TYPES,
+    chatRoomModel: mongoose.model("ChatRoom", chatRoomSchema),
+};

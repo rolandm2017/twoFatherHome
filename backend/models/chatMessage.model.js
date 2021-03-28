@@ -1,5 +1,5 @@
-import mongoose from "mongoose";
-import { v4 as uuidv4 } from "uuid";
+const mongoose = require("mongoose");
+const uuidv4 = require("uuid").v4;
 
 const MESSAGE_TYPES = {
     TYPE_TEXT: "text",
@@ -269,4 +269,7 @@ chatMessageSchema.statics.getRecentConversation = async function (
     }
 };
 
-export default mongoose.model("ChatMessage", chatMessageSchema);
+module.exports = {
+    MESSAGE_TYPES: MESSAGE_TYPES,
+    chatMessageModel: mongoose.model("ChatMessage", chatMessageSchema),
+};

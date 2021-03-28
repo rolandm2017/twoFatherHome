@@ -40,4 +40,7 @@ const userSchema = new Schema(
     { timestamps: true }
 );
 
-module.exports = mongoose.model("User", userSchema);
+module.exports = {
+    CHAT_ROOM_TYPES: CHAT_ROOM_TYPES,
+    userModel: mongoose.model("User", userSchema),
+};

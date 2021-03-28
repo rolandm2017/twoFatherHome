@@ -6,7 +6,6 @@ const bodyParser = require("body-parser");
 // socket configuration
 const WebSockets = require("./utils/WebSockets.js");
 // routes
-const indexRouter = require("./routes/index.js");
 const userRouter = require("./routes/user.js");
 const chatRoomRouter = require("./routes/chatRoom.js");
 const deleteRouter = require("./routes/delete.js");
@@ -41,6 +40,7 @@ app.use(api + "/auth", require("./authentication/authentication"));
 // Sign Up Validation
 
 app.use(api + "/signup/validate", require("./accountCreation/accountCreation"));
+// fixme: line 43 and line 36 req the same routes, is this intended?
 
 // *** *** ***
 // *** *** ***
@@ -58,7 +58,6 @@ app.use(api + "/user", require("./userActions/userActions"));
 // app.use(express.json());
 // app.use(express.urlencoded({ extended: false }));
 
-// app.use("/", indexRouter);
 // app.use("/users", userRouter);
 // app.use("/room", decode, chatRoomRouter);
 // app.use("/delete", deleteRouter);
