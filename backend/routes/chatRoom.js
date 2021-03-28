@@ -2,6 +2,8 @@ import express from "express";
 // controllers
 import chatRoom from "../controllers/chatRoom.js";
 
+// for chatroom code boilerplate, see: https://www.freecodecamp.org/news/create-a-professional-node-express/
+
 const router = express.Router();
 
 router

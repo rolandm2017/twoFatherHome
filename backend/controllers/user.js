@@ -1,8 +1,8 @@
-import makeValidation from "@withvoid/make-validation";
+const makeValidation = require("@withvoid/make-validation");
 // models
-import UserModel, { USER_TYPES } from "../models/User.js";
+const UserModel = require("../models/user.model.js");
 
-export default {
+module.exports = {
     onGetAllUsers: async (req, res) => {
         try {
             const users = await UserModel.getUsers();

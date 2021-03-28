@@ -3,11 +3,15 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 
-const port = 8080;
+// socket configuration
+const WebSockets = require("./utils/WebSockets.js");
+// routes
+const indexRouter = require("./routes/index.js");
+const userRouter = require("./routes/user.js");
+const chatRoomRouter = require("./routes/chatRoom.js");
+const deleteRouter = require("./routes/delete.js");
 
-// TODO: Make a list of code to keep from this server to use in the real dev server.
-// TODO: make a list of code to keep from the other server.js file to use in the real dev server.
-// TODO: copy this Mockserver.js file to a new server.js file and start fresh.
+const port = 8080;
 
 const app = express();
 
@@ -24,12 +28,6 @@ if (process.env.NODE_ENV === "development") {
 }
 
 const api = "/api";
-
-// *** *** ***
-// *** *** ***
-// Page Stuff
-
-app.use(api, require("./pages/pages"));
 
 // *** *** ***
 // *** *** ***
@@ -52,14 +50,40 @@ app.use(api + "/user", require("./userActions/userActions"));
 
 // *** *** ***
 // *** *** ***
-// CRUD for Massives
-app.use(api + "/massives", require("./massiveActions/massiveActions"));
-
-// *** *** ***
-// *** *** ***
 // CRUD for DMs
 
 // todo: implement later...
+
+// app.use(logger("dev"));
+// app.use(express.json());
+// app.use(express.urlencoded({ extended: false }));
+
+// app.use("/", indexRouter);
+// app.use("/users", userRouter);
+// app.use("/room", decode, chatRoomRouter);
+// app.use("/delete", deleteRouter);
+
+// /** catch 404 and forward to error handler */
+// app.use("*", (req, res) => {
+//     return res.status(404).json({
+//         success: false,
+//         message: "API endpoint doesnt exist",
+//     });
+// });
+
+// for chatroom code boilerplate, see: https://www.freecodecamp.org/news/create-a-professional-node-express/
+
+// /** Create HTTP server. */
+const server = http.createServer(app);
+// /** Create socket connection */
+global.io = socketio.listen(server);
+global.io.on("connection", WebSockets.connection);
+// /** Listen on provided port, on all network interfaces. */
+server.listen(port);
+// /** Event listener for HTTP server "listening" event. */
+server.on("listening", () => {
+    console.log(`Listening on port:: http://localhost:${port}/`);
+});
 
 app.listen(port, () => {
     console.log(`Example app listening at http://127.0.0.1:${port}`);

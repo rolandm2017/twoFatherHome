@@ -1,9 +1,12 @@
 // utils
-import makeValidation from "@withvoid/make-validation";
+const makeValidation = require("@withvoid/make-validation");
 // models
-import ChatRoomModel, { CHAT_ROOM_TYPES } from "../models/ChatRoom.js";
-import ChatMessageModel from "../models/ChatMessage.js";
-import UserModel from "../models/User.js";
+const ChatRoomModel,
+    { CHAT_ROOM_TYPES } = require("../models/ChatRoom.js");
+const ChatMessageModel = require("../models/ChatMessage.js");
+const UserModel = require("../models/User.js");
+
+// for chatroom code boilerplate, see: https://www.freecodecamp.org/news/create-a-professional-node-express/
 
 export default {
     initiate: async (req, res) => {
