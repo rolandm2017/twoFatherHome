@@ -8,10 +8,6 @@ const io = new Server();
 
 // socket configuration
 const WebSockets = require("./utils/WebSockets.js");
-// routes
-const userRouter = require("./routes/user.js");
-const chatRoomRouter = require("./routes/chatRoom.js");
-const deleteRouter = require("./routes/delete.js");
 
 const port = 8080;
 
@@ -21,6 +17,10 @@ const app = express();
 app.use(cors());
 app.use(cookieParser());
 app.use(bodyParser.json());
+
+// app.use(logger("dev"));
+// app.use(express.json());
+// app.use(express.urlencoded({ extended: false }));
 
 let saltRounds;
 if (process.env.NODE_ENV === "development") {
@@ -55,23 +55,22 @@ app.use(api + "/signup/validate", require("./accountCreation/accountCreation"));
 // *** *** ***
 // CRUD for DMs
 
-// todo: implement later...
+const DMs = "/dm";
 
-// app.use(logger("dev"));
-// app.use(express.json());
-// app.use(express.urlencoded({ extended: false }));
-
-// app.use("/users", userRouter);
-// app.use("/room", decode, chatRoomRouter);
-// app.use("/delete", deleteRouter);
+app.use(api + DMs + "/users", require("./routes/user.js"));
+// current TODO: find out how the /routes/users.js is used in the boilerplate code.
+// Do I need to replace it with my own? Can I simply delete it?
+// The question to ask specifically would be: Does the /room and /delete route use any of the user methods?
+app.use(api + DMs + "/room", decode, require("./routes/chatRoom.js"));
+app.use(api + DMs + "/delete", require("./routes/delete.js"));
 
 // /** catch 404 and forward to error handler */
-// app.use("*", (req, res) => {
-//     return res.status(404).json({
-//         success: false,
-//         message: "API endpoint doesnt exist",
-//     });
-// });
+app.use("*", (req, res) => {
+    return res.status(404).json({
+        success: false,
+        message: "API endpoint doesnt exist",
+    });
+});
 
 // for chatroom code boilerplate, see: https://www.freecodecamp.org/news/create-a-professional-node-express/
 
@@ -90,3 +89,7 @@ server.on("listening", () => {
 // app.listen(port, () => {
 //     console.log(`Example app listening at http://127.0.0.1:${port}`);
 // });
+
+// TODO: test server's lines 79 to 87.
+// does the chatroom work ?
+// does the rest of the server work despite switching from "app.listen()" to "server.on()"?

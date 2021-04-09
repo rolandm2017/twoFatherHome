@@ -1,8 +1,8 @@
-// import express from "express";
-// // controllers
+const express = require("express");
+// controllers
 // import user from "../controllers/user.js";
 
-// const router = express.Router();
+const router = express.Router();
 
 // router
 //     .get("/", user.onGetAllUsers)
@@ -10,6 +10,6 @@
 //     .get("/:id", user.onGetUserById)
 //     .delete("/:id", user.onDeleteUserById);
 
-// export default router;
+module.exports = router;
 
 // // commented out because I don't think I'll use this... I might tho

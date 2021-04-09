@@ -13,4 +13,4 @@ router
     .post("/:roomId/message", chatRoom.postMessage)
     .put("/:roomId/mark-read", chatRoom.markConversationReadByRoomId);
 
-module.export = router;
+module.exports = router;
