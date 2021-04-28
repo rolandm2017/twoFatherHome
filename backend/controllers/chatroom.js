@@ -14,6 +14,7 @@ module.exports = {
             const validation = makeValidation((types) => ({
                 payload: req.body,
                 checks: {
+                    // FIXME: this is from the boilerplate, it'll need retooling for the 2fh json data.
                     userIds: {
                         type: types.array,
                         options: {

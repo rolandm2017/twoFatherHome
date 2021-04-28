@@ -57,11 +57,13 @@ app.use(api + "/signup/validate", require("./accountCreation/accountCreation"));
 
 const DMs = "/dm";
 
+// TODO !important: add authorization to DM routes. Currently they are unprotected.
+
 app.use(api + DMs + "/users", require("./routes/user.js"));
 // current TODO: find out how the /routes/users.js is used in the boilerplate code.
 // Do I need to replace it with my own? Can I simply delete it?
 // The question to ask specifically would be: Does the /room and /delete route use any of the user methods?
-app.use(api + DMs + "/room", decode, require("./routes/chatRoom.js"));
+app.use(api + DMs + "/room", require("./routes/chatRoom.js"));
 app.use(api + DMs + "/delete", require("./routes/delete.js"));
 
 // /** catch 404 and forward to error handler */
