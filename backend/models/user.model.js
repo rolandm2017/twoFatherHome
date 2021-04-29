@@ -48,7 +48,7 @@ const userSchema = new Schema(
         // account status
         suspended: { type: Boolean, required: true },
         accountType: { type: String, required: true }, // user, moderator, admin, verified
-
+        // fixme: accountType is in here twice
         // personal info to display on the profile
         bio: { type: String, required: true },
         location: { type: String, required: false }, // fixme: location field exists, but also city, state, country. bad. fix!
@@ -100,31 +100,54 @@ userSchema.statics.createUser = async function (
     drugs,
     hasPremium
 ) {
-    try {
-        // task 1: find out how the auth system creates a new user in the db. Task 2: make this createUser func align with auth sys.
-        const user = await this.create({
-            username,
-            fullName,
-            bio,
-            location,
-            city,
-            state,
-            country,
-            age,
-            familySize,
-            familyValues,
-            interests,
-            hasPets,
-            diet,
-            drinks,
-            smokes,
-            drugs,
-            hasPremium,
-        });
-        return user;
-    } catch (error) {
-        throw error;
-    }
+    const fakeEmail = "foo@bar.com";
+    const dobFaked = new Date();
+    const pwHashFake = "asdfdkasfjasd";
+    const acctCreatedAtFaked = new Date();
+    const stringFake = "asdfdsfjds";
+    const integerFake = 0234234;
+    const fakeBool = true;
+    const FAKE_USER_TYPE = "user";
+    const introArray = [];
+    console.log("asfu9wfu89ewfa9f9asf9dsfad");
+    // task 1: find out how the auth system creates a new user in the db. Task 2: make this createUser func align with auth sys.
+    const user = await this.create({
+        username: username,
+        email: fakeEmail,
+        fullName: fullName,
+        dateOfBirth: dobFaked,
+        passwordHash: pwHashFake,
+        accountCreatedAt: acctCreatedAtFaked,
+        verificationCode: stringFake,
+        joinDate: dobFaked,
+        accountVerifiedAt: dobFaked, // joindate, verifiedAt
+        failedVerifications: integerFake, // fails
+        activeAccount: fakeBool,
+        accountType: FAKE_USER_TYPE,
+        acceptsTermsAndConditions: fakeBool,
+        suspended: fakeBool,
+        accountType: FAKE_USER_TYPE,
+        bio,
+        location,
+        city,
+        state,
+        country,
+        age,
+        familySize,
+        familyValues,
+        interests,
+        hasPets,
+        diet,
+        drinks,
+        smokes,
+        drugs,
+        hasPremium,
+        introArray,
+        introArray,
+        introArray,
+    });
+    console.log("NOPE");
+    return user;
 };
 
 /**
@@ -181,6 +204,6 @@ userSchema.statics.deleteByUserById = async function (id) {
 
 module.exports = {
     USER_TYPES: USER_TYPES,
-    userModel: mongoose.model("User", userSchema),
+    UserModel: mongoose.model("User", userSchema),
     // FIXME: I think this should be the statics from https://github.com/adeelibr/node-playground/blob/master/chapter-1-chat/server/models/User.js
 };
