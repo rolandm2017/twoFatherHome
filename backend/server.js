@@ -47,7 +47,8 @@ app.use(api + "/signup/validate", require("./accountCreation/accountCreation"));
 
 // *** *** ***
 // *** *** ***
-// CRUD for User account info, including their bio & user settings
+// CRUD for User to edit their account info, including their bio & user settings.
+// This is used when the user clicks to Edit Profile or change Settings.
 
 // app.use(api + "/user", require("./userActions/userActions")); // TODO: implement profile editing & settings editing
 
@@ -59,13 +60,21 @@ const DMs = "/dm";
 
 // TODO !important: add authorization to DM routes. Currently they are unprotected.
 
-app.use(api + DMs + "/users", require("./routes/user.js"));
+// app.use(api + DMs + "/users", require("./routes/user.js"));
 // current TODO: find out how the /routes/users.js is used in the boilerplate code.
 // Do I need to replace it with my own? Can I simply delete it?
 // The question to ask specifically would be: Does the /room and /delete route use any of the user methods?
 app.use(api + DMs + "/room", require("./routes/chatRoom.js"));
 app.use(api + DMs + "/delete", require("./routes/delete.js"));
 
+// *** *** ***
+// *** *** ***
+// User methods
+
+app.use(api + "/users", require("./routes/user.js"));
+
+// /** */
+// /** */
 // /** catch 404 and forward to error handler */
 app.use("*", (req, res) => {
     return res.status(404).json({

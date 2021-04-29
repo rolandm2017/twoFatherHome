@@ -1,7 +1,17 @@
 const mongoose = require("mongoose");
 
+// FIXME: I really don't know... Should I use a "User" model? An "Account" model? Both?
+// fixme: I'm saying "const UserModel = require("../models/account.model.js");" in another file :-(
+
 const Schema = mongoose.Schema;
 const ObjectId = Schema.ObjectId;
+
+const USER_TYPES = {
+    // instead of writing "admin", write UserTypes.ADMIN, so there's no typos.
+    ADMIN: "admin",
+    MODERATOR: "moderator",
+    USER: "user",
+};
 
 const LEAVE_THIS_FALSE = false;
 
@@ -10,6 +20,7 @@ const userSchema = new Schema({
     email: { type: String, required: true, select: LEAVE_THIS_FALSE }, // FALSE so it doesn't get sent to client accidentally
     fullName: { type: String, required: true, select: LEAVE_THIS_FALSE }, // FALSE so it doesn't get sent to client accidentally
     dateOfBirth: { type: Date, required: true, select: LEAVE_THIS_FALSE }, // FALSE so it doesn't get sent to client accidentally
+    // note: "select: false" means you have to clarify your query to the db, "get the field even tho i said 'false' for 'select'"
 
     // account security stuff -- should this be in a separate db from info displayed on their profile?
     passwordHash: { type: String, required: true, select: LEAVE_THIS_FALSE }, // FALSE so it doesn't get sent to client accidentally
@@ -56,10 +67,11 @@ const userSchema = new Schema({
 });
 
 module.exports = {
+    USER_TYPES: USER_TYPES,
     userModel: mongoose.model("User", userSchema),
     onGetAllUsers: async (req, res) => {
         try {
-            const users = await UserModel.getUsers();
+            const users = await UserModel.getUsers(); // FIXME: pretty sure "UserModel" is referencing sth that DNE
             return res.status(200).json({ success: true, users });
         } catch (error) {
             return res.status(500).json({ success: false, error: error });

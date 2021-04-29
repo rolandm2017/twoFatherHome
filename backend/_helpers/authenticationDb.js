@@ -9,7 +9,7 @@ const connectionOptions = {
 mongoose.connect(config.connectionString, connectionOptions);
 
 module.exports = {
-    Account: require("../accounts/account.model"),
+    Account: require("../models/account.model"),
     RefreshToken: require("../accounts/refresh-token.model"),
     isValidId,
 };
