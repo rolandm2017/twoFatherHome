@@ -42,7 +42,7 @@ function authorize(roles = []) {
         async (req, res, next) => {
             console.log("25:", req.body, req.user, req.user.id);
             // const account = mockFindById(req.user.id);
-            const account = await db.Account.findById(req.user.id);
+            const account = await db.User.findById(req.user.id);
             const refreshTokens = await db.RefreshToken.find({
                 account: account.id,
             });

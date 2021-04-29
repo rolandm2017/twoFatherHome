@@ -28,16 +28,49 @@ module.exports = {
             const validation = makeValidation((types) => ({
                 payload: req.body,
                 checks: {
-                    firstName: { type: types.string },
-                    lastName: { type: types.string },
+                    username: { type: types.string },
+                    fullName: { type: types.string },
+                    bio: { type: types.string },
+                    location: { type: types.string },
+                    city: { type: types.string },
+                    state: { type: types.string },
+                    country: { type: types.string },
+                    age: { type: types.string },
+                    familySize: { type: types.string },
+                    familyValues: { type: types.array },
+                    interests: { type: types.array },
+                    hasPets: { type: types.string },
+                    diet: { type: types.string },
+                    drinks: { type: types.string },
+                    smokes: { type: types.string },
+                    drugs: { type: types.string },
+                    hasPremium: { type: types.string }, // bool
+
                     type: { type: types.enum, options: { enum: USER_TYPES } },
                 },
             }));
             if (!validation.success)
                 return res.status(400).json({ ...validation });
 
-            const { firstName, lastName, type } = req.body;
-            const user = await UserModel.createUser(firstName, lastName, type);
+            const user = await UserModel.createUser(
+                req.body.username,
+                req.body.fullName,
+                req.body.bio,
+                req.body.location,
+                req.body.city,
+                req.body.state,
+                req.body.country,
+                parseInt(req.body.age, 10),
+                parseInt(req.body.familySize, 10),
+                req.body.familyValues,
+                req.body.interests,
+                req.body.hasPets,
+                req.body.diet,
+                req.body.drinks === "True" ? True : False, // hacky code
+                req.body.smokes === "True" ? True : False,
+                req.body.drugs === "True" ? True : False,
+                req.body.hasPremium === "True" ? True : False
+            );
             return res.status(200).json({ success: true, user });
         } catch (error) {
             return res.status(500).json({ success: false, error: error });
