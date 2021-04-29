@@ -51,7 +51,7 @@ const userSchema = new Schema(
 
         // personal info to display on the profile
         bio: { type: String, required: true },
-        location: { type: String, required: false },
+        location: { type: String, required: false }, // fixme: location field exists, but also city, state, country. bad. fix!
         // birthday: { type: Date, required: true },
         city: { type: String, required: true },
         state: { type: String, required: true },
@@ -81,9 +81,46 @@ const userSchema = new Schema(
  * @param {String} lastName
  * @returns {Object} new user object created
  */
-userSchema.statics.createUser = async function (firstName, lastName, type) {
+userSchema.statics.createUser = async function (
+    username,
+    fullName,
+    bio,
+    location,
+    city,
+    state,
+    country,
+    age,
+    familySize,
+    familyValues,
+    interests,
+    hasPets,
+    diet,
+    drinks,
+    smokes,
+    drugs,
+    hasPremium
+) {
     try {
-        const user = await this.create({ firstName, lastName, type });
+        // task 1: find out how the auth system creates a new user in the db. Task 2: make this createUser func align with auth sys.
+        const user = await this.create({
+            username,
+            fullName,
+            bio,
+            location,
+            city,
+            state,
+            country,
+            age,
+            familySize,
+            familyValues,
+            interests,
+            hasPets,
+            diet,
+            drinks,
+            smokes,
+            drugs,
+            hasPremium,
+        });
         return user;
     } catch (error) {
         throw error;

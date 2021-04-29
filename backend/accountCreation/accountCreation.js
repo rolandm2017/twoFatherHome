@@ -242,9 +242,3 @@ function increaseFailedVerificationAttempts(email) {
         });
     });
 }
-
-// const emailPattern = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-// const patternForUsernames = /^[a-zA-Z0-9_]*$/;
-// const brandName = /([Pp][Oo][Ss][Tt][Mm][Aa][Ss]{2}[Ii][Vv])/;
-// const offensiveWord = /([Nn][Ii][Gg]{2}[Ee][Rr])/;
-// const offensiveSlang = /([Nn][Ii][Gg]{2}[Aa])/;

@@ -1,6 +1,6 @@
-const makeValidation = require("@withvoid/make-validation");
 // models
-const UserModel = require("../models/account.model.js");
+const UserModel = require("../models/user.model.js");
+const USER_TYPES = require("../models/user.model.js").USER_TYPES;
 
 module.exports = {
     // TODO: integrate this boilerplate code into a more 2fh friendly system.
@@ -24,34 +24,47 @@ module.exports = {
         }
     },
     onCreateUser: async (req, res) => {
+        console.log("lol");
         try {
-            const validation = makeValidation((types) => ({
-                payload: req.body,
-                checks: {
-                    username: { type: types.string },
-                    fullName: { type: types.string },
-                    bio: { type: types.string },
-                    location: { type: types.string },
-                    city: { type: types.string },
-                    state: { type: types.string },
-                    country: { type: types.string },
-                    age: { type: types.string },
-                    familySize: { type: types.string },
-                    familyValues: { type: types.array },
-                    interests: { type: types.array },
-                    hasPets: { type: types.string },
-                    diet: { type: types.string },
-                    drinks: { type: types.string },
-                    smokes: { type: types.string },
-                    drugs: { type: types.string },
-                    hasPremium: { type: types.string }, // bool
+            const validation = (() => {
+                const validation = {
+                    username: typeof req.body.username === "string",
+                    fullName: typeof req.body.fullName === "string",
+                    bio: typeof req.body.bio === "string",
+                    location: typeof req.body.location === "string",
+                    city: typeof req.body.city === "string",
+                    country: typeof req.body.country === "string",
+                    state: typeof req.body.state === "string",
+                    age: Number.isInteger(req.body.age),
+                    familySize: Number.isInteger(req.body.familySize),
+                    familyValues: Array.isArray(req.body.familyValues),
+                    interests: Array.isArray(req.body.interests),
+                    hasPets: typeof req.body.hasPets === "boolean",
+                    diet: typeof req.body.diet === "string",
+                    drinks: typeof req.body.hasPets === "boolean",
+                    smokes: typeof req.body.hasPets === "boolean",
+                    drugs: typeof req.body.hasPets === "boolean",
+                    hasPremium: typeof req.body.hasPets === "boolean",
+                };
 
-                    type: { type: types.enum, options: { enum: USER_TYPES } },
-                },
-            }));
-            if (!validation.success)
-                return res.status(400).json({ ...validation });
+                if (
+                    Object.keys(validation).every(function (k) {
+                        return validation[k] === true;
+                    })
+                ) {
+                    validation["success"] = true;
+                    return validation;
+                } else {
+                    validation["success"] = false;
+                    return validation;
+                }
+            })();
 
+            if (!validation.success) {
+                console.log("fial", validation);
+                return res.status(400).json(validation); // never found out what validation was supposed to return as
+            }
+            console.log("creating user");
             const user = await UserModel.createUser(
                 req.body.username,
                 req.body.fullName,
@@ -60,19 +73,20 @@ module.exports = {
                 req.body.city,
                 req.body.state,
                 req.body.country,
-                parseInt(req.body.age, 10),
-                parseInt(req.body.familySize, 10),
+                req.body.age,
+                req.body.familySize,
                 req.body.familyValues,
                 req.body.interests,
                 req.body.hasPets,
                 req.body.diet,
-                req.body.drinks === "True" ? True : False, // hacky code
-                req.body.smokes === "True" ? True : False,
-                req.body.drugs === "True" ? True : False,
-                req.body.hasPremium === "True" ? True : False
+                req.body.drinks,
+                req.body.smokes,
+                req.body.drugs,
+                req.body.hasPremium
             );
             return res.status(200).json({ success: true, user });
         } catch (error) {
+            console.log(error);
             return res.status(500).json({ success: false, error: error });
         }
     },
