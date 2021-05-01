@@ -117,6 +117,7 @@ module.exports = {
             return res.status(500).json({ success: false, error: error });
         }
     },
+    // likes! should this go in a separate file???
     onAddLikedUserToUser: async (req, res) => {
         try {
             const updatedLikes = await UserModel.updateLikesListForUser(

@@ -74,6 +74,21 @@ app.use(api + DMs + "/delete", require("./routes/delete.js"));
 
 app.use(api + "/users", require("./routes/user.js"));
 
+// *** *** ***
+// *** *** ***
+// Moderation and admin tools
+
+const admin = "/admin";
+
+app.use(
+    api + admin + "/users/:uid/addLike/:candidate",
+    require("./routes/admin.js")
+);
+app.use(
+    api + admin + "/users/:uid/deleteLike/:candidate",
+    require("./routes/admin.js")
+);
+
 // /** */
 // /** */
 // /** catch 404 and forward to error handler */
