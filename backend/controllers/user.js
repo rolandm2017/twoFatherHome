@@ -11,16 +11,20 @@ module.exports = {
         console.log("asdfdasfdasfs");
         try {
             console.log("a");
-            let users = await UserModel.getUsers();
-            users = users.forEach((user) => {
-                return {
+            const users = await UserModel.getUsers();
+
+            const sortedUsers = [];
+
+            users.forEach((user) => {
+                sortedUsers.push({
+                    // asdf: "asdfdasf",
                     username: user.username,
                     data: { user },
-                };
+                });
             });
-            console.log("dis", users);
+            console.log("dis", sortedUsers);
             console.log("spaghetti of infinite length");
-            return res.status(200).json({ success: true, users });
+            return res.status(200).json({ success: true, sortedUsers });
         } catch (error) {
             console.log(error);
             return res.status(500).json({ success: false, error: error });
