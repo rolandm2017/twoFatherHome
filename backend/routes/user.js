@@ -4,7 +4,7 @@ const user = require("../controllers/user.js");
 
 const router = express.Router();
 
-router
+router // LOOK HOW NEAT THIS IS. Tidy!!!
     .get("/", user.onGetAllUsers)
     .post("/", user.onCreateUser)
     .get("/:id", user.onGetUserById)

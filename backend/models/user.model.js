@@ -202,6 +202,40 @@ userSchema.statics.deleteByUserById = async function (id) {
     }
 };
 
+/**
+ * @param {String} suitorId - id of user who owns the LikesList
+ * @param {String} candidateId - id of candidate, the one who is going in the list
+ */
+userSchema.statics.updateLikesListForUser = async function (
+    suitorId,
+    candidateId
+) {
+    try {
+        const suitor = await this.find({ _id: { $in: suitorId } });
+        suitor.likes.push(candidateId);
+        const result = await suitor.save();
+        return result;
+    } catch (error) {
+        throw error;
+    }
+};
+
+userSchema.statics.deleteLikeFromUserList = async function (
+    suitorId,
+    candidateId
+) {
+    try {
+        const result = this.update(
+            // todo: confirm that this updates the doc for suitorId and pulls candidateId from his Likes
+            { _id: suitorId },
+            { $pull: { likes: candidateId } }
+        );
+        return result;
+    } catch (error) {
+        throw error;
+    }
+};
+
 module.exports = {
     USER_TYPES: USER_TYPES,
     UserModel: mongoose.model("User", userSchema),

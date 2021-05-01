@@ -80,14 +80,7 @@ app.use(api + "/users", require("./routes/user.js"));
 
 const admin = "/admin";
 
-app.use(
-    api + admin + "/users/:uid/addLike/:candidate",
-    require("./routes/admin.js")
-);
-app.use(
-    api + admin + "/users/:uid/deleteLike/:candidate",
-    require("./routes/admin.js")
-);
+app.use(api + admin, require("./routes/admin.js"));
 
 // /** */
 // /** */
