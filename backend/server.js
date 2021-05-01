@@ -24,6 +24,7 @@ app.use(bodyParser.json());
 
 let saltRounds;
 if (process.env.NODE_ENV === "development") {
+    // TODO: make sure node_env is set to production...
     saltRounds = 10;
 } else {
     saltRounds = 17;

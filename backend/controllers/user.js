@@ -8,10 +8,21 @@ module.exports = {
     // TODO: write a short blurb explaining what make-validation does. It doesn't necessarily need to sit in this file
     // but its gotta go somewhere.
     onGetAllUsers: async (req, res) => {
+        console.log("asdfdasfdasfs");
         try {
-            const users = await UserModel.getUsers();
+            console.log("a");
+            let users = await UserModel.getUsers();
+            users = users.forEach((user) => {
+                return {
+                    username: user.username,
+                    data: { user },
+                };
+            });
+            console.log("dis", users);
+            console.log("spaghetti of infinite length");
             return res.status(200).json({ success: true, users });
         } catch (error) {
+            console.log(error);
             return res.status(500).json({ success: false, error: error });
         }
     },
@@ -66,15 +77,15 @@ module.exports = {
         }
         console.log("creating user");
         const user = await UserModel.createUser(
-            req.body.username,
+            req.body.username, // FIXME: convert it into objects yo. the Profile object, the Addy object, the Preferences object
             req.body.fullName,
             req.body.bio,
-            req.body.location,
+            req.body.location, // addy obj ...
             req.body.city,
             req.body.state,
             req.body.country,
-            req.body.age,
-            req.body.familySize,
+            req.body.age, // this is profile material
+            req.body.familySize, // preferences obj ...
             req.body.familyValues,
             req.body.interests,
             req.body.hasPets,
