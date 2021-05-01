@@ -10,7 +10,7 @@ module.exports = {
     onGetAllUsers: async (req, res) => {
         console.log("asdfdasfdasfs");
         try {
-            console.log("a");
+            // console.log("a");
             const users = await UserModel.getUsers();
 
             const sortedUsers = [];
@@ -22,8 +22,8 @@ module.exports = {
                     data: { user },
                 });
             });
-            console.log("dis", sortedUsers);
-            console.log("spaghetti of infinite length");
+            // console.log("dis", sortedUsers);
+            // console.log("spaghetti of infinite length");
             return res.status(200).json({ success: true, sortedUsers });
         } catch (error) {
             console.log(error);
@@ -112,6 +112,36 @@ module.exports = {
             return res.status(200).json({
                 success: true,
                 message: `Deleted a count of ${user.deletedCount} user.`,
+            });
+        } catch (error) {
+            return res.status(500).json({ success: false, error: error });
+        }
+    },
+    onAddLikedUserToUser: async (req, res) => {
+        try {
+            const updatedLikes = await UserModel.updateLikesListForUser(
+                req.params.suitorId,
+                req.params.candidateId
+            );
+            return res.status(200).json({
+                success: true,
+                message: `User ${req.params.suitorId} received a new Like for his candidate ${req.params.candidateId}.`,
+                newList: updatedLikes,
+            });
+        } catch (error) {
+            return res.status(500).json({ success: false, error: error });
+        }
+    },
+    onDelLikeFromUser: async (req, res) => {
+        try {
+            const oneLessLikeOnTheListNow = await UserModel.deleteLikeFromUserList(
+                req.params.suitorId,
+                req.params.candidateId
+            );
+            return res.status(200).json({
+                success: true,
+                message: `User ${req.params.suitorId} had the user ${req.params.candidateId} removed from his Likes`,
+                newList: oneLessLikeOnTheListNow,
             });
         } catch (error) {
             return res.status(500).json({ success: false, error: error });
