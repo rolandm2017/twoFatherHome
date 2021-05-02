@@ -242,6 +242,20 @@ userSchema.statics.deleteLikeFromUserList = async function (
     }
 };
 
+userSchema.statics.addToRecentlySeenList = async function (
+    suitorId,
+    candidateId
+) {
+    try {
+        const suitor = await UserModel.findOne({ _id: suitorId });
+        suitor.recentlySeen.push(candidateId);
+        const result = suitor.save();
+        return result;
+    } catch (error) {
+        throw error;
+    }
+};
+
 module.exports = {
     USER_TYPES: USER_TYPES,
     UserModel: mongoose.model("User", userSchema),

@@ -31,10 +31,9 @@ module.exports = {
     },
     onPass: async (req, res) => {
         //
-        const result = UserModel.updateRecentlySeenList(
+        const result = UserModel.addToRecentlySeenList(
             req.params.suitorId,
-            req.params,
-            candidateId
+            req.params.candidateId
         );
         res.status(200).json({
             success: true,
