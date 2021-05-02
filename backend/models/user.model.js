@@ -210,16 +210,16 @@ userSchema.statics.updateLikesListForUser = async function (
     suitorId,
     candidateId
 ) {
-    console.log("this will print");
+    // console.log("this will print");
     try {
         // fixme: this is supposed to grab the user the admin is targeting
-        console.log("logogoggogog", suitorId);
+        // console.log("logogoggogog", suitorId);
         const suitor = await this.findOne({ _id: { $in: suitorId } });
-        console.log("no suitor found?", suitor);
+        // console.log("no suitor found?", suitor);
         suitor.likes.push(candidateId);
-        console.log("this aint running either", suitor);
+        // console.log("this aint running either", suitor);
         const result = await suitor.save();
-        console.log("result:", result);
+        // console.log("result:", result);
         return result;
     } catch (error) {
         console.log(error);

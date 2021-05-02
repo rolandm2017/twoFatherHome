@@ -76,6 +76,12 @@ app.use(api + "/users", require("./routes/user.js"));
 
 // *** *** ***
 // *** *** ***
+// User methods
+
+app.use(api + "/matchmaker", require("./routes/matchmaker.js"));
+
+// *** *** ***
+// *** *** ***
 // Moderation and admin tools
 
 const admin = "/admin";
