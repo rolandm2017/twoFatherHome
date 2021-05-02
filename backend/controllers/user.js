@@ -119,7 +119,13 @@ module.exports = {
     },
     // likes! should this go in a separate file???
     onAddLikedUserToUser: async (req, res) => {
+        console.log("hey look it worked");
         try {
+            console.log(
+                "fry from futurama",
+                req.params.suitorId,
+                req.params.candidateId
+            );
             const updatedLikes = await UserModel.updateLikesListForUser(
                 req.params.suitorId,
                 req.params.candidateId
@@ -134,6 +140,7 @@ module.exports = {
         }
     },
     onDelLikeFromUser: async (req, res) => {
+        console.log("this is a post about cartman from south park");
         try {
             const oneLessLikeOnTheListNow = await UserModel.deleteLikeFromUserList(
                 req.params.suitorId,
