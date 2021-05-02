@@ -233,7 +233,6 @@ userSchema.statics.deleteLikeFromUserList = async function (
 ) {
     try {
         const result = this.update(
-            // todo: confirm that this updates the doc for suitorId and pulls candidateId from his Likes
             { _id: suitorId },
             { $pull: { likes: candidateId } }
         );
