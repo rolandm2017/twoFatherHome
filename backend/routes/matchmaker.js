@@ -1,6 +1,6 @@
 const express = require("express");
 // controllers
-const matchmaker = require("../controllers/matchmaker.js");
+const matchmaker = require("../controllers/matchmaker.controller.js");
 
 const router = express.Router();
 

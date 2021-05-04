@@ -128,7 +128,20 @@ module.exports = {
             return res.status(500).json({ success: false, error: error });
         }
     },
-    // likes! should this go in a separate file???
+    // likes & matchmaker services! should this go in a separate file???
+    getCandidates: async (req, res) => {
+        try {
+            const candidates = await UserModel.getCandidatesForUser(
+                req.params.id
+            );
+            return res.status(200).json({
+                success: true,
+                candidates: candidates,
+            });
+        } catch (error) {
+            return res.status(500).json({ success: false, error: error });
+        }
+    },
     onAddLikedUserToUser: async (req, res) => {
         console.log("hey look it worked");
         try {

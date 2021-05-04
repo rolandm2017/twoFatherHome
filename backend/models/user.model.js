@@ -256,6 +256,20 @@ userSchema.statics.addToRecentlySeenList = async function (
     }
 };
 
+userSchema.statics.createMatch = async function (userOneId, userTwoId) {
+    try {
+        const userOne = await userModel.findOne({ _id: userOneId });
+        const userTwo = await userModel.findOne({ _id: userTwoId });
+        userOne.matches.push(userTwoId);
+        userTwo.matches.push(userOneId);
+        const res1 = userOne.save();
+        const res2 = userTwo.save();
+        return res1 && res2; // this is supposed to return true if both operations go well...
+    } catch (error) {
+        throw error;
+    }
+};
+
 module.exports = {
     USER_TYPES: USER_TYPES,
     UserModel: mongoose.model("User", userSchema),
