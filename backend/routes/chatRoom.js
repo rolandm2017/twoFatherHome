@@ -1,6 +1,6 @@
 const express = require("express");
 // controllers
-const chatRoom = require("../controllers/chatRoom.js");
+const chatRoom = require("../controllers/chatroom.controller.js");
 
 // for chatroom code boilerplate, see: https://www.freecodecamp.org/news/create-a-professional-node-express/
 

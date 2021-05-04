@@ -128,13 +128,16 @@ module.exports = {
             return res.status(500).json({ success: false, error: error });
         }
     },
+    // @@@
     // likes & matchmaker services! should this go in a separate file???
+    // @@@
     getCandidates: async (req, res) => {
         try {
             const candidates = await UserModel.getCandidatesForUser(
                 req.params.id
             );
             return res.status(200).json({
+                // FIXME: shouldn't this return the candidates...?
                 success: true,
                 candidates: candidates,
             });
@@ -173,7 +176,39 @@ module.exports = {
             return res.status(200).json({
                 success: true,
                 message: `User ${req.params.suitorId} had the user ${req.params.candidateId} removed from his Likes`,
+                // QUESTION: is it really wise to send the user ids to the frontend? should they be backend data only?
                 whatEvenIsThis: x, // fixme: remove this once you notice what x is... unless its something good
+            });
+        } catch (error) {
+            return res.status(500).json({ success: false, error: error });
+        }
+    },
+    // @@@@
+    // block methods
+    // @@@@
+    onBlock: async (req, res) => {
+        try {
+            const result = await userModel.blockUser(
+                req.params.userId,
+                req.params.blockedId
+            );
+            return res.status(200).json({
+                success: true,
+                message: `User ${req.params.blockedId} has been blocked.`,
+            });
+        } catch (error) {
+            return res.status(500).json({ success: false, error: error });
+        }
+    },
+    onUnblock: async (req, res) => {
+        try {
+            result = await UserModel.unblockUser(
+                req.params.userId,
+                req.params.blockedId
+            );
+            return res.status(200).json({
+                success: true,
+                message: `User ${req.params.blockedId} has been unblocked.`,
             });
         } catch (error) {
             return res.status(500).json({ success: false, error: error });

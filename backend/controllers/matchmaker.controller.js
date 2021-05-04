@@ -1,5 +1,6 @@
 const UserModel = require("../models/user.model").UserModel;
-const 
+// note: the Matchmaker controller interacts with the User model.
+// It seems the split between User routes and Matchmaker routes is basically here for readability.
 
 module.exports = {
     onGetCandidates: async (req, res) => {
@@ -11,7 +12,6 @@ module.exports = {
             usersToFilterOut,
             recentlySeenUsers
         );
-
         return res
             .status(200)
             .json({ success: true, candidates: fiveCandidatesToSend });

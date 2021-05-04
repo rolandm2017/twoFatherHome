@@ -1,6 +1,6 @@
 const express = require("express");
 // controllers
-const deleteController = require("../controllers/delete.js");
+const deleteController = require("../controllers/delete.controller.js");
 
 const router = express.Router();
 

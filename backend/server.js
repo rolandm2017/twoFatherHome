@@ -51,7 +51,7 @@ app.use(api + "/signup/validate", require("./accountCreation/accountCreation"));
 // CRUD for User to edit their account info, including their bio & user settings.
 // This is used when the user clicks to Edit Profile or change Settings.
 
-// app.use(api + "/user", require("./userActions/userActions")); // TODO: implement profile editing & settings editing
+app.use(api + "/user", require("./routes/profile.js")); // TODO: implement profile editing & settings editing
 
 // *** *** ***
 // *** *** ***
@@ -79,6 +79,12 @@ app.use(api + "/users", require("./routes/user.js"));
 // User methods
 
 app.use(api + "/matchmaker", require("./routes/matchmaker.js"));
+
+// *** *** ***
+// *** *** ***
+// User methods
+
+app.use(api + "/blocking", require("./routes/block.js"));
 
 // *** *** ***
 // *** *** ***

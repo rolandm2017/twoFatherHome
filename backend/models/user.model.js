@@ -202,6 +202,39 @@ userSchema.statics.deleteByUserById = async function (id) {
     }
 };
 
+// @@@@ @@@@ @@@@
+// @@@@ @@@@ @@@@
+
+// MATCHMAKER related stuff:
+// getCandidatesForUser,
+// add Likes,
+// delete Like,
+// add to Recently Seen,
+// delete from Recently Seen,
+// create Match,
+// delete Match,
+//
+
+/**
+ * @param {String} suitorId - id of user who owns the LikesList
+ */
+userSchema.statics.getCandidatesForUser = async function (suitorId) {
+    try {
+        const suitor = await this.findOne({ _id: { $in: suitorId } });
+        const excludeByLikes = suitor.likes;
+        const excludeByRecentlySeen = suitor.recentlySeen;
+        const summedExclusions = excludeByLikes.concat(excludeByRecentlySeen);
+        // find users who are not excluded!
+        // TODO: exclude by location... or include only by location.
+        const candidates = await this.find({
+            _id: { $nin: summedExclusions },
+        }).limit(5);
+        return candidates;
+    } catch (error) {
+        throw error;
+    }
+};
+
 /**
  * @param {String} suitorId - id of user who owns the LikesList
  * @param {String} candidateId - id of candidate, the one who is going in the list
@@ -247,7 +280,7 @@ userSchema.statics.addToRecentlySeenList = async function (
     candidateId
 ) {
     try {
-        const suitor = await UserModel.findOne({ _id: suitorId });
+        const suitor = await this.findOne({ _id: suitorId });
         suitor.recentlySeen.push(candidateId);
         const result = suitor.save();
         return result;
@@ -258,13 +291,51 @@ userSchema.statics.addToRecentlySeenList = async function (
 
 userSchema.statics.createMatch = async function (userOneId, userTwoId) {
     try {
-        const userOne = await userModel.findOne({ _id: userOneId });
-        const userTwo = await userModel.findOne({ _id: userTwoId });
+        const userOne = await this.findOne({ _id: userOneId });
+        const userTwo = await this.findOne({ _id: userTwoId });
         userOne.matches.push(userTwoId);
         userTwo.matches.push(userOneId);
         const res1 = userOne.save();
         const res2 = userTwo.save();
         return res1 && res2; // this is supposed to return true if both operations go well...
+    } catch (error) {
+        throw error;
+    }
+};
+
+// @@@@ @@@@ @@@@
+// @@@@ @@@@ @@@@
+// BLOCKS
+
+userSchema.statics.blockUser = async function (userId, blockedId) {
+    try {
+        const result = await this.update(
+            { _id: userId },
+            {
+                $push: {
+                    blocks: { _id: blockedId },
+                },
+            }
+        );
+        // NOTE ABOUT YAGNI: you do NOT need to cleanse the blocked user's matches array of the blocking user's uid
+        // because... if Blockey McBlockerson decides to unblock, they can go right back to being matched!
+        return result;
+    } catch (error) {
+        throw error;
+    }
+};
+
+userSchema.statics.unblockUser = async function (userId, blockedId) {
+    try {
+        const result = await this.update(
+            { _id: userId },
+            {
+                $pull: {
+                    blocks: { _id: blockedId },
+                },
+            }
+        );
+        return result;
     } catch (error) {
         throw error;
     }
