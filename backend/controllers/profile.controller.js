@@ -11,12 +11,21 @@ module.exports = {
     },
     submitProfile: async (req, res) => {
         try {
+            // have the db update only changed fields. obviously.
+            const result = UserModel.createProfileData(
+                req.params.newProfileInfo
+            );
+            res.status(200).json({ success: true, result: result });
         } catch (error) {
             res.status(500).json({ success: false, error: error });
         }
     },
     updateProfile: async (req, res) => {
         try {
+            const result = UserModel.updateProfileFields(
+                req.params.profileUpdates
+            );
+            res.status(200).json({ success: true, result: result });
         } catch (error) {
             res.status(500).json({ success: false, error: error });
         }

@@ -204,6 +204,55 @@ userSchema.statics.deleteByUserById = async function (id) {
 
 // @@@@ @@@@ @@@@
 // @@@@ @@@@ @@@@
+// Profile Methods
+
+userSchema.statics.getProfileById = async function (id) {
+    try {
+        const result = await this.findOne({ _id: id });
+        return result;
+    } catch (error) {
+        throw error;
+    }
+};
+
+userSchema.statics.createProfileData = async function () {
+    try {
+        // const result = await this.create({ _id: id }); // uhh... createById? when will this thing get used?
+        // I'm gonna skip creating the CreateProfile section and backend because I'm not sure how the workflow will go...
+        // wait no i'll just google someone else's workflow and use it lol
+        return result;
+    } catch (error) {
+        throw error;
+    }
+};
+
+userSchema.statics.updateProfile = async function (id, updates) {
+    try {
+        // // bio, location, familySize, familyValues, interests, hasPets, diet, drinks, smokes, hasPremium
+        // TODO: how to handle udpate with one method, but such that the method can handle various diff fields being
+        // populated, or not populated, or whatever? 8 fields, could be updates made to any one of em.
+        const result = await this.findByIdAndUpdate(
+            { _id: id },
+            {
+                bio: updates.bio,
+                location: updates.location,
+                familySize: updates.fSize,
+                familyValues: updates.fValues,
+                interests: updates.interests,
+                hasPets: updates.hasPets,
+                diet: updates.diet,
+                drinks: updates.drinks,
+                smokes: updates.smokes,
+            }
+        );
+        return result;
+    } catch (error) {
+        throw error;
+    }
+};
+
+// @@@@ @@@@ @@@@
+// @@@@ @@@@ @@@@
 
 // MATCHMAKER related stuff:
 // getCandidatesForUser,
